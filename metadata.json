@@ -1,0 +1,6 @@
+{
+  "name": "Karabu Visas y Viajes",
+  "description": "Sitio web oficial de Karabu Visas y Viajes - Agencia de viajes a medida y asesoría de visas experta.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
