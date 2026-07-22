@@ -28,7 +28,7 @@ services:
 
   frontend:
     build:
-      context: .
+      context: ./frontend
       dockerfile: Dockerfile
     container_name: karabu-frontend
     depends_on:
