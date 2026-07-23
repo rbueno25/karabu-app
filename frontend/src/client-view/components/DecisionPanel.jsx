@@ -6,8 +6,14 @@ export function DecisionPanel({ quotationId, currentStatus, currentNotes, onUpda
   const [rejectionComment, setRejectionComment] = useState('');
   const [loadingAction, setLoadingAction] = useState(null);
   const [feedbackMessage, setFeedbackMessage] = useState(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-  const handleAccept = async () => {
+  const handleAcceptClick = () => {
+    setShowConfirmModal(true);
+  };
+
+  const confirmAccept = async () => {
+    setShowConfirmModal(false);
     try {
       setLoadingAction('accept');
       setFeedbackMessage(null);
@@ -94,7 +100,7 @@ export function DecisionPanel({ quotationId, currentStatus, currentNotes, onUpda
               Tus comentarios han sido notificados a tu asesor. Revisará tus preferencias y te enviará una propuesta ajustada.
             </p>
             <div className="pt-2 flex justify-center gap-3">
-              <button onClick={handleAccept} disabled={loadingAction === 'accept'} className="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-bold text-white bg-[#00A896] hover:bg-[#008F80] transition shadow-md">
+              <button onClick={handleAcceptClick} disabled={loadingAction === 'accept'} className="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-bold text-white bg-[#00A896] hover:bg-[#008F80] transition shadow-md">
                 {loadingAction === 'accept' ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
                 Cambiar de opinión y Aceptar Propuesta
               </button>
@@ -105,7 +111,7 @@ export function DecisionPanel({ quotationId, currentStatus, currentNotes, onUpda
         {/* IDLE: 2 buttons closer together */}
         {mode === 'idle' && currentStatus !== 'aceptada' && currentStatus !== 'rechazada' && (
           <div className="pt-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2.5 sm:gap-3">
-            <button onClick={handleAccept} disabled={loadingAction !== null}
+            <button onClick={handleAcceptClick} disabled={loadingAction !== null}
               className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2.5 px-6 sm:px-8 py-4 rounded-2xl font-extrabold text-base text-white bg-gradient-to-r from-[#00A896] to-[#02C39A] hover:from-[#008F80] hover:to-[#00A896] shadow-lg shadow-[#00A896]/25 hover:shadow-xl active:scale-[0.98] transition-all disabled:opacity-50">
               {loadingAction === 'accept' ? <><Loader2 className="w-5 h-5 animate-spin" /><span>Procesando...</span></> : <><CheckCircle2 className="w-5 h-5" /><span>ACEPTAR PROPUESTA</span></>}
             </button>
@@ -148,6 +154,37 @@ export function DecisionPanel({ quotationId, currentStatus, currentNotes, onUpda
           </p>
         </div>
       </div>
+
+      {/* Confirmation Modal — ¿Está seguro? */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white dark:bg-[#0D1B2A] rounded-2xl border border-gray-200 dark:border-gray-700 shadow-2xl w-full max-w-sm p-6 text-center space-y-4">
+            <div className="w-14 h-14 mx-auto rounded-full bg-brand-turquoise/10 text-brand-turquoise flex items-center justify-center">
+              <CheckCircle2 className="w-7 h-7" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white">Confirmar Aceptación</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                ¿Está seguro de que desea aceptar esta propuesta de viaje?
+              </p>
+            </div>
+            <div className="flex items-center justify-center gap-3 pt-2">
+              <button
+                onClick={() => setShowConfirmModal(false)}
+                className="px-5 py-2.5 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmAccept}
+                className="px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-[#00A896] to-[#02C39A] hover:from-[#008F80] hover:to-[#00A896] shadow-lg transition"
+              >
+                Sí, Aceptar Propuesta
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

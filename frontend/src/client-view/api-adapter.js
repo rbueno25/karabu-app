@@ -6,7 +6,7 @@ export async function getQuotation(id) {
   return res.data;
 }
 
-export async function updateQuotation(id, payload) {
-  const res = await api.put(`/quotations/${id}`, payload);
+export async function updateQuotationStatus(id, payload) {
+  const res = await api.patch(`/quotations/${id}/status`, payload);
   return res.data;
 }

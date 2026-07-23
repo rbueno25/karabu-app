@@ -50,8 +50,7 @@ export function PriceComparison({ quotation }) {
           {/* Booking */}
           {hasBooking && (
             <div className="p-4 rounded-xl bg-[#003B95]/5 dark:bg-[#003B95]/10 border border-[#003B95]/20 text-center">
-              <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Booking.com_logo.svg/2560px-Booking.com_logo.svg.png" 
-                   alt="Booking.com" className="h-5 mx-auto mb-1.5 object-contain opacity-80" />
+              <span className="text-xs font-bold text-[#003B95] dark:text-blue-300 block mb-1">Booking.com</span>
               <span className="text-lg font-bold text-[#003B95] dark:text-blue-300 block">{formatPrice(quotation.booking_price)}</span>
             </div>
           )}
@@ -59,8 +58,7 @@ export function PriceComparison({ quotation }) {
           {/* Expedia */}
           {hasExpedia && (
             <div className="p-4 rounded-xl bg-[#FFC107]/5 dark:bg-[#FFC107]/10 border border-[#FFC107]/20 text-center">
-              <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Expedia_Group_logo.svg/2560px-Expedia_Group_logo.svg.png" 
-                   alt="Expedia" className="h-5 mx-auto mb-1.5 object-contain opacity-80" />
+              <span className="text-xs font-bold text-amber-600 dark:text-amber-300 block mb-1">Expedia</span>
               <span className="text-lg font-bold text-amber-600 dark:text-amber-300 block">{formatPrice(quotation.expedia_price)}</span>
             </div>
           )}

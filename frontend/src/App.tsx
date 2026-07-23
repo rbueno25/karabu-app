@@ -37,7 +37,6 @@ const Reservations = lazy(() => import('./admin/Reservations'));
 const ReservationDetail = lazy(() => import('./admin/ReservationDetail'));
 const Payments = lazy(() => import('./admin/Payments'));
 const AdminDestinations = lazy(() => import('./admin/Destinations'));
-const Packages = lazy(() => import('./admin/Packages'));
 const UsersPage = lazy(() => import('./admin/Users'));
 const Settings = lazy(() => import('./admin/Settings'));
 
@@ -131,7 +130,6 @@ export default function App() {
             <Route path="reservas/:id" element={<Suspense fallback={<AdminLoader />}><ReservationDetail /></Suspense>} />
             <Route path="pagos" element={<Suspense fallback={<AdminLoader />}><Payments /></Suspense>} />
             <Route path="destinos" element={<Suspense fallback={<AdminLoader />}><AdminDestinations /></Suspense>} />
-            <Route path="paquetes" element={<Suspense fallback={<AdminLoader />}><Packages /></Suspense>} />
             <Route path="usuarios" element={<Suspense fallback={<AdminLoader />}><UsersPage /></Suspense>} />
             <Route path="configuracion" element={<Suspense fallback={<AdminLoader />}><Settings /></Suspense>} />
           </Route>

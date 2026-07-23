@@ -26,19 +26,27 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(String, primary_key=True, default=new_id)
+    username = Column(String, unique=True, nullable=True, index=True)  # unique handle for login/mentions
     email = Column(String, unique=True, nullable=False, index=True)
     password_hash = Column(String, nullable=False)
     name = Column(String, nullable=False)
     role = Column(String, nullable=False, default="advisor")  # super_admin, admin, advisor
     status = Column(String, nullable=False, default="activo")
+    phone = Column(String, default="")  # WhatsApp / teléfono
+    avatar_url = Column(String, default="")  # foto de perfil
+    department = Column(String, default="")  # sucursal / área
+    notes = Column(Text, default="")  # notas internas
     last_login = Column(DateTime(timezone=True), nullable=True)
     created_at = Column(DateTime(timezone=True), nullable=False, default=utcnow)
     updated_at = Column(DateTime(timezone=True), nullable=False, default=utcnow, onupdate=utcnow)
 
     def to_dict(self, safe=True):
         d = {
-            "id": self.id, "email": self.email, "name": self.name,
+            "id": self.id, "username": self.username,
+            "email": self.email, "name": self.name,
             "role": self.role, "status": self.status,
+            "phone": self.phone, "avatar_url": self.avatar_url,
+            "department": self.department, "notes": self.notes,
             "last_login": self.last_login.isoformat() if self.last_login else None,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
@@ -336,4 +344,29 @@ class Lugar(Base):
             "id_ciudad": self.id_ciudad,
             "categoria": self.categoria,
             "rating": self.rating,
+        }
+
+
+class Notification(Base):
+    __tablename__ = "notifications"
+
+    id = Column(String, primary_key=True, default=new_id)
+    user_id = Column(String, ForeignKey("users.id"), nullable=False, index=True)
+    type = Column(String, nullable=False)  # new_lead, accepted, rejected, payment, upcoming_trip, assigned, converted, regret
+    title = Column(String, nullable=False)
+    message = Column(Text, default="")
+    link = Column(String, default="")  # e.g. /admin/cotizaciones/{id}
+    read = Column(Boolean, default=False)
+    created_at = Column(DateTime(timezone=True), nullable=False, default=utcnow)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "type": self.type,
+            "title": self.title,
+            "message": self.message,
+            "link": self.link,
+            "read": self.read,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
         }

@@ -12,12 +12,12 @@ from typing import List, Optional, Any
 from fastapi import FastAPI, APIRouter, HTTPException, Depends, Request, Response, status
 from starlette.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, EmailStr
-from sqlalchemy import select, func, and_, or_, text
+from sqlalchemy import select, func, and_, or_, text, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from database import Base, engine, get_db, init_db, AsyncSessionLocal
-from models import User, Client, Quotation, Reservation, Payment, Destination, Package, Setting, Pais, Ciudad, Lugar
+from models import User, Client, Quotation, Reservation, Payment, Destination, Package, Setting, Pais, Ciudad, Lugar, Notification
 
 # -------------------- Setup --------------------
 app = FastAPI(title="Karabu Viajes API")
@@ -84,6 +84,28 @@ def now_iso() -> str:
 def new_id() -> str:
     return str(uuid.uuid4())
 
+async def create_notification(db: AsyncSession, user_id: str, type_: str, title: str, message: str = "", link: str = ""):
+    """Create a notification for a specific user."""
+    notif = Notification(
+        id=new_id(),
+        user_id=user_id,
+        type=type_,
+        title=title,
+        message=message,
+        link=link,
+    )
+    db.add(notif)
+    logger.info(f"Notification [{type_}] → user {user_id}: {title}")
+
+async def create_notification_all(db: AsyncSession, type_: str, title: str, message: str = "", link: str = ""):
+    """Create a notification for ALL active users (admins + advisors)."""
+    result = await db.execute(
+        select(User).where(User.status == "activo", User.role.in_(["super_admin", "admin", "advisor"]))
+    )
+    users = result.scalars().all()
+    for u in users:
+        await create_notification(db, u.id, type_, title, message, link)
+
 def require_admin(user: dict):
     if user.get("role") not in ("super_admin", "admin"):
         raise HTTPException(status_code=403, detail="No tienes permiso")
@@ -113,6 +135,9 @@ class QuotationIn(BaseModel):
     amount: float = 0
     currency: str = "USD"
     notes: Optional[str] = ""
+    assigned_hotel: Optional[str] = ""
+    booking_price: Optional[float] = None
+    expedia_price: Optional[float] = None
     status: str = "borrador"
     sent_via: Optional[str] = ""
     sent_at: Optional[str] = ""
@@ -189,10 +214,15 @@ class PackageIn(BaseModel):
     status: str = "activo"
 
 class UserIn(BaseModel):
+    username: Optional[str] = None
     name: str
     email: EmailStr
     role: str = "advisor"
     status: str = "activo"
+    phone: Optional[str] = ""
+    avatar_url: Optional[str] = ""
+    department: Optional[str] = ""
+    notes: Optional[str] = ""
     password: Optional[str] = None
 
 class SettingsIn(BaseModel):
@@ -234,7 +264,7 @@ async def login(body: LoginIn, response: Response, db: AsyncSession = Depends(ge
         secure=False, samesite="lax", max_age=43200, path="/",
     )
     return {
-        "user": {"id": user.id, "email": user.email, "name": user.name, "role": user.role},
+        "user": {"id": user.id, "username": user.username, "email": user.email, "name": user.name, "role": user.role, "phone": user.phone, "avatar_url": user.avatar_url, "department": user.department},
         "token": token,
     }
 
@@ -247,7 +277,13 @@ async def logout(response: Response, _user=Depends(get_current_user)):
 async def me(user=Depends(get_optional_user)):
     if user is None:
         return None
-    return {"id": user["id"], "email": user["email"], "name": user["name"], "role": user["role"]}
+    return {
+        "id": user["id"], "username": user.get("username"),
+        "email": user["email"], "name": user["name"],
+        "role": user["role"], "phone": user.get("phone", ""),
+        "avatar_url": user.get("avatar_url", ""),
+        "department": user.get("department", ""),
+    }
 
 
 # -------------------- Clients --------------------
@@ -399,6 +435,63 @@ async def update_quotation(qid: str, body: QuotationIn, db: AsyncSession = Depen
         setattr(q, k, v)
     return q.to_dict()
 
+
+class ClientStatusUpdate(BaseModel):
+    """Public endpoint: client accepts/rejects a quotation (no auth)."""
+    status: str  # "aceptada" or "rechazada"
+    notes: Optional[str] = None
+
+
+@api.patch("/quotations/{qid}/status")
+async def client_update_status(qid: str, body: ClientStatusUpdate, db: AsyncSession = Depends(get_db)):
+    """Public: client accepts or rejects their quotation."""
+    if body.status not in ("aceptada", "rechazada"):
+        raise HTTPException(status_code=400, detail="Estado inválido. Usa 'aceptada' o 'rechazada'")
+    result = await db.execute(select(Quotation).where(Quotation.id == qid))
+    q = result.scalar_one_or_none()
+    if not q:
+        raise HTTPException(status_code=404, detail="Cotización no encontrada")
+
+    old_status = q.status
+    is_regret = old_status == "aceptada" and body.status == "rechazada"
+
+    q.status = body.status
+    if body.notes is not None:
+        q.notes = (q.notes or "") + "\n" + body.notes
+
+    # Get client name for notification
+    client_r = await db.execute(select(Client).where(Client.id == q.client_id))
+    client = client_r.scalar_one_or_none()
+    client_name = f"{client.first_name} {client.last_name}" if client else "Cliente"
+
+    # Notify the advisor who created the quotation
+    if q.created_by:
+        if body.status == "aceptada":
+            await create_notification(
+                db, q.created_by, "accepted",
+                title=f"{client_name} aceptó la propuesta",
+                message=f"Cotización para {q.destination} fue aceptada",
+                link=f"/admin/cotizaciones/{q.id}",
+            )
+        elif is_regret:
+            await create_notification(
+                db, q.created_by, "regret",
+                title=f"{client_name} cambió de opinión",
+                message=f"Había aceptado {q.destination} y ahora solicita cambios",
+                link=f"/admin/cotizaciones/{q.id}",
+            )
+        elif body.status == "rechazada":
+            notes_preview = (body.notes or "")[:100]
+            await create_notification(
+                db, q.created_by, "rejected",
+                title=f"{client_name} solicita cambios",
+                message=f"Rechazó {q.destination}" + (f": {notes_preview}" if notes_preview else ""),
+                link=f"/admin/cotizaciones/{q.id}",
+            )
+
+    return q.to_dict()
+
+
 @api.post("/quotations/{qid}/convert")
 async def convert_quotation(qid: str, db: AsyncSession = Depends(get_db), u=Depends(get_current_user)):
     result = await db.execute(select(Quotation).where(Quotation.id == qid))
@@ -418,6 +511,16 @@ async def convert_quotation(qid: str, db: AsyncSession = Depends(get_db), u=Depe
     )
     db.add(reservation)
     await db.flush()
+
+    # Notify if converted by a different user than original creator
+    if q.created_by and q.created_by != u["id"]:
+        await create_notification(
+            db, q.created_by, "converted",
+            title=f"Tu cotización fue convertida en reserva",
+            message=f"Cotización para {q.destination} ahora es reserva #{reservation.id[:8]}",
+            link=f"/admin/reservas/{reservation.id}",
+        )
+
     return reservation.to_dict()
 
 @api.delete("/quotations/{qid}")
@@ -495,6 +598,15 @@ async def create_lead(body: LeadIn, db: AsyncSession = Depends(get_db)):
     db.add(q)
     await db.flush()
 
+    # Notify all users about new lead
+    await create_notification_all(
+        db,
+        type_="new_lead",
+        title=f"Nuevo lead: {body.fullName}",
+        message=f"{body.fullName} solicitó cotización para {body.country}{', ' + body.city if body.city else ''}",
+        link=f"/admin/cotizaciones/{q.id}",
+    )
+
     logger.info(f"New lead from {email}: {q.id}")
 
     return {
@@ -503,6 +615,55 @@ async def create_lead(body: LeadIn, db: AsyncSession = Depends(get_db)):
         "lead_id": q.id,
         "client_id": client.id,
     }
+
+
+# -------------------- Notifications --------------------
+@api.get("/notifications")
+async def list_notifications(
+    db: AsyncSession = Depends(get_db),
+    _u=Depends(get_current_user),
+):
+    """Get notifications for current user, most recent first."""
+    result = await db.execute(
+        select(Notification)
+        .where(Notification.user_id == _u["id"])
+        .order_by(Notification.created_at.desc())
+        .limit(50)
+    )
+    return [n.to_dict() for n in result.scalars().all()]
+
+
+@api.get("/notifications/unread-count")
+async def unread_count(
+    db: AsyncSession = Depends(get_db),
+    _u=Depends(get_current_user),
+):
+    result = await db.execute(
+        select(func.count(Notification.id))
+        .where(Notification.user_id == _u["id"], Notification.read == False)
+    )
+    return {"count": result.scalar() or 0}
+
+
+@api.patch("/notifications/{nid}/read")
+async def mark_read(nid: str, db: AsyncSession = Depends(get_db), _u=Depends(get_current_user)):
+    result = await db.execute(
+        select(Notification).where(Notification.id == nid, Notification.user_id == _u["id"])
+    )
+    n = result.scalar_one_or_none()
+    if n:
+        n.read = True
+    return {"ok": True}
+
+
+@api.patch("/notifications/read-all")
+async def mark_all_read(db: AsyncSession = Depends(get_db), _u=Depends(get_current_user)):
+    result = await db.execute(
+        select(Notification).where(Notification.user_id == _u["id"], Notification.read == False)
+    )
+    for n in result.scalars().all():
+        n.read = True
+    return {"ok": True}
 
 
 # -------------------- Reservations --------------------
@@ -763,9 +924,16 @@ async def create_user(body: UserIn, db: AsyncSession = Depends(get_db), u=Depend
     existing = await db.execute(select(User).where(User.email == body.email.lower()))
     if existing.scalar_one_or_none():
         raise HTTPException(status_code=400, detail="Ya existe un usuario con ese correo")
+    if body.username:
+        existing_un = await db.execute(select(User).where(User.username == body.username.lower()))
+        if existing_un.scalar_one_or_none():
+            raise HTTPException(status_code=400, detail="Ya existe un usuario con ese nombre de usuario")
     user = User(
         id=new_id(), email=body.email.lower(), name=body.name,
+        username=body.username.lower() if body.username else None,
         role=body.role, status=body.status,
+        phone=body.phone or "", avatar_url=body.avatar_url or "",
+        department=body.department or "", notes=body.notes or "",
         password_hash=hash_password(body.password),
     )
     db.add(user)
@@ -783,8 +951,14 @@ async def update_user(uid: str, body: UserIn, db: AsyncSession = Depends(get_db)
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
     user.name = body.name
     user.email = body.email.lower()
+    if body.username is not None:
+        user.username = body.username.lower() if body.username else None
     user.role = body.role
     user.status = body.status
+    user.phone = body.phone or ""
+    user.avatar_url = body.avatar_url or ""
+    user.department = body.department or ""
+    user.notes = body.notes or ""
     if body.password:
         user.password_hash = hash_password(body.password)
     return user.to_dict()
@@ -852,6 +1026,35 @@ async def dashboard_stats(period: str = "6m", db: AsyncSession = Depends(get_db)
     )
     new_clients_month = new_clients_r.scalar() or 0
 
+    # Quotations metrics
+    sent_quot_r = await db.execute(select(func.count(Quotation.id)).where(Quotation.status == "enviada"))
+    sent_quotations = sent_quot_r.scalar() or 0
+
+    accepted_quot_r = await db.execute(select(func.count(Quotation.id)).where(Quotation.status == "aceptada"))
+    accepted_quotations = accepted_quot_r.scalar() or 0
+
+    # Monthly sales (reservations created this month)
+    sales_month_r = await db.execute(
+        select(func.count(Reservation.id)).where(Reservation.created_at >= month_start)
+    )
+    monthly_sales = sales_month_r.scalar() or 0
+
+    # Top destinations (most quoted)
+    top_dest_r = await db.execute(
+        select(Quotation.destination, func.count(Quotation.id).label("cnt"))
+        .group_by(Quotation.destination).order_by(desc("cnt")).limit(5)
+    )
+    top_destinations = [{"destination": r[0], "count": r[1]} for r in top_dest_r.all()]
+
+    # Top brokers (most accepted quotations)
+    top_brokers_r = await db.execute(
+        select(User.name, func.count(Quotation.id).label("cnt"))
+        .join(Quotation, Quotation.created_by == User.id)
+        .where(Quotation.status == "aceptada")
+        .group_by(User.name).order_by(desc("cnt")).limit(5)
+    )
+    top_brokers = [{"name": r[0], "accepted": r[1]} for r in top_brokers_r.all()]
+
     payments_month_r = await db.execute(
         select(func.coalesce(func.sum(Payment.amount), 0))
         .where(Payment.status == "completado", Payment.created_at >= month_start)
@@ -907,8 +1110,13 @@ async def dashboard_stats(period: str = "6m", db: AsyncSession = Depends(get_db)
         "total_clients": total_clients,
         "active_reservations": active_reservations,
         "pending_quotations": pending_quotations,
+        "sent_quotations": sent_quotations,
+        "accepted_quotations": accepted_quotations,
         "monthly_income": monthly_income,
+        "monthly_sales": monthly_sales,
         "new_clients_month": new_clients_month,
+        "top_destinations": top_destinations,
+        "top_brokers": top_brokers,
         "upcoming_trips": upcoming,
         "recent_reservations": recent_res,
         "income_series": income_series,
@@ -1297,112 +1505,26 @@ async def startup():
     await init_db()
 
     async with AsyncSessionLocal() as session:
-        # Seed admin user
-        admin_email = os.environ.get("ADMIN_EMAIL", "admin@karabu.com").lower()
-        admin_password = os.environ.get("ADMIN_PASSWORD", "admin123")
-        existing = await session.execute(select(User).where(User.email == admin_email))
-        user = existing.scalar_one_or_none()
-        if not user:
-            session.add(User(
-                id=new_id(), email=admin_email,
-                password_hash=hash_password(admin_password),
-                name="Super Administrador", role="super_admin",
-            ))
-            logger.info(f"Seeded admin: {admin_email}")
-        else:
-            # Ensure password is correct
-            if not verify_password(admin_password, user.password_hash):
-                user.password_hash = hash_password(admin_password)
-
-        # Seed advisor
-        adv = await session.execute(select(User).where(User.email == "asesor@karabu.com"))
-        if not adv.scalar_one_or_none():
-            session.add(User(
-                id=new_id(), email="asesor@karabu.com",
-                password_hash=hash_password("asesor123"),
-                name="María Rodríguez", role="advisor",
-            ))
+        # Seed admin user — only from env vars, no defaults
+        admin_email = os.environ.get("ADMIN_EMAIL")
+        admin_password = os.environ.get("ADMIN_PASSWORD")
+        if admin_email and admin_password:
+            admin_email = admin_email.lower()
+            existing = await session.execute(select(User).where(User.email == admin_email))
+            user = existing.scalar_one_or_none()
+            if not user:
+                session.add(User(
+                    id=new_id(), email=admin_email,
+                    password_hash=hash_password(admin_password),
+                    name="Administrador", role="super_admin",
+                ))
+                logger.info(f"Seeded admin: {admin_email}")
+            else:
+                if not verify_password(admin_password, user.password_hash):
+                    user.password_hash = hash_password(admin_password)
+                    logger.info(f"Updated admin password for {admin_email}")
 
         await session.commit()
-
-    # Seed sample data
-    async with AsyncSessionLocal() as session:
-        count_r = await session.execute(select(func.count(Client.id)))
-        if count_r.scalar() == 0:
-            sample_clients = [
-                {"first_name": "Carlos", "last_name": "Mendoza", "email": "carlos.mendoza@mail.com", "phone": "+57 300 123 4567", "document_id": "1023456789", "address": "Bogotá, Colombia", "status": "activo"},
-                {"first_name": "Ana", "last_name": "Torres", "email": "ana.torres@mail.com", "phone": "+57 301 234 5678", "document_id": "1034567890", "address": "Medellín, Colombia", "status": "activo"},
-                {"first_name": "Luis", "last_name": "Ramírez", "email": "luis.ramirez@mail.com", "phone": "+57 302 345 6789", "document_id": "1045678901", "address": "Cali, Colombia", "status": "activo"},
-                {"first_name": "Sofía", "last_name": "García", "email": "sofia.garcia@mail.com", "phone": "+57 303 456 7890", "document_id": "1056789012", "address": "Cartagena, Colombia", "status": "activo"},
-                {"first_name": "Diego", "last_name": "Herrera", "email": "diego.herrera@mail.com", "phone": "+57 304 567 8901", "document_id": "1067890123", "address": "Barranquilla, Colombia", "status": "inactivo"},
-            ]
-            # Get admin user id for created_by
-            admin_r = await session.execute(select(User).where(User.email == "admin@karabu.com"))
-            admin = admin_r.scalar_one()
-            client_ids = []
-            for c in sample_clients:
-                cid = new_id()
-                client_ids.append(cid)
-                session.add(Client(id=cid, **c, notes="", created_by=admin.id))
-
-            destinations = ["Cancún, México", "París, Francia", "Cusco, Perú", "Buenos Aires, Argentina", "Roma, Italia"]
-            for i, cid in enumerate(client_ids):
-                session.add(Quotation(
-                    id=new_id(), client_id=cid, destination=destinations[i % len(destinations)],
-                    travel_date=(datetime.now(timezone.utc) + timedelta(days=30 + i * 10)).isoformat(),
-                    return_date=(datetime.now(timezone.utc) + timedelta(days=37 + i * 10)).isoformat(),
-                    travelers=2 + (i % 3), amount=1200 + i * 350, currency="USD", notes="",
-                    status=["borrador", "enviada", "aceptada", "enviada", "rechazada"][i % 5],
-                    created_by=admin.id,
-                ))
-
-            res_ids = []
-            for i, cid in enumerate(client_ids[:4]):
-                rid = new_id()
-                res_ids.append(rid)
-                total = 1800 + i * 500
-                session.add(Reservation(
-                    id=rid, client_id=cid, destination=destinations[i],
-                    departure_date=(datetime.now(timezone.utc) + timedelta(days=15 + i * 7)).isoformat(),
-                    return_date=(datetime.now(timezone.utc) + timedelta(days=22 + i * 7)).isoformat(),
-                    travelers=2 + i, services="Vuelos + Hotel + Traslados", notes="",
-                    total_amount=total, currency="USD",
-                    status=["pendiente", "confirmada", "pagada", "en_viaje"][i],
-                    created_by=admin.id,
-                ))
-
-            for i, rid in enumerate(res_ids):
-                session.add(Payment(
-                    id=new_id(), reservation_id=rid, client_id=client_ids[i],
-                    amount=800 + i * 200, method=["transferencia", "tarjeta", "efectivo", "transferencia"][i],
-                    reference=f"REF-{1000 + i}", payment_date=now_iso(),
-                    status="completado", notes="", created_by=admin.id,
-                ))
-
-            # Seed destinations
-            dests = [
-                {"name": "Cancún", "country": "México", "image_url": "https://images.pexels.com/photos/1268855/pexels-photo-1268855.jpeg", "description": "Playas del Caribe mexicano.", "status": "activo"},
-                {"name": "París", "country": "Francia", "image_url": "https://images.pexels.com/photos/338515/pexels-photo-338515.jpeg", "description": "La ciudad de la luz.", "status": "activo"},
-                {"name": "Cusco", "country": "Perú", "image_url": "https://images.pexels.com/photos/2356045/pexels-photo-2356045.jpeg", "description": "Puerta a Machu Picchu.", "status": "activo"},
-                {"name": "Buenos Aires", "country": "Argentina", "image_url": "https://images.pexels.com/photos/2662116/pexels-photo-2662116.jpeg", "description": "Tango, gastronomía y cultura.", "status": "activo"},
-                {"name": "Roma", "country": "Italia", "image_url": "https://images.pexels.com/photos/2064827/pexels-photo-2064827.jpeg", "description": "Historia milenaria.", "status": "inactivo"},
-            ]
-            for d in dests:
-                session.add(Destination(id=new_id(), **d))
-
-            # Seed packages
-            pkgs = [
-                {"name": "Cancún Todo Incluido 7D", "destination": "Cancún, México", "price": 1450, "currency": "USD", "duration_days": 7, "description": "Hotel 5* + vuelos + traslados.", "status": "activo"},
-                {"name": "París Romántico 5D", "destination": "París, Francia", "price": 2100, "currency": "USD", "duration_days": 5, "description": "Hotel boutique + city tour.", "status": "activo"},
-                {"name": "Machu Picchu Aventura 6D", "destination": "Cusco, Perú", "price": 1750, "currency": "USD", "duration_days": 6, "description": "Camino Inca + hospedaje.", "status": "activo"},
-                {"name": "Escapada a Buenos Aires 4D", "destination": "Buenos Aires, Argentina", "price": 890, "currency": "USD", "duration_days": 4, "description": "City + cena show de tango.", "status": "activo"},
-                {"name": "Roma Clásica 6D", "destination": "Roma, Italia", "price": 1980, "currency": "USD", "duration_days": 6, "description": "Coliseo + Vaticano.", "status": "inactivo"},
-            ]
-            for p in pkgs:
-                session.add(Package(id=new_id(), **p))
-
-            await session.commit()
-            logger.info("Seeded sample data")
 
 
 @app.on_event("shutdown")

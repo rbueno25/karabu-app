@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getQuotation, updateQuotation } from './api-adapter';
+import { getQuotation, updateQuotationStatus } from './api-adapter';
 import { Navbar } from './components/Navbar';
 import { HeroBanner } from './components/HeroBanner';
 import { MetricsCards } from './components/MetricsCards';
@@ -57,7 +57,7 @@ export default function ClientQuotationView() {
 
   const handleUpdateStatus = async (payload) => {
     if (!data) return;
-    await updateQuotation(currentId, payload);
+    await updateQuotationStatus(currentId, payload);
     setData((prev) => {
       if (!prev) return prev;
       return {
@@ -100,10 +100,10 @@ export default function ClientQuotationView() {
             <HeroBanner data={data} />
             <MetricsCards quotation={data.quotation} formData={data.quotation.form_data} />
             <FormDataDetails formData={data.quotation.form_data} />
+            <PriceComparison quotation={data.quotation} />
             <ItinerarySection quotation={data.quotation} />
             <DestinationGallery destination={data.quotation.destination} images={data.quotation.gallery_images} />
             <BrokerCard broker={data.broker} quotationId={data.quotation.id} />
-            <PriceComparison quotation={data.quotation} />
             <DecisionPanel quotationId={data.quotation.id} currentStatus={data.quotation.status}
               currentNotes={data.quotation.notes} onUpdateStatus={handleUpdateStatus} />
           </div>

@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState, useMemo } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import api, { formatApiError } from "../lib/api";
 import PageHeader from "./PageHeader";
 import StatusBadge from "./StatusBadge";
 import EmptyState from "./EmptyState";
-import { Plus, Loader2, Pencil, Trash2, FileText, ArrowRight, X, Eye } from "lucide-react";
+import { Plus, Search, Loader2, Pencil, Trash2, FileText, ArrowRight, X, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { formatCurrency, formatDate } from "../lib/format";
 
@@ -20,15 +20,27 @@ const emptyQuote = {
   status: "borrador",
 };
 
+const inputCls = "w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#132D52] text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none";
+const selectCls = "text-sm border border-gray-200 dark:border-[#1A3356] rounded-[10px] px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none bg-white dark:bg-[#0F2444] text-gray-900 dark:text-gray-100";
+
 export default function Quotations() {
+  const [searchParams] = useSearchParams();
   const [items, setItems] = useState([]);
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState("");
+  const [q, setQ] = useState("");
+  const [statusFilter, setStatusFilter] = useState(searchParams.get("status") || "");
   const [modalOpen, setModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(emptyQuote);
+  const [page, setPage] = useState(1);
+  const [convertedIds, setConvertedIds] = useState(() => {
+    try {
+      return new Set(JSON.parse(localStorage.getItem("karabu_converted_ids") || "[]"));
+    } catch { return new Set(); }
+  });
+  const perPage = 10;
 
   const load = async () => {
     setLoading(true);
@@ -52,6 +64,19 @@ export default function Quotations() {
     load();
     // eslint-disable-next-line
   }, [statusFilter]);
+
+  // Client-side search + pagination
+  const filtered = useMemo(() => {
+    if (!q) return items;
+    const lower = q.toLowerCase();
+    return items.filter((it) =>
+      (it.client_name || "").toLowerCase().includes(lower) ||
+      (it.destination || "").toLowerCase().includes(lower)
+    );
+  }, [items, q]);
+
+  const paginated = useMemo(() => filtered.slice((page - 1) * perPage, page * perPage), [filtered, page]);
+  const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
 
   const openCreate = () => {
     setEditingId(null);
@@ -111,7 +136,9 @@ export default function Quotations() {
     try {
       await api.post(`/quotations/${q.id}/convert`);
       toast.success("Convertida en reserva");
-      load();
+      const next = new Set([...convertedIds, q.id]);
+      setConvertedIds(next);
+      localStorage.setItem("karabu_converted_ids", JSON.stringify([...next]));
     } catch (e) {
       toast.error(formatApiError(e.response?.data?.detail) || "No fue posible convertir");
     }
@@ -133,12 +160,21 @@ export default function Quotations() {
         }
       />
 
-      <div className="bg-white dark:bg-gray-900 rounded-[16px] border border-gray-200 dark:border-gray-700 shadow-[0_1px_3px_0_rgba(0,0,0,0.04)] overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center gap-3 flex-wrap">
+      <div className="bg-white dark:bg-[#0F2444] rounded-[16px] border border-gray-200 dark:border-[#1A3356] shadow-[0_1px_3px_0_rgba(0,0,0,0.04)] overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-200 dark:border-[#1A3356] flex items-center gap-3 flex-wrap">
+          <div className="relative flex-1 min-w-[240px]">
+            <Search className="h-4 w-4 text-gray-400 dark:text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              value={q}
+              onChange={(e) => { setQ(e.target.value); setPage(1); }}
+              placeholder="Buscar por cliente o destino…"
+              className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 dark:border-[#1A3356] bg-white dark:bg-[#0F2444] text-gray-900 dark:text-gray-100 rounded-[10px] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none"
+            />
+          </div>
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="text-sm border border-gray-200 dark:border-gray-700 rounded-[10px] px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none bg-white dark:bg-gray-900"
+            onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
+            className={selectCls}
           >
             <option value="">Todos los estados</option>
             <option value="borrador">Borrador</option>
@@ -150,93 +186,103 @@ export default function Quotations() {
         </div>
 
         {loading ? (
-          <div className="p-10 text-center text-gray-500 dark:text-gray-400 flex items-center justify-center gap-2">
+          <div className="p-10 text-center text-gray-500 dark:text-gray-300 flex items-center justify-center gap-2">
             <Loader2 className="h-4 w-4 animate-spin" /> Cargando…
           </div>
-        ) : items.length === 0 ? (
+        ) : filtered.length === 0 ? (
           <EmptyState
             title="Sin cotizaciones"
             description="Crea la primera cotización para un cliente."
             icon={FileText}
           />
         ) : (
-          <table className="w-full text-sm" data-testid="quotations-table">
-            <thead className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-              <tr>
-                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Cliente</th>
-                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Destino</th>
-                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Fecha viaje</th>
-                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Monto</th>
-                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Estado</th>
-                <th className="text-right px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((q) => (
-                <tr key={q.id} className="border-b border-gray-100 dark:border-gray-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800">
-                  <td className="px-6 py-3 text-gray-900 dark:text-gray-100 font-medium">{q.client_name}</td>
-                  <td className="px-6 py-3">
-                    <Link
-                      to={`/admin/cotizaciones/${q.id}`}
-                      data-testid={`quotation-link-${q.id}`}
-                      className="text-blue-600 hover:text-blue-800 font-medium hover:underline transition-colors"
-                    >
-                      {q.destination}
-                    </Link>
-                  </td>
-                  <td className="px-6 py-3 text-gray-600 dark:text-gray-400">{formatDate(q.travel_date)}</td>
-                  <td className="px-6 py-3 text-gray-900 dark:text-gray-100">{formatCurrency(q.amount, q.currency)}</td>
-                  <td className="px-6 py-3"><StatusBadge value={q.status} /></td>
-                  <td className="px-6 py-3 text-right">
-                    <div className="inline-flex items-center gap-1">
-                      {q.status === "aceptada" && (
-                        <button
-                          onClick={() => convert(q)}
-                          data-testid={`quotation-convert-${q.id}`}
-                          className="inline-flex items-center gap-1 h-8 px-2.5 rounded-[8px] bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-100 text-xs font-medium"
-                        >
-                          <ArrowRight className="h-3.5 w-3.5" /> Convertir
-                        </button>
-                      )}
+          <>
+            <table className="w-full text-sm" data-testid="quotations-table">
+              <thead className="bg-gray-50 dark:bg-[#132D52] border-b border-gray-200 dark:border-[#1A3356]">
+                <tr>
+                  <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Cliente</th>
+                  <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Destino</th>
+                  <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Fecha viaje</th>
+                  <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Monto</th>
+                  <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Estado</th>
+                  <th className="text-right px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginated.map((q) => (
+                  <tr key={q.id} className="border-b border-gray-100 dark:border-[#1A3356] last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800">
+                    <td className="px-6 py-3 text-gray-900 dark:text-gray-100 font-medium">{q.client_name}</td>
+                    <td className="px-6 py-3">
                       <Link
                         to={`/admin/cotizaciones/${q.id}`}
-                        data-testid={`quotation-edit-${q.id}`}
-                        className="h-8 w-8 rounded-[8px] hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400 transition-colors"
+                        data-testid={`quotation-link-${q.id}`}
+                        className="text-blue-600 hover:text-blue-800 font-medium hover:underline transition-colors"
                       >
-                        <Pencil className="h-4 w-4" />
+                        {q.destination}
                       </Link>
-                      <a
-                        href={`/cotizacion/${q.id}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        data-testid={`quotation-view-${q.id}`}
-                        className="h-8 w-8 rounded-[8px] hover:bg-brand-turquoise/10 dark:hover:bg-brand-turquoise/20 flex items-center justify-center text-brand-turquoise transition-colors"
-                        title="Ver entregable del cliente"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </a>
-                      <button
-                        onClick={() => remove(q)}
-                        className="h-8 w-8 rounded-[8px] hover:bg-red-50 flex items-center justify-center text-red-600"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                    </td>
+                    <td className="px-6 py-3 text-gray-600 dark:text-gray-300">{formatDate(q.travel_date)}</td>
+                    <td className="px-6 py-3 text-gray-900 dark:text-gray-100">{formatCurrency(q.amount, q.currency)}</td>
+                    <td className="px-6 py-3"><StatusBadge value={q.status} /></td>
+                    <td className="px-6 py-3 text-right">
+                      <div className="inline-flex items-center gap-1">
+                        {q.status === "aceptada" && !convertedIds.has(q.id) && (
+                          <button
+                            onClick={() => convert(q)}
+                            data-testid={`quotation-convert-${q.id}`}
+                            className="inline-flex items-center gap-1 h-8 px-2.5 rounded-[8px] bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-100 text-xs font-medium"
+                          >
+                            <ArrowRight className="h-3.5 w-3.5" /> Convertir
+                          </button>
+                        )}
+                        <Link
+                          to={`/admin/cotizaciones/${q.id}`}
+                          data-testid={`quotation-edit-${q.id}`}
+                          className="h-8 w-8 rounded-[8px] hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-300 transition-colors"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Link>
+                        <a
+                          href={`/cotizacion/${q.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          data-testid={`quotation-view-${q.id}`}
+                          className="h-8 w-8 rounded-[8px] hover:bg-brand-turquoise/10 dark:hover:bg-brand-turquoise/20 flex items-center justify-center text-brand-turquoise transition-colors"
+                          title="Ver entregable del cliente"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </a>
+                        <button
+                          onClick={() => remove(q)}
+                          className="h-8 w-8 rounded-[8px] hover:bg-red-50 flex items-center justify-center text-red-600"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <div className="px-6 py-3 border-t border-gray-200 dark:border-[#1A3356] flex items-center justify-between text-sm text-gray-500 dark:text-gray-300">
+              <div>Mostrando {paginated.length} de {filtered.length}</div>
+              <div className="flex items-center gap-2">
+                <button disabled={page === 1} onClick={() => setPage((p) => Math.max(1, p - 1))} className="px-3 py-1 border border-gray-200 dark:border-[#1A3356] rounded-[8px] disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-800">Anterior</button>
+                <span className="text-gray-700 dark:text-gray-300">Página {page} / {totalPages}</span>
+                <button disabled={page === totalPages} onClick={() => setPage((p) => Math.min(totalPages, p + 1))} className="px-3 py-1 border border-gray-200 dark:border-[#1A3356] rounded-[8px] disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-800">Siguiente</button>
+              </div>
+            </div>
+          </>
         )}
       </div>
 
       {modalOpen && (
         <div data-testid="quotation-modal" className="fixed inset-0 z-50 flex items-start justify-center bg-gray-900/50 backdrop-blur-sm p-4 overflow-y-auto">
-          <form onSubmit={save} className="mt-16 bg-white dark:bg-gray-900 rounded-[16px] shadow-xl border border-gray-200 dark:border-gray-700 w-full max-w-lg p-6">
+          <form onSubmit={save} className="mt-16 bg-white dark:bg-[#0F2444] rounded-[16px] shadow-xl border border-gray-200 dark:border-[#1A3356] w-full max-w-lg p-6">
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{editingId ? "Editar cotización" : "Nueva cotización"}</h3>
               <button type="button" onClick={() => setModalOpen(false)} className="h-8 w-8 rounded-[8px] hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center">
-                <X className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                <X className="h-4 w-4 text-gray-500 dark:text-gray-300" />
               </button>
             </div>
 
@@ -291,7 +337,7 @@ export default function Quotations() {
             </div>
 
             <div className="mt-6 flex items-center justify-end gap-2">
-              <button type="button" onClick={() => setModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-[10px] hover:bg-gray-50 dark:hover:bg-gray-800">
+              <button type="button" onClick={() => setModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-[#1A3356] rounded-[10px] hover:bg-gray-50 dark:hover:bg-gray-800">
                 Cancelar
               </button>
               <button type="submit" disabled={saving} data-testid="quotation-save-btn" className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] px-4 py-2 text-sm font-medium disabled:opacity-60">
@@ -304,8 +350,6 @@ export default function Quotations() {
     </div>
   );
 }
-
-const inputCls = "w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none";
 
 function Field({ label, required, children }) {
   return (

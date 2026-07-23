@@ -1,8 +1,9 @@
 import React from "react";
-import { Bell, Sun, Moon } from "lucide-react";
+import { Sun, Moon } from "lucide-react";
 import { useAuth } from "./AuthContext";
 import { useTheme } from "./ThemeContext";
 import { useLocation } from "react-router-dom";
+import NotificationDropdown from "./NotificationDropdown";
 
 const CRUMB_MAP = {
   "/": ["Tablero"],
@@ -28,7 +29,7 @@ export default function Header() {
   return (
     <header
       data-testid="app-header"
-      className="h-16 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900/85 dark:bg-gray-950/85 backdrop-blur-md flex items-center justify-between px-8 sticky top-0 z-30"
+      className="h-16 border-b border-gray-200 dark:border-[#1A3356] bg-white dark:bg-[#0F2444] dark:bg-opacity-90 backdrop-blur-md flex items-center justify-between px-8 sticky top-0 z-30"
     >
       <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
         <span className="text-gray-400 dark:text-gray-400">Karabu</span>
@@ -43,19 +44,13 @@ export default function Header() {
       <div className="flex items-center gap-4">
         <button
           onClick={toggle}
-          className="h-9 w-9 rounded-[10px] border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center justify-center transition-colors"
+          className="h-9 w-9 rounded-[10px] border border-gray-200 dark:border-[#1A3356] hover:bg-gray-50 dark:hover:bg-[#132D52] flex items-center justify-center transition-colors"
           aria-label={dark ? "Modo claro" : "Modo oscuro"}
         >
           {dark ? <Sun className="h-4 w-4 text-yellow-500" /> : <Moon className="h-4 w-4 text-gray-600 dark:text-gray-400" />}
         </button>
-        <button
-          data-testid="header-notifications-btn"
-          className="relative h-9 w-9 rounded-[10px] border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center justify-center transition-colors"
-          aria-label="Notificaciones"
-        >
-          <Bell className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-        </button>
-        <div className="flex items-center gap-3 pl-4 border-l border-gray-200 dark:border-gray-700">
+        <NotificationDropdown />
+        <div className="flex items-center gap-3 pl-4 border-l border-gray-200 dark:border-[#1A3356]">
           <div className="text-right leading-tight">
             <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{user?.name || "—"}</div>
             <div className="text-xs text-gray-500 dark:text-gray-400 capitalize">

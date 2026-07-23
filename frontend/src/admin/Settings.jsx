@@ -16,7 +16,7 @@ const SECTIONS = [
   { id: "seguridad", label: "Seguridad", icon: Lock },
 ];
 
-const inputCls = "w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none";
+const inputCls = "w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#132D52] text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none";
 
 export default function Settings() {
   const { user } = useAuth();
@@ -56,7 +56,7 @@ export default function Settings() {
     return (
       <div>
         <PageHeader title="Configuración" description="Configuración general de la empresa." />
-        <div className="p-10 text-center text-gray-500 dark:text-gray-400 flex items-center justify-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Cargando…</div>
+        <div className="p-10 text-center text-gray-500 dark:text-gray-300 flex items-center justify-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Cargando…</div>
       </div>
     );
   }
@@ -67,7 +67,7 @@ export default function Settings() {
 
       <div className="grid grid-cols-12 gap-6">
         <aside className="col-span-12 md:col-span-3">
-          <nav className="bg-white dark:bg-gray-900 rounded-[16px] border border-gray-200 dark:border-gray-700 p-2 shadow-[0_1px_3px_0_rgba(0,0,0,0.04)]">
+          <nav className="bg-white dark:bg-[#0F2444] rounded-[16px] border border-gray-200 dark:border-[#1A3356] p-2 shadow-[0_1px_3px_0_rgba(0,0,0,0.04)]">
             {SECTIONS.map(({ id, label, icon: Icon }) => (
               <button
                 key={id}
@@ -76,7 +76,7 @@ export default function Settings() {
                 data-testid={`settings-tab-${id}`}
                 className={[
                   "w-full flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium transition-colors text-left",
-                  section === id ? "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300" : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800",
+                  section === id ? "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300" : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800",
                 ].join(" ")}
               >
                 <Icon className="h-4 w-4" /> {label}
@@ -85,7 +85,7 @@ export default function Settings() {
           </nav>
         </aside>
 
-        <form onSubmit={save} className="col-span-12 md:col-span-9 bg-white dark:bg-gray-900 rounded-[16px] border border-gray-200 dark:border-gray-700 p-6 shadow-[0_1px_3px_0_rgba(0,0,0,0.04)] space-y-6" data-testid="settings-form">
+        <form onSubmit={save} className="col-span-12 md:col-span-9 bg-white dark:bg-[#0F2444] rounded-[16px] border border-gray-200 dark:border-[#1A3356] p-6 shadow-[0_1px_3px_0_rgba(0,0,0,0.04)] space-y-6" data-testid="settings-form">
           {!canEdit && (
             <div className="text-sm text-yellow-700 dark:text-yellow-300 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 rounded-[10px] px-3 py-2">
               Solo lectura. Únicamente los administradores pueden modificar la configuración.
@@ -119,8 +119,8 @@ export default function Settings() {
                 <input value={form.logo_url} onChange={(e) => setForm({ ...form, logo_url: e.target.value })} className={inputCls} placeholder="https://…" disabled={!canEdit} />
               </Field>
               {form.logo_url ? (
-                <div className="border border-gray-200 dark:border-gray-700 rounded-[10px] p-4 bg-gray-50 dark:bg-gray-800">
-                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">Vista previa</div>
+                <div className="border border-gray-200 dark:border-[#1A3356] rounded-[10px] p-4 bg-gray-50 dark:bg-[#132D52]">
+                  <div className="text-xs text-gray-500 dark:text-gray-300 mb-2">Vista previa</div>
                   <img src={form.logo_url} alt="Logo" className="max-h-24 object-contain" />
                 </div>
               ) : null}
@@ -195,7 +195,7 @@ export default function Settings() {
           )}
 
           {canEdit && (
-            <div className="flex items-center justify-end pt-4 border-t border-gray-100 dark:border-gray-800">
+            <div className="flex items-center justify-end pt-4 border-t border-gray-100 dark:border-[#1A3356]">
               <button type="submit" disabled={saving} data-testid="settings-save-btn" className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] px-4 py-2 text-sm font-medium disabled:opacity-60">
                 {saving && <Loader2 className="h-4 w-4 animate-spin" />} Guardar cambios
               </button>
@@ -208,7 +208,7 @@ export default function Settings() {
 }
 
 function SectionTitle({ children }) {
-  return <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-gray-800 pb-3">{children}</h3>;
+  return <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-[#1A3356] pb-3">{children}</h3>;
 }
 
 function Field({ label, required, children }) {

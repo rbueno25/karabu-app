@@ -12,7 +12,7 @@ import {
   Mail, Phone
 } from "lucide-react";
 
-const inputCls = "w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-shadow";
+const inputCls = "w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#132D52] text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-shadow";
 
 export default function ReservationDetail() {
   const { id } = useParams();
@@ -86,7 +86,7 @@ export default function ReservationDetail() {
 
   if (loading || !data) {
     return (
-      <div className="p-10 text-center text-gray-500 dark:text-gray-400 flex items-center justify-center gap-2">
+      <div className="p-10 text-center text-gray-500 dark:text-gray-300 flex items-center justify-center gap-2">
         <Loader2 className="h-4 w-4 animate-spin" /> Cargando detalle de reserva…
       </div>
     );
@@ -263,7 +263,7 @@ export default function ReservationDetail() {
       <div className="flex items-center gap-3">
         <Link 
           to="/admin/reservas" 
-          className="h-9 w-9 border border-gray-200 dark:border-gray-700 rounded-[10px] bg-white dark:bg-gray-900 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+          className="h-9 w-9 border border-gray-200 dark:border-[#1A3356] rounded-[10px] bg-white dark:bg-[#0F2444] flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
           data-testid="reservation-back-btn"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -275,7 +275,7 @@ export default function ReservationDetail() {
             </h1>
             <StatusBadge value={reservation.status} />
           </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400">ID Reserva: {reservation.id}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-300">ID Reserva: {reservation.id}</p>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -293,8 +293,8 @@ export default function ReservationDetail() {
         {/* Left Column: Quick summary and Accounts */}
         <aside className="col-span-12 lg:col-span-4 space-y-6">
           {/* Client summary */}
-          <div className="bg-white dark:bg-gray-900 rounded-[16px] border border-gray-200 dark:border-gray-700 p-6 shadow-[0_1px_3px_0_rgba(0,0,0,0.05)]">
-            <span className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 block mb-3">Cliente de la Reserva</span>
+          <div className="bg-white dark:bg-[#0F2444] rounded-[16px] border border-gray-200 dark:border-[#1A3356] p-6 shadow-[0_1px_3px_0_rgba(0,0,0,0.05)]">
+            <span className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-400 block mb-3">Cliente de la Reserva</span>
             {client ? (
               <div className="space-y-2">
                 <Link 
@@ -303,31 +303,31 @@ export default function ReservationDetail() {
                 >
                   {client.first_name} {client.last_name}
                 </Link>
-                <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1">
+                <div className="text-xs text-gray-500 dark:text-gray-300 space-y-1">
                   <p className="flex items-center gap-1.5"><Mail className="h-3.5 w-3.5" /> {client.email}</p>
                   <p className="flex items-center gap-1.5"><Phone className="h-3.5 w-3.5" /> {client.phone}</p>
                 </div>
               </div>
             ) : (
-              <p className="text-sm text-gray-500 dark:text-gray-400 font-semibold">—</p>
+              <p className="text-sm text-gray-500 dark:text-gray-300 font-semibold">—</p>
             )}
           </div>
 
           {/* Pricing & Payments summary */}
-          <div className="bg-white dark:bg-gray-900 rounded-[16px] border border-gray-200 dark:border-gray-700 p-6 shadow-[0_1px_3px_0_rgba(0,0,0,0.05)]">
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-gray-800 pb-3 mb-4">Estado Financiero</h3>
+          <div className="bg-white dark:bg-[#0F2444] rounded-[16px] border border-gray-200 dark:border-[#1A3356] p-6 shadow-[0_1px_3px_0_rgba(0,0,0,0.05)]">
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-[#1A3356] pb-3 mb-4">Estado Financiero</h3>
             <div className="space-y-3.5">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-500 dark:text-gray-400 font-medium">Monto Total:</span>
+                <span className="text-gray-500 dark:text-gray-300 font-medium">Monto Total:</span>
                 <span className="font-bold text-gray-900 dark:text-gray-100">{formatCurrency(form.total_amount, form.currency)}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-500 dark:text-gray-400 font-medium">Monto Pagado:</span>
+                <span className="text-gray-500 dark:text-gray-300 font-medium">Monto Pagado:</span>
                 <span className="font-bold text-green-600">{formatCurrency(calculatedPaidAmount, form.currency)}</span>
               </div>
-              <div className="flex justify-between text-sm pt-2 border-t border-gray-100 dark:border-gray-800">
-                <span className="text-gray-500 dark:text-gray-400 font-semibold">Pendiente:</span>
-                <span className={`font-extrabold ${calculatedPendingAmount > 0 ? "text-yellow-600" : "text-gray-500 dark:text-gray-400"}`}>
+              <div className="flex justify-between text-sm pt-2 border-t border-gray-100 dark:border-[#1A3356]">
+                <span className="text-gray-500 dark:text-gray-300 font-semibold">Pendiente:</span>
+                <span className={`font-extrabold ${calculatedPendingAmount > 0 ? "text-yellow-600" : "text-gray-500 dark:text-gray-300"}`}>
                   {formatCurrency(calculatedPendingAmount, form.currency)}
                 </span>
               </div>
@@ -337,9 +337,9 @@ export default function ReservationDetail() {
 
         {/* Right Column: Tabbed Panels */}
         <main className="col-span-12 lg:col-span-8 space-y-6">
-          <div className="bg-white dark:bg-gray-900 rounded-[16px] border border-gray-200 dark:border-gray-700 shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] overflow-hidden">
+          <div className="bg-white dark:bg-[#0F2444] rounded-[16px] border border-gray-200 dark:border-[#1A3356] shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] overflow-hidden">
             {/* Tabs Header */}
-            <div className="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700 px-6 py-2 flex items-center gap-1 overflow-x-auto">
+            <div className="bg-gray-50 dark:bg-[#132D52]/50 border-b border-gray-200 dark:border-[#1A3356] px-6 py-2 flex items-center gap-1 overflow-x-auto">
               {[
                 { id: "info", label: "Detalles", icon: Info },
                 { id: "pasajeros", label: "Pasajeros", icon: User },
@@ -353,8 +353,8 @@ export default function ReservationDetail() {
                   className={[
                     "flex items-center gap-2 px-3.5 py-2.5 rounded-[10px] text-xs font-semibold uppercase tracking-wider transition-colors",
                     tab === t.id 
-                      ? "bg-white dark:bg-gray-900 text-blue-600 shadow-sm border border-gray-200 dark:border-gray-700" 
-                      : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/55"
+                      ? "bg-white dark:bg-[#0F2444] text-blue-600 shadow-sm border border-gray-200 dark:border-[#1A3356]" 
+                      : "text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/55"
                   ].join(" ")}
                 >
                   <t.icon className="h-3.5 w-3.5" />
@@ -476,7 +476,7 @@ export default function ReservationDetail() {
                     />
                   </Field>
 
-                  <div className="pt-4 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
+                  <div className="pt-4 border-t border-gray-100 dark:border-[#1A3356] flex items-center justify-between">
                     <button
                       type="button"
                       onClick={handleDeleteReservation}
@@ -521,26 +521,26 @@ export default function ReservationDetail() {
                   ) : (
                     <div className="overflow-x-auto border border-gray-150 rounded-[10px]">
                       <table className="w-full text-sm text-left">
-                        <thead className="bg-gray-50 dark:bg-gray-800 border-b border-gray-150">
+                        <thead className="bg-gray-50 dark:bg-[#132D52] border-b border-gray-150">
                           <tr>
-                            <th className="px-4 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Nombre Completo</th>
-                            <th className="px-4 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Documento</th>
-                            <th className="px-4 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">F. Nacimiento</th>
-                            <th className="px-4 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Acciones</th>
+                            <th className="px-4 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Nombre Completo</th>
+                            <th className="px-4 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Documento</th>
+                            <th className="px-4 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider">F. Nacimiento</th>
+                            <th className="px-4 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider text-right">Acciones</th>
                           </tr>
                         </thead>
                         <tbody>
                           {form.passengers.map((p, idx) => (
-                            <tr key={idx} className="border-b border-gray-100 dark:border-gray-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                            <tr key={idx} className="border-b border-gray-100 dark:border-[#1A3356] last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50">
                               <td className="px-4 py-3 font-semibold text-gray-900 dark:text-gray-100">{p.name}</td>
                               <td className="px-4 py-3 text-gray-700 dark:text-gray-300 font-mono text-xs">{p.document_id || "—"}</td>
-                              <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{p.birth_date ? formatDate(p.birth_date) : "—"}</td>
+                              <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{p.birth_date ? formatDate(p.birth_date) : "—"}</td>
                               <td className="px-4 py-3 text-right">
                                 <div className="inline-flex items-center gap-1">
                                   <button 
                                     onClick={() => openPassengerModal(idx)}
                                     data-testid={`passenger-edit-${idx}`}
-                                    className="h-7 w-7 rounded-[6px] hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400"
+                                    className="h-7 w-7 rounded-[6px] hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-300"
                                     aria-label="Editar"
                                   >
                                     <Pencil className="h-3.5 w-3.5" />
@@ -587,7 +587,7 @@ export default function ReservationDetail() {
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {form.documents.map((doc, idx) => (
-                        <div key={idx} className="flex items-center justify-between p-3 border border-gray-150 rounded-[10px] bg-gray-50 dark:bg-gray-800/30 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                        <div key={idx} className="flex items-center justify-between p-3 border border-gray-150 rounded-[10px] bg-gray-50 dark:bg-[#132D52]/30 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                           <div className="flex items-start gap-3 min-w-0">
                             <div className="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-[8px] text-blue-600 shrink-0">
                               <FileText className="h-4 w-4" />
@@ -646,21 +646,21 @@ export default function ReservationDetail() {
                   ) : (
                     <div className="overflow-x-auto border border-gray-150 rounded-[10px]">
                       <table className="w-full text-sm text-left">
-                        <thead className="bg-gray-50 dark:bg-gray-800 border-b border-gray-150">
+                        <thead className="bg-gray-50 dark:bg-[#132D52] border-b border-gray-150">
                           <tr>
-                            <th className="px-4 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Fecha</th>
-                            <th className="px-4 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Método</th>
-                            <th className="px-4 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Referencia</th>
-                            <th className="px-4 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Monto</th>
-                            <th className="px-4 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Estado</th>
+                            <th className="px-4 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Fecha</th>
+                            <th className="px-4 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Método</th>
+                            <th className="px-4 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Referencia</th>
+                            <th className="px-4 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Monto</th>
+                            <th className="px-4 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Estado</th>
                           </tr>
                         </thead>
                         <tbody>
                           {payments.map(p => (
-                            <tr key={p.id} className="border-b border-gray-100 dark:border-gray-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                              <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{formatDate(p.payment_date || p.created_at)}</td>
+                            <tr key={p.id} className="border-b border-gray-100 dark:border-[#1A3356] last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                              <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{formatDate(p.payment_date || p.created_at)}</td>
                               <td className="px-4 py-3 text-gray-700 dark:text-gray-300 capitalize font-medium">{p.method}</td>
-                              <td className="px-4 py-3 text-gray-600 dark:text-gray-400 font-mono text-xs">{p.reference || "—"}</td>
+                              <td className="px-4 py-3 text-gray-600 dark:text-gray-300 font-mono text-xs">{p.reference || "—"}</td>
                               <td className="px-4 py-3 text-gray-900 dark:text-gray-100 font-bold">{formatCurrency(p.amount, p.currency)}</td>
                               <td className="px-4 py-3"><StatusBadge value={p.status} /></td>
                             </tr>
@@ -679,13 +679,13 @@ export default function ReservationDetail() {
       {/* Passenger Modal */}
       {passengerModalOpen && (
         <div data-testid="passenger-modal" className="fixed inset-0 z-50 flex items-start justify-center bg-gray-900/50 backdrop-blur-sm p-4 overflow-y-auto">
-          <form onSubmit={savePassenger} className="mt-16 bg-white dark:bg-gray-900 rounded-[16px] shadow-xl border border-gray-200 dark:border-gray-700 w-full max-w-md p-6">
+          <form onSubmit={savePassenger} className="mt-16 bg-white dark:bg-[#0F2444] rounded-[16px] shadow-xl border border-gray-200 dark:border-[#1A3356] w-full max-w-md p-6">
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">
                 {editingPassengerIdx !== null ? "Editar Pasajero" : "Agregar Pasajero"}
               </h3>
               <button type="button" onClick={() => setPassengerModalOpen(false)} className="h-8 w-8 rounded-[8px] hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center">
-                <X className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                <X className="h-4 w-4 text-gray-500 dark:text-gray-300" />
               </button>
             </div>
             
@@ -719,7 +719,7 @@ export default function ReservationDetail() {
             </div>
 
             <div className="mt-6 flex items-center justify-end gap-2">
-              <button type="button" onClick={() => setPassengerModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-[10px] hover:bg-gray-50 dark:hover:bg-gray-800">Cancelar</button>
+              <button type="button" onClick={() => setPassengerModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-[#1A3356] rounded-[10px] hover:bg-gray-50 dark:hover:bg-gray-800">Cancelar</button>
               <button type="submit" disabled={savingPassenger} data-testid="passenger-save-btn" className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] px-4 py-2 text-sm font-semibold disabled:opacity-60">
                 {savingPassenger ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Guardar
               </button>
@@ -731,11 +731,11 @@ export default function ReservationDetail() {
       {/* Document Modal */}
       {documentModalOpen && (
         <div data-testid="document-modal" className="fixed inset-0 z-50 flex items-start justify-center bg-gray-900/50 backdrop-blur-sm p-4 overflow-y-auto">
-          <form onSubmit={saveDocument} className="mt-16 bg-white dark:bg-gray-900 rounded-[16px] shadow-xl border border-gray-200 dark:border-gray-700 w-full max-w-md p-6">
+          <form onSubmit={saveDocument} className="mt-16 bg-white dark:bg-[#0F2444] rounded-[16px] shadow-xl border border-gray-200 dark:border-[#1A3356] w-full max-w-md p-6">
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">Agregar Documento</h3>
               <button type="button" onClick={() => setDocumentModalOpen(false)} className="h-8 w-8 rounded-[8px] hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center">
-                <X className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                <X className="h-4 w-4 text-gray-500 dark:text-gray-300" />
               </button>
             </div>
             
@@ -764,7 +764,7 @@ export default function ReservationDetail() {
             </div>
 
             <div className="mt-6 flex items-center justify-end gap-2">
-              <button type="button" onClick={() => setDocumentModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-[10px] hover:bg-gray-50 dark:hover:bg-gray-800">Cancelar</button>
+              <button type="button" onClick={() => setDocumentModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-[#1A3356] rounded-[10px] hover:bg-gray-50 dark:hover:bg-gray-800">Cancelar</button>
               <button type="submit" disabled={savingDocument} data-testid="document-save-btn" className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] px-4 py-2 text-sm font-semibold disabled:opacity-60">
                 {savingDocument ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Guardar
               </button>
@@ -776,11 +776,11 @@ export default function ReservationDetail() {
       {/* Payment Modal */}
       {paymentModalOpen && (
         <div data-testid="payment-modal" className="fixed inset-0 z-50 flex items-start justify-center bg-gray-900/50 backdrop-blur-sm p-4 overflow-y-auto">
-          <form onSubmit={savePayment} className="mt-16 bg-white dark:bg-gray-900 rounded-[16px] shadow-xl border border-gray-200 dark:border-gray-700 w-full max-w-md p-6">
+          <form onSubmit={savePayment} className="mt-16 bg-white dark:bg-[#0F2444] rounded-[16px] shadow-xl border border-gray-200 dark:border-[#1A3356] w-full max-w-md p-6">
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">Registrar Pago</h3>
               <button type="button" onClick={() => setPaymentModalOpen(false)} className="h-8 w-8 rounded-[8px] hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center">
-                <X className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                <X className="h-4 w-4 text-gray-500 dark:text-gray-300" />
               </button>
             </div>
             
@@ -831,7 +831,7 @@ export default function ReservationDetail() {
             </div>
 
             <div className="mt-6 flex items-center justify-end gap-2">
-              <button type="button" onClick={() => setPaymentModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-[10px] hover:bg-gray-50 dark:hover:bg-gray-800">Cancelar</button>
+              <button type="button" onClick={() => setPaymentModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-[#1A3356] rounded-[10px] hover:bg-gray-50 dark:hover:bg-gray-800">Cancelar</button>
               <button type="submit" disabled={savingPayment} data-testid="payment-save-btn" className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] px-4 py-2 text-sm font-semibold disabled:opacity-60">
                 {savingPayment ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Registrar
               </button>
@@ -846,7 +846,7 @@ export default function ReservationDetail() {
 function Field({ label, required, children }) {
   return (
     <div>
-      <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">
+      <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300 mb-1.5">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
       {children}

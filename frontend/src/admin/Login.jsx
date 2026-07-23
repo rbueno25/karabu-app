@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import { useAuth } from "./AuthContext";
 import { useNavigate } from "react-router-dom";
-import { Plane, Loader2 } from "lucide-react";
+import { Plane, Loader2, Eye, EyeOff } from "lucide-react";
 
 export default function Login() {
   const { login } = useAuth();
   const nav = useNavigate();
-  const [email, setEmail] = useState("admin@karabu.com");
-  const [password, setPassword] = useState("admin123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -25,10 +26,10 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen grid lg:grid-cols-2 bg-white dark:bg-gray-900">
+    <div className="min-h-screen grid lg:grid-cols-2 bg-white dark:bg-[#0F2444]">
       <div className="hidden lg:flex flex-col justify-between p-12 bg-gradient-to-br from-blue-600 to-blue-700 text-white relative overflow-hidden">
         <div className="flex items-center gap-2 z-10">
-          <div className="h-9 w-9 rounded-[10px] bg-white dark:bg-gray-900/15 flex items-center justify-center backdrop-blur">
+          <div className="h-9 w-9 rounded-[10px] bg-white/15 flex items-center justify-center backdrop-blur">
             <Plane className="h-4 w-4" />
           </div>
           <div className="text-lg font-semibold tracking-tight">Karabu Viajes</div>
@@ -43,8 +44,8 @@ export default function Login() {
           </p>
         </div>
         <div className="text-xs text-white/60 z-10">© {new Date().getFullYear()} Karabu Viajes</div>
-        <div className="absolute -right-32 -bottom-32 h-96 w-96 rounded-full bg-white dark:bg-gray-900/5 blur-3xl" />
-        <div className="absolute -left-16 top-24 h-64 w-64 rounded-full bg-white dark:bg-gray-900/5 blur-3xl" />
+        <div className="absolute -right-32 -bottom-32 h-96 w-96 rounded-full bg-white/5 blur-3xl" />
+        <div className="absolute -left-16 top-24 h-64 w-64 rounded-full bg-white/5 blur-3xl" />
       </div>
 
       <div className="flex items-center justify-center p-8 lg:p-12">
@@ -73,19 +74,31 @@ export default function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-shadow"
+                autoComplete="email"
+                className="w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#132D52] text-gray-900 dark:text-gray-100 px-3 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-shadow"
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Contraseña</label>
-              <input
-                data-testid="login-password-input"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-shadow"
-              />
+              <div className="relative">
+                <input
+                  data-testid="login-password-input"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  autoComplete="current-password"
+                  className="w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#132D52] text-gray-900 dark:text-gray-100 px-3 py-2.5 pr-10 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-shadow"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
           </div>
 
@@ -107,12 +120,6 @@ export default function Login() {
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
             Ingresar
           </button>
-
-          <div className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed border-t border-gray-100 dark:border-gray-800 pt-4">
-            <div className="font-medium text-gray-700 dark:text-gray-300 mb-1">Credenciales de prueba</div>
-            <div>Admin: <code>admin@karabu.com</code> / <code>admin123</code></div>
-            <div>Asesor: <code>asesor@karabu.com</code> / <code>asesor123</code></div>
-          </div>
         </form>
       </div>
     </div>

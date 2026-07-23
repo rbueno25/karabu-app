@@ -6,7 +6,7 @@ import { Toaster } from "sonner";
 
 export default function Layout() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0A1628]">
       <Sidebar />
       <div className="pl-64">
         <Header />
