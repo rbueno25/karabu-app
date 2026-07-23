@@ -29,7 +29,7 @@ services:
         source: /*
         destination: /index.html
 
-  - type: pserv
+  - type: postgres
     name: karabu-db
     plan: free
     databaseName: karabu
