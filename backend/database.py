@@ -17,7 +17,7 @@ engine = create_async_engine(
     echo=False,
     pool_size=10,
     max_overflow=5,
-    connect_args={"timeout": 10},
+    connect_args={"timeout": 10, "ssl": "require"},
 )
 AsyncSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
