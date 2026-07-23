@@ -5,6 +5,11 @@ from sqlalchemy.orm import DeclarativeBase
 
 logger = logging.getLogger("karabu.db")
 DATABASE_URL = os.environ["DATABASE_URL"]
+# Ensure async driver prefix for SQLAlchemy async engine
+if DATABASE_URL.startswith("postgresql://"):
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
+elif DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+asyncpg://", 1)
 
 # Create engine with connection retry on startup
 engine = create_async_engine(
