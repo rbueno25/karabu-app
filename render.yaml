@@ -1,27 +1,13 @@
 services:
-  - type: web
-    name: karabu-api
-    env: docker
-    dockerfilePath: ./backend/Dockerfile
-    rootDir: backend
-    plan: free
-    envVars:
-      - key: DATABASE_URL
-        sync: false
-      - key: JWT_SECRET
-        value: karabu-secret-key-2026
-      - key: ADMIN_EMAIL
-        value: admin@karabu.com
-      - key: ADMIN_PASSWORD
-        value: admin123
-
-  - type: web
-    name: karabu-frontend
-    env: static
+  - type: static_site
+    name: karabu
+    repo: https://github.com/rbueno25/karabu-app
+    branch: master
     rootDir: frontend
     buildCommand: npm install && npm run build
-    staticPublishPath: ./dist
-    plan: free
+    envVars:
+      - key: VITE_API_URL
+        value: https://karabu-srv.onrender.com
     routes:
       - type: rewrite
         source: /*
