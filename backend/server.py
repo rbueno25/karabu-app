@@ -1,4 +1,6 @@
-"""Karabu Viajes API — FastAPI + SQLAlchemy async + PostgreSQL."""
+"""Karabu Viajes API — FastAPI + SQLAlchemy async + PostgreSQL.
+v2 — Render deploy
+"""
 from dotenv import load_dotenv
 from pathlib import Path
 ROOT_DIR = Path(__file__).parent
