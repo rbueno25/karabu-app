@@ -13,8 +13,8 @@ import { Compass, Loader2, AlertCircle, RefreshCw, ShieldCheck } from 'lucide-re
 
 export default function ClientQuotationView() {
   const getInitialId = () => {
-    const path = window.location.pathname;
-    const match = path.match(/\/cotizacion\/(.+)/);
+    const hash = window.location.hash;
+    const match = hash.match(/#\/cotizacion\/(.+)/);
     if (match && match[1]) return match[1];
     return '';
   };
@@ -33,9 +33,7 @@ export default function ClientQuotationView() {
 
   const handleSelectId = (newId) => {
     setCurrentId(newId);
-    if (window.history.pushState) {
-      window.history.pushState({ path: `/cotizacion/${newId}` }, '', `/cotizacion/${newId}`);
-    }
+    window.location.hash = `#/cotizacion/${newId}`;
   };
 
   const loadQuotationData = async (idToFetch) => {

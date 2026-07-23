@@ -243,7 +243,7 @@ export default function Quotations() {
                           <Pencil className="h-4 w-4" />
                         </Link>
                         <a
-                          href={`/cotizacion/${q.id}`}
+                          href={`/#/cotizacion/${q.id}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           data-testid={`quotation-view-${q.id}`}

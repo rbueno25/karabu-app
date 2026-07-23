@@ -124,7 +124,7 @@ export default function QuotationSheet() {
   };
 
   const copyClientLink = () => {
-    const link = `${window.location.origin}/cotizacion/${id}`;
+    const link = `${window.location.origin}/#/cotizacion/${id}`;
     navigator.clipboard.writeText(link);
     toast.success("Enlace copiado al portapapeles");
   };
@@ -138,7 +138,7 @@ export default function QuotationSheet() {
   }
 
   const { quotation, client, broker } = data;
-  const clientLink = `${window.location.origin}/cotizacion/${id}`;
+  const clientLink = `${window.location.origin}/#/cotizacion/${id}`;
   
   // Custom WhatsApp deep link
   const cleanPhone = (client.phone || "").replace(/[^\d+]/g, "");
