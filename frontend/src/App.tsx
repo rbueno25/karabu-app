@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect, lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import Stats from './components/Stats';
@@ -107,7 +107,7 @@ function LoginRoute() {
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <ThemeProvider>
       <AuthProvider>
         <Routes>
@@ -139,6 +139,6 @@ export default function App() {
         </Routes>
       </AuthProvider>
       </ThemeProvider>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
