@@ -4,7 +4,7 @@ import api, { formatApiError } from "../lib/api";
 import PageHeader from "./PageHeader";
 import StatusBadge from "./StatusBadge";
 import EmptyState from "./EmptyState";
-import { Plus, Loader2, Pencil, Trash2, FileText, ArrowRight, X } from "lucide-react";
+import { Plus, Loader2, Pencil, Trash2, FileText, ArrowRight, X, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { formatCurrency, formatDate } from "../lib/format";
 
@@ -133,12 +133,12 @@ export default function Quotations() {
         }
       />
 
-      <div className="bg-white rounded-[16px] border border-gray-200 shadow-[0_1px_3px_0_rgba(0,0,0,0.04)] overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200 flex items-center gap-3 flex-wrap">
+      <div className="bg-white dark:bg-gray-900 rounded-[16px] border border-gray-200 dark:border-gray-700 shadow-[0_1px_3px_0_rgba(0,0,0,0.04)] overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center gap-3 flex-wrap">
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="text-sm border border-gray-200 rounded-[10px] px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none bg-white"
+            className="text-sm border border-gray-200 dark:border-gray-700 rounded-[10px] px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none bg-white dark:bg-gray-900"
           >
             <option value="">Todos los estados</option>
             <option value="borrador">Borrador</option>
@@ -150,7 +150,7 @@ export default function Quotations() {
         </div>
 
         {loading ? (
-          <div className="p-10 text-center text-gray-500 flex items-center justify-center gap-2">
+          <div className="p-10 text-center text-gray-500 dark:text-gray-400 flex items-center justify-center gap-2">
             <Loader2 className="h-4 w-4 animate-spin" /> Cargando…
           </div>
         ) : items.length === 0 ? (
@@ -161,20 +161,20 @@ export default function Quotations() {
           />
         ) : (
           <table className="w-full text-sm" data-testid="quotations-table">
-            <thead className="bg-gray-50 border-b border-gray-200">
+            <thead className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
               <tr>
-                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
-                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Destino</th>
-                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha viaje</th>
-                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Monto</th>
-                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                <th className="text-right px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Cliente</th>
+                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Destino</th>
+                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Fecha viaje</th>
+                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Monto</th>
+                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Estado</th>
+                <th className="text-right px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Acciones</th>
               </tr>
             </thead>
             <tbody>
               {items.map((q) => (
-                <tr key={q.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50">
-                  <td className="px-6 py-3 text-gray-900 font-medium">{q.client_name}</td>
+                <tr key={q.id} className="border-b border-gray-100 dark:border-gray-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800">
+                  <td className="px-6 py-3 text-gray-900 dark:text-gray-100 font-medium">{q.client_name}</td>
                   <td className="px-6 py-3">
                     <Link
                       to={`/admin/cotizaciones/${q.id}`}
@@ -184,8 +184,8 @@ export default function Quotations() {
                       {q.destination}
                     </Link>
                   </td>
-                  <td className="px-6 py-3 text-gray-600">{formatDate(q.travel_date)}</td>
-                  <td className="px-6 py-3 text-gray-900">{formatCurrency(q.amount, q.currency)}</td>
+                  <td className="px-6 py-3 text-gray-600 dark:text-gray-400">{formatDate(q.travel_date)}</td>
+                  <td className="px-6 py-3 text-gray-900 dark:text-gray-100">{formatCurrency(q.amount, q.currency)}</td>
                   <td className="px-6 py-3"><StatusBadge value={q.status} /></td>
                   <td className="px-6 py-3 text-right">
                     <div className="inline-flex items-center gap-1">
@@ -193,7 +193,7 @@ export default function Quotations() {
                         <button
                           onClick={() => convert(q)}
                           data-testid={`quotation-convert-${q.id}`}
-                          className="inline-flex items-center gap-1 h-8 px-2.5 rounded-[8px] bg-blue-50 text-blue-700 hover:bg-blue-100 text-xs font-medium"
+                          className="inline-flex items-center gap-1 h-8 px-2.5 rounded-[8px] bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-100 text-xs font-medium"
                         >
                           <ArrowRight className="h-3.5 w-3.5" /> Convertir
                         </button>
@@ -201,10 +201,20 @@ export default function Quotations() {
                       <Link
                         to={`/admin/cotizaciones/${q.id}`}
                         data-testid={`quotation-edit-${q.id}`}
-                        className="h-8 w-8 rounded-[8px] hover:bg-gray-100 flex items-center justify-center text-gray-600 transition-colors"
+                        className="h-8 w-8 rounded-[8px] hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400 transition-colors"
                       >
                         <Pencil className="h-4 w-4" />
                       </Link>
+                      <a
+                        href={`/cotizacion/${q.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        data-testid={`quotation-view-${q.id}`}
+                        className="h-8 w-8 rounded-[8px] hover:bg-brand-turquoise/10 dark:hover:bg-brand-turquoise/20 flex items-center justify-center text-brand-turquoise transition-colors"
+                        title="Ver entregable del cliente"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </a>
                       <button
                         onClick={() => remove(q)}
                         className="h-8 w-8 rounded-[8px] hover:bg-red-50 flex items-center justify-center text-red-600"
@@ -222,11 +232,11 @@ export default function Quotations() {
 
       {modalOpen && (
         <div data-testid="quotation-modal" className="fixed inset-0 z-50 flex items-start justify-center bg-gray-900/50 backdrop-blur-sm p-4 overflow-y-auto">
-          <form onSubmit={save} className="mt-16 bg-white rounded-[16px] shadow-xl border border-gray-200 w-full max-w-lg p-6">
+          <form onSubmit={save} className="mt-16 bg-white dark:bg-gray-900 rounded-[16px] shadow-xl border border-gray-200 dark:border-gray-700 w-full max-w-lg p-6">
             <div className="flex items-center justify-between mb-5">
-              <h3 className="text-lg font-semibold text-gray-900">{editingId ? "Editar cotización" : "Nueva cotización"}</h3>
-              <button type="button" onClick={() => setModalOpen(false)} className="h-8 w-8 rounded-[8px] hover:bg-gray-100 flex items-center justify-center">
-                <X className="h-4 w-4 text-gray-500" />
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{editingId ? "Editar cotización" : "Nueva cotización"}</h3>
+              <button type="button" onClick={() => setModalOpen(false)} className="h-8 w-8 rounded-[8px] hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center">
+                <X className="h-4 w-4 text-gray-500 dark:text-gray-400" />
               </button>
             </div>
 
@@ -281,7 +291,7 @@ export default function Quotations() {
             </div>
 
             <div className="mt-6 flex items-center justify-end gap-2">
-              <button type="button" onClick={() => setModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-200 rounded-[10px] hover:bg-gray-50">
+              <button type="button" onClick={() => setModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-[10px] hover:bg-gray-50 dark:hover:bg-gray-800">
                 Cancelar
               </button>
               <button type="submit" disabled={saving} data-testid="quotation-save-btn" className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] px-4 py-2 text-sm font-medium disabled:opacity-60">
@@ -295,12 +305,12 @@ export default function Quotations() {
   );
 }
 
-const inputCls = "w-full rounded-[10px] border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none";
+const inputCls = "w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none";
 
 function Field({ label, required, children }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
       {children}

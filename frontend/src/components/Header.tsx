@@ -72,7 +72,7 @@ export default function Header({ onNavigate, activeSection }: HeaderProps) {
             </a>
             
             <button
-              onClick={() => handleLinkClick('contacto')}
+              onClick={() => handleLinkClick('cotizacion')}
               className="bg-brand-orange hover:bg-brand-orange/90 text-white font-semibold text-sm px-5 py-2.5 rounded-md shadow-md transition-all transform hover:scale-[1.02] active:scale-[0.98]"
             >
               Solicitar cotización
@@ -162,7 +162,7 @@ export default function Header({ onNavigate, activeSection }: HeaderProps) {
                 </a>
 
                 <button
-                  onClick={() => handleLinkClick('contacto')}
+                  onClick={() => handleLinkClick('cotizacion')}
                   className="w-full bg-brand-orange hover:bg-brand-orange/90 text-white font-bold text-base py-3 rounded-md shadow-md transition-all active:scale-[0.98]"
                 >
                   Solicitar cotización

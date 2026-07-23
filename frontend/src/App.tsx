@@ -32,6 +32,7 @@ const Clients = lazy(() => import('./admin/Clients'));
 const ClientDetail = lazy(() => import('./admin/ClientDetail'));
 const Quotations = lazy(() => import('./admin/Quotations'));
 const QuotationSheet = lazy(() => import('./admin/QuotationSheet'));
+const ClientQuotationView = lazy(() => import('./client-view/ClientQuotationView'));
 const Reservations = lazy(() => import('./admin/Reservations'));
 const ReservationDetail = lazy(() => import('./admin/ReservationDetail'));
 const Payments = lazy(() => import('./admin/Payments'));
@@ -63,11 +64,11 @@ function LandingPage() {
 
   const handleSelectDestination = (destName: string) => {
     setPreselectedDestination(destName);
-    handleNavigate('contacto');
+    handleNavigate('cotizacion');
   };
 
   useEffect(() => {
-    const sections = ['inicio', 'destinos', 'servicios', 'por-que-elegirnos', 'contacto'];
+    const sections = ['inicio', 'destinos', 'servicios', 'por-que-elegirnos', 'cotizacion', 'contacto'];
     const observerOptions = { root: null, rootMargin: '-50% 0px -50% 0px', threshold: 0 };
 
     const handleIntersect = (entries: IntersectionObserverEntry[]) => {
@@ -83,7 +84,7 @@ function LandingPage() {
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans selection:bg-brand-turquoise/20 selection:text-brand-navy antialiased">
       <Header activeSection={activeSection} onNavigate={handleNavigate} />
       <main>
-        <Hero onExploreDestinations={() => handleNavigate('destinos')} onContact={() => handleNavigate('contacto')} />
+        <Hero onExploreDestinations={() => handleNavigate('destinos')} onContact={() => handleNavigate('cotizacion')} />
         <Stats />
         <Destinations onSelectDestination={handleSelectDestination} />
         <Services />
@@ -91,7 +92,7 @@ function LandingPage() {
         <Steps />
         <QuoteForm preselectedDestination={preselectedDestination} onClearPreselected={() => setPreselectedDestination('')} />
         <Testimonials />
-        <CTA onContactClick={() => handleNavigate('contacto')} />
+        <CTA onContactClick={() => handleNavigate('cotizacion')} />
       </main>
       <Footer onNavigate={handleNavigate} onSelectDestination={handleSelectDestination} />
     </div>
@@ -135,6 +136,8 @@ export default function App() {
             <Route path="configuracion" element={<Suspense fallback={<AdminLoader />}><Settings /></Suspense>} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
+          {/* Public client quotation view — no auth required */}
+          <Route path="/cotizacion/:id" element={<Suspense fallback={<AdminLoader />}><ClientQuotationView /></Suspense>} />
         </Routes>
       </AuthProvider>
       </ThemeProvider>

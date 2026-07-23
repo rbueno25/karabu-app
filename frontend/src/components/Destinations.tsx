@@ -9,54 +9,54 @@ interface DestinationsProps {
 export default function Destinations({ onSelectDestination }: DestinationsProps) {
   const tallDestination = {
     name: 'República Dominicana',
-    image: 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&q=80&w=700&h=1000',
+    image: '/destinos/Republica-Dominicana.jpg',
     description: 'Paraíso cercano, experiencias inolvidables'
   };
 
   const topDestinations = [
     {
-      id: 'bayahibe',
-      name: 'Bayahibe',
-      image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&q=80&w=500&h=375',
-      description: 'Aguas turquesa y playas de ensueño'
+      id: 'punta-cana',
+      name: 'Punta Cana',
+      image: '/destinos/punta-cana.jpg',
+      description: 'Playas infinitas y resorts de clase mundial'
     },
     {
-      id: 'puerto-plata',
-      name: 'Puerto Plata',
-      image: 'https://images.unsplash.com/photo-1454391304352-2bf4678b1a7a?auto=format&fit=crop&q=80&w=500&h=375',
-      description: 'Montañas, mar y cultura caribeña'
+      id: 'miami',
+      name: 'Miami',
+      image: '/destinos/Miami.jpg',
+      description: 'Compras, playas y vida nocturna'
     },
     {
-      id: 'samana',
-      name: 'Samaná',
-      image: 'https://images.unsplash.com/photo-1589519160732-57fc4e75902d?auto=format&fit=crop&q=80&w=500&h=375',
-      description: 'Naturaleza virgen y ballenas majestuosas'
+      id: 'new-york',
+      name: 'New York',
+      image: '/destinos/New York.jpg',
+      description: 'La ciudad que nunca duerme'
     },
     {
-      id: 'aruba',
-      name: 'Aruba',
-      image: 'https://images.unsplash.com/photo-1506929562872-bb421503ef21?auto=format&fit=crop&q=80&w=500&h=375',
-      description: 'El paraíso feliz del Caribe'
+      id: 'cancun',
+      name: 'Cancún',
+      image: '/destinos/Cancun.jpg',
+      description: 'Mar Caribe y ruinas mayas'
     }
   ];
 
   const bottomDestinations = [
     {
-      id: 'colombia',
-      name: 'Colombia',
-      image: 'https://images.unsplash.com/photo-1532408840957-031d8034aeef?auto=format&fit=crop&q=80&w=600&h=450',
-      description: 'Diversidad que te enamora'
+      id: 'bogota',
+      name: 'Bogotá',
+      image: '/destinos/Bogotá.jpg',
+      description: 'Cultura, gastronomía y montañas'
     },
     {
-      id: 'espana',
-      name: 'España',
-      image: 'https://images.unsplash.com/photo-1504019347908-b45f9b0b8dd5?auto=format&fit=crop&q=80&w=600&h=450',
-      description: 'Historia, arte y gastronomía'
+      id: 'paris',
+      name: 'París',
+      image: '/destinos/Paris.jpg',
+      description: 'La ciudad del amor y la luz'
     },
     {
       id: 'orlando',
       name: 'Orlando',
-      image: 'https://images.unsplash.com/photo-1597466765990-64ad1c35dafc?auto=format&fit=crop&q=80&w=600&h=450',
+      image: '/destinos/Orlando.jpg',
       description: 'Diversión sin límites en los parques'
     }
   ];

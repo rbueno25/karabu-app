@@ -30,7 +30,7 @@ export default function CTA({ onContactClick }: CTAProps) {
           transition={{ duration: 0.5 }}
           className="text-brand-turquoise font-display font-extrabold text-xs sm:text-sm uppercase tracking-widest block"
         >
-          ¿LISTO PARA VIVIR TU PRÓXIMA AVENTURA?
+          ¿LISTO PARA VIAJAR SIN COMPLICACIONES?
         </motion.span>
 
         <motion.h2
@@ -40,7 +40,7 @@ export default function CTA({ onContactClick }: CTAProps) {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="font-display text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight"
         >
-          Permítenos diseñar el viaje perfecto para ti
+          Cotiza tu viaje hoy y viaja con confianza
         </motion.h2>
 
         <motion.p
@@ -50,7 +50,7 @@ export default function CTA({ onContactClick }: CTAProps) {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="text-slate-300 font-sans text-base sm:text-lg max-w-2xl leading-relaxed mt-2"
         >
-          Contáctanos hoy mismo y empieza a crear recuerdos imborrables junto a tu familia, pareja o colegas de trabajo. Asesoría de visados y paquetes vacacionales completos.
+          Contáctanos hoy y recibe una cotización personalizada con paquetes de viaje, asesoría de visas y acompañamiento en cada paso.
         </motion.p>
 
         {/* CTA Buttons Row */}
@@ -62,15 +62,13 @@ export default function CTA({ onContactClick }: CTAProps) {
           className="flex flex-col sm:flex-row items-center gap-4 mt-6 w-full sm:w-auto"
         >
           {/* Solicitar cotización Button */}
-          <a
-            href="https://wa.me/18093062424?text=Hola!%20Estoy%20listo%20para%20organizar%20mi%20viaje%20con%20Karabu.%20Me%20interesa%20recibir%20asesoría."
-            target="_blank"
-            rel="noreferrer"
+          <button
+            onClick={onContactClick}
             className="w-full sm:w-auto flex items-center justify-center gap-2.5 bg-brand-orange hover:bg-brand-orange/90 text-white font-bold px-8 py-4 rounded-md shadow-lg transition-all transform hover:scale-[1.03] active:scale-[0.97]"
           >
             <Calendar className="w-4.5 h-4.5" />
             <span>Solicitar cotización</span>
-          </a>
+          </button>
 
           {/* Llamar ahora Button */}
           <a

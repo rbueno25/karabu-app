@@ -25,10 +25,10 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen grid lg:grid-cols-2 bg-white">
+    <div className="min-h-screen grid lg:grid-cols-2 bg-white dark:bg-gray-900">
       <div className="hidden lg:flex flex-col justify-between p-12 bg-gradient-to-br from-blue-600 to-blue-700 text-white relative overflow-hidden">
         <div className="flex items-center gap-2 z-10">
-          <div className="h-9 w-9 rounded-[10px] bg-white/15 flex items-center justify-center backdrop-blur">
+          <div className="h-9 w-9 rounded-[10px] bg-white dark:bg-gray-900/15 flex items-center justify-center backdrop-blur">
             <Plane className="h-4 w-4" />
           </div>
           <div className="text-lg font-semibold tracking-tight">Karabu Viajes</div>
@@ -43,8 +43,8 @@ export default function Login() {
           </p>
         </div>
         <div className="text-xs text-white/60 z-10">© {new Date().getFullYear()} Karabu Viajes</div>
-        <div className="absolute -right-32 -bottom-32 h-96 w-96 rounded-full bg-white/5 blur-3xl" />
-        <div className="absolute -left-16 top-24 h-64 w-64 rounded-full bg-white/5 blur-3xl" />
+        <div className="absolute -right-32 -bottom-32 h-96 w-96 rounded-full bg-white dark:bg-gray-900/5 blur-3xl" />
+        <div className="absolute -left-16 top-24 h-64 w-64 rounded-full bg-white dark:bg-gray-900/5 blur-3xl" />
       </div>
 
       <div className="flex items-center justify-center p-8 lg:p-12">
@@ -57,34 +57,34 @@ export default function Login() {
             <div className="h-8 w-8 rounded-[10px] bg-blue-600 text-white flex items-center justify-center">
               <Plane className="h-4 w-4" />
             </div>
-            <div className="font-semibold text-gray-900">Karabu Viajes</div>
+            <div className="font-semibold text-gray-900 dark:text-gray-100">Karabu Viajes</div>
           </div>
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Iniciar sesión</h1>
-            <p className="mt-1 text-sm text-gray-500">Ingresa tus credenciales para acceder al panel.</p>
+            <h1 className="text-2xl font-semibold tracking-tight text-gray-900 dark:text-gray-100">Iniciar sesión</h1>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Ingresa tus credenciales para acceder al panel.</p>
           </div>
 
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Correo electrónico</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Correo electrónico</label>
               <input
                 data-testid="login-email-input"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full rounded-[10px] border border-gray-300 px-3 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-shadow"
+                className="w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-shadow"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Contraseña</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Contraseña</label>
               <input
                 data-testid="login-password-input"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full rounded-[10px] border border-gray-300 px-3 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-shadow"
+                className="w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-shadow"
               />
             </div>
           </div>
@@ -92,7 +92,7 @@ export default function Login() {
           {error ? (
             <div
               data-testid="login-error"
-              className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-[10px] px-3 py-2"
+              className="text-sm text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-[10px] px-3 py-2"
             >
               {error}
             </div>
@@ -108,8 +108,8 @@ export default function Login() {
             Ingresar
           </button>
 
-          <div className="text-xs text-gray-500 leading-relaxed border-t border-gray-100 pt-4">
-            <div className="font-medium text-gray-700 mb-1">Credenciales de prueba</div>
+          <div className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed border-t border-gray-100 dark:border-gray-800 pt-4">
+            <div className="font-medium text-gray-700 dark:text-gray-300 mb-1">Credenciales de prueba</div>
             <div>Admin: <code>admin@karabu.com</code> / <code>admin123</code></div>
             <div>Asesor: <code>asesor@karabu.com</code> / <code>asesor123</code></div>
           </div>

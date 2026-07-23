@@ -7,37 +7,37 @@ export default function Services() {
     {
       id: 1,
       title: "Paquetes Turísticos",
-      description: "Diseñados a tu medida para vivir experiencias únicas.",
+      description: "Viajes todo incluido con vuelos, hoteles y traslados. Tú solo disfruta.",
       icon: <Luggage className="w-10 h-10 text-[#00A896]" />
     },
     {
       id: 2,
       title: "Reservas",
-      description: "Hoteles, vuelos, traslados y más, todo en un solo lugar.",
+      description: "Hoteles, vuelos y transporte al mejor precio, sin letra pequeña.",
       icon: <CalendarDays className="w-10 h-10 text-[#00A896]" />
     },
     {
       id: 3,
       title: "Circuitos y Tours",
-      description: "Rutas planificadas para descubrir lo mejor de cada destino.",
+      description: "Rutas planificadas por expertos para que aproveches cada minuto del viaje.",
       icon: <Map className="w-10 h-10 text-[#00A896]" />
     },
     {
       id: 4,
       title: "Viajes Corporativos",
-      description: "Soluciones eficientes para empresas y ejecutivos.",
+      description: "Soluciones de viaje para empresas, grupos e instituciones.",
       icon: <Briefcase className="w-10 h-10 text-[#00A896]" />
     },
     {
       id: 5,
       title: "Lunas de Miel",
-      description: "Momentos inolvidables para comenzar su nueva historia juntos.",
+      description: "Escapadas románticas diseñadas a tu medida para una experiencia inolvidable.",
       icon: <Heart className="w-10 h-10 text-[#00A896]" />
     },
     {
       id: 6,
       title: "Asesoría de Visas",
-      description: "Te guiamos en todo el proceso de visado de forma segura y rápida.",
+      description: "Te guiamos paso a paso en todo el proceso de visado, sin errores ni estrés.",
       icon: <FileCheck className="w-10 h-10 text-[#00A896]" />
     }
   ];

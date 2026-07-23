@@ -136,7 +136,7 @@ export default function Dashboard() {
         <div className="bg-white dark:bg-gray-900 rounded-[16px] border border-gray-200 dark:border-gray-800 p-6 shadow-[0_1px_3px_0_rgba(0,0,0,0.04)]">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">Próximos viajes</h3>
-            <Plane className="h-4 w-4 text-gray-400" />
+            <Plane className="h-4 w-4 text-gray-400 dark:text-gray-500" />
           </div>
           {data.upcoming_trips.length === 0 ? (
             <EmptyState title="Sin viajes próximos" description="Cuando confirmes reservas, aparecerán aquí." icon={Plane} />

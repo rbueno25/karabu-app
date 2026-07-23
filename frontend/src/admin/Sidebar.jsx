@@ -63,7 +63,7 @@ export default function Sidebar() {
                 "flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium transition-colors",
                 isActive
                   ? "bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-400"
-                  : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100",
+                  : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:text-gray-100 dark:hover:text-gray-100",
               ].join(" ")
             }
           >
@@ -77,7 +77,7 @@ export default function Sidebar() {
         <button
           onClick={handleLogout}
           data-testid="sidebar-logout-btn"
-          className="w-full flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:text-gray-100 dark:hover:text-gray-100 transition-colors"
         >
           <LogOut className="h-4 w-4" />
           <span>Cerrar sesión</span>

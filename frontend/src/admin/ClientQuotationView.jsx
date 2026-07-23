@@ -5,28 +5,31 @@ import StatusBadge from "./StatusBadge";
 import { formatDate, formatCurrency } from "../lib/format";
 import { toast } from "sonner";
 import { 
-  Loader2, Calendar, Users, DollarSign, CheckCircle, 
-  XCircle, Send, User, Mail, Phone, Info
+  Loader2, Calendar, Users, DollarSign, CheckCircle2, 
+  XCircle, Send, User, Mail, Phone, Info, FileText,
+  RotateCcw, HeartHandshake, ShieldCheck, AlertCircle,
+  Sparkles, MessageSquare, Compass, MapPin, Briefcase,
+  Hotel, CreditCard, Tag
 } from "lucide-react";
 
 // Image matching helper based on destination name
 const DESTINATION_IMAGES = [
-  { keywords: ["punta cana", "dominicana", "bavaro"], url: "https://images.unsplash.com/photo-1548889291-1f5abf8d8f64?w=1000", desc: "Playa caribeña en Punta Cana" },
-  { keywords: ["orlando", "disney", "universal"], url: "https://images.unsplash.com/photo-1560986992-f7e5b1c1f909?w=1000", desc: "Diversión en Orlando" },
-  { keywords: ["cancun", "mexico", "riviera maya"], url: "https://images.unsplash.com/photo-1571281100235-ecb6e9e7bcf8?w=1000", desc: "Playa de Cancún" },
-  { keywords: ["miami", "south beach"], url: "https://images.unsplash.com/photo-1535498730771-e735b998cd64?w=1000", desc: "Ocean Drive en Miami" },
-  { keywords: ["nueva york", "new york", "manhattan"], url: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=1000", desc: "Rascacielos de Nueva York" },
-  { keywords: ["paris", "francia", "torre eiffel"], url: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=1000", desc: "Torre Eiffel en París" },
-  { keywords: ["roma", "italia", "coliseo"], url: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=1000", desc: "Coliseo Romano" },
-  { keywords: ["buenos aires", "argentina"], url: "https://images.unsplash.com/photo-1589909202802-8f4aadce1849?w=1000", desc: "El Obelisco de Buenos Aires" },
-  { keywords: ["cusco", "peru", "machu"], url: "https://images.unsplash.com/photo-1587595421960-47cbab8a2b58?w=1000", desc: "Machu Picchu en Cusco" },
-  { keywords: ["toronto", "canada"], url: "https://images.unsplash.com/photo-1517090504586-fde19ea6066f?w=1000", desc: "CN Tower de Toronto" }
+  { keywords: ["punta cana", "dominicana", "bavaro"], url: "https://images.unsplash.com/photo-1548889291-1f5abf8d8f64?w=1200&fit=crop" },
+  { keywords: ["orlando", "disney", "universal"], url: "https://images.unsplash.com/photo-1560986992-f7e5b1c1f909?w=1200&fit=crop" },
+  { keywords: ["cancun", "mexico", "riviera maya"], url: "https://images.unsplash.com/photo-1571281100235-ecb6e9e7bcf8?w=1200&fit=crop" },
+  { keywords: ["miami", "south beach"], url: "https://images.unsplash.com/photo-1535498730771-e735b998cd64?w=1200&fit=crop" },
+  { keywords: ["nueva york", "new york", "manhattan"], url: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=1200&fit=crop" },
+  { keywords: ["paris", "francia", "torre eiffel"], url: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=1200&fit=crop" },
+  { keywords: ["roma", "italia", "coliseo"], url: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=1200&fit=crop" },
+  { keywords: ["buenos aires", "argentina"], url: "https://images.unsplash.com/photo-1589909202802-8f4aadce1849?w=1200&fit=crop" },
+  { keywords: ["cusco", "peru", "machu"], url: "https://images.unsplash.com/photo-1587595421960-47cbab8a2b58?w=1200&fit=crop" },
+  { keywords: ["toronto", "canada"], url: "https://images.unsplash.com/photo-1517090504586-fde19ea6066f?w=1200&fit=crop" }
 ];
 
 const getDestinationImage = (destName = "") => {
   const norm = destName.toLowerCase();
   const match = DESTINATION_IMAGES.find(d => d.keywords.some(k => norm.includes(k)));
-  return match ? match.url : "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1000";
+  return match ? match.url : "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1200&fit=crop";
 };
 
 export default function ClientQuotationView() {
@@ -35,17 +38,18 @@ export default function ClientQuotationView() {
   const [loading, setLoading] = useState(true);
 
   // Client decisions
-  const [status, setStatus] = useState("idle"); // idle, accepted, rejecting, rejected
+  const [mode, setMode] = useState("idle"); // idle | requesting_changes
   const [comments, setComments] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [actionType, setActionType] = useState(null); // accept | reject
 
   const loadQuotation = async () => {
     setLoading(true);
     try {
       const res = await api.get(`/quotations/${id}`);
       setData(res.data);
-      if (res.data.quotation.status === "aceptada") setStatus("accepted");
-      if (res.data.quotation.status === "rechazada") setStatus("rejected");
+      if (res.data.quotation.status === "aceptada") setMode("accepted");
+      if (res.data.quotation.status === "rechazada") setMode("rejected");
     } catch (e) {
       toast.error(formatApiError(e.response?.data?.detail) || "Error al cargar la propuesta de viaje");
     } finally {
@@ -60,6 +64,7 @@ export default function ClientQuotationView() {
 
   const handleAccept = async () => {
     setSubmitting(true);
+    setActionType("accept");
     try {
       const body = {
         client_id: data.quotation.client_id,
@@ -75,12 +80,13 @@ export default function ClientQuotationView() {
         sent_at: data.quotation.sent_at
       };
       await api.put(`/quotations/${id}`, body);
-      setStatus("accepted");
+      setMode("accepted");
       toast.success("¡Propuesta aceptada con éxito!");
     } catch (e) {
       toast.error(formatApiError(e.response?.data?.detail) || "Error al aceptar la propuesta");
     } finally {
       setSubmitting(false);
+      setActionType(null);
     }
   };
 
@@ -91,6 +97,7 @@ export default function ClientQuotationView() {
       return;
     }
     setSubmitting(true);
+    setActionType("reject");
     try {
       const fullNotes = data.quotation.notes 
         ? `${data.quotation.notes}\n\n[Comentario de rechazo del cliente]: ${comments}`
@@ -110,21 +117,28 @@ export default function ClientQuotationView() {
         sent_at: data.quotation.sent_at
       };
       await api.put(`/quotations/${id}`, body);
-      setStatus("rejected");
+      setMode("rejected");
       toast.success("Comentarios enviados. Tu asesor ajustará la propuesta.");
+      setComments("");
     } catch (e) {
       toast.error(formatApiError(e.response?.data?.detail) || "Error al enviar comentarios");
     } finally {
       setSubmitting(false);
+      setActionType(null);
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="text-center text-gray-500 flex items-center gap-2">
-          <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
-          <span className="font-medium text-sm">Cargando propuesta de viaje…</span>
+      <div className="min-h-screen bg-slate-50 dark:bg-[#070F1E] flex items-center justify-center p-4">
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 mx-auto rounded-2xl bg-brand-turquoise/10 text-brand-turquoise flex items-center justify-center animate-pulse">
+            <Compass className="w-8 h-8 animate-spin" />
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">Cargando tu propuesta de viaje...</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Obteniendo detalles de Karabu Viajes</p>
+          </div>
         </div>
       </div>
     );
@@ -132,11 +146,11 @@ export default function ClientQuotationView() {
 
   if (!data) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white rounded-[16px] border border-gray-200 p-8 text-center shadow-sm">
+      <div className="min-h-screen bg-slate-50 dark:bg-[#070F1E] flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white dark:bg-[#0D1B2A] rounded-3xl border border-slate-200 dark:border-slate-800 p-8 text-center shadow-xl">
           <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h3 className="text-lg font-bold text-gray-900">Enlace Inválido</h3>
-          <p className="text-sm text-gray-500 mt-2">La propuesta de viaje solicitada no existe o ha sido dada de baja del sistema.</p>
+          <h3 className="text-lg font-bold text-slate-900 dark:text-white">Enlace Inválido</h3>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">La propuesta de viaje solicitada no existe o ha sido dada de baja.</p>
         </div>
       </div>
     );
@@ -144,202 +158,360 @@ export default function ClientQuotationView() {
 
   const { quotation, client, broker } = data;
   const imageUrl = getDestinationImage(quotation.destination);
+  const formData = quotation.form_data;
+  const isFinal = mode === "accepted" || mode === "rejected";
 
   return (
-    <div data-testid="client-quotation-view-page" className="min-h-screen bg-gray-50 text-gray-800 flex flex-col antialiased">
-      {/* Navbar Premium */}
-      <nav className="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-6 sticky top-0 z-30 shadow-[0_1px_2px_0_rgba(0,0,0,0.02)]">
-        <div className="text-lg font-extrabold tracking-wider text-gray-950 flex items-center gap-2">
-          <span className="bg-blue-600 text-white px-2.5 py-1 rounded-[6px] text-xs font-black">K</span>
-          <span>KARABU VIAJES</span>
+    <div className="min-h-screen bg-slate-50 dark:bg-[#070F1E] text-slate-900 dark:text-slate-100 flex flex-col antialiased transition-colors duration-300">
+
+      {/* ── Navbar Premium ── */}
+      <nav className="bg-white/90 dark:bg-[#0D1B2A]/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 h-16 flex items-center justify-between px-6 sticky top-0 z-30">
+        <div className="flex items-center gap-2">
+          <span className="bg-brand-turquoise text-white w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black">K</span>
+          <span className="text-lg font-extrabold tracking-tight text-slate-900 dark:text-white">
+            KARABU <span className="text-brand-turquoise">VIAJES</span>
+          </span>
         </div>
-        <div className="text-xs font-semibold text-gray-400">PROPUESTA DIGITAL</div>
+        <div className="flex items-center gap-3">
+          <StatusBadge value={quotation.status} />
+          <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Propuesta Digital</span>
+        </div>
       </nav>
 
-      {/* Main Content */}
-      <main className="flex-1 max-w-4xl w-full mx-auto p-4 md:p-8 space-y-6">
-        {/* Banner de Bienvenida */}
-        <div className="bg-white border border-gray-250 rounded-[16px] p-6 md:p-8 shadow-[0_1px_3px_0_rgba(0,0,0,0.05)]">
-          <span className="text-xs font-bold uppercase tracking-wider text-blue-600 block mb-2">¡Hola, {client.first_name}!</span>
-          <h2 className="text-xl md:text-2xl font-bold text-gray-900 tracking-tight">Hemos preparado tu viaje soñado a {quotation.destination}</h2>
-          <p className="text-sm text-gray-500 mt-1.5 leading-relaxed">
-            A continuación, encontrarás el itinerario, las condiciones generales y el costo estimado de la propuesta. Recuerda que puedes aceptarla o solicitar cambios directamente desde esta página.
-          </p>
-        </div>
+      {/* ── Main Content ── */}
+      <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
 
-        {/* Imagen del Destino */}
-        <div className="h-64 md:h-80 w-full rounded-[16px] overflow-hidden relative shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] border border-gray-200">
+        {/* 1. Hero Banner */}
+        <div className="relative h-64 sm:h-80 w-full rounded-3xl overflow-hidden shadow-xl shadow-brand-navy/10">
           <img src={imageUrl} alt={quotation.destination} className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-gray-950/70 via-gray-950/20 to-transparent flex items-end p-6 md:p-8">
-            <div>
-              <span className="text-xs font-semibold uppercase tracking-wider text-blue-300 block mb-1">Destino Propuesto</span>
-              <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">{quotation.destination}</h1>
-            </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-brand-navy/80 via-brand-navy/30 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-brand-navy/40 to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-brand-turquoise/20 text-brand-turquoise backdrop-blur-sm mb-2">
+              <MapPin className="w-3 h-3" /> Destino Propuesto
+            </span>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">{quotation.destination}</h1>
           </div>
         </div>
 
-        {/* Detalles en Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Card Detalle 1: Fechas */}
-          <div className="bg-white rounded-[16px] border border-gray-200 p-5 shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] flex items-start gap-4">
-            <div className="p-2.5 bg-blue-50 text-blue-600 rounded-[10px] shrink-0">
+        {/* 2. Welcome Banner */}
+        <div className="bg-white dark:bg-[#0D1B2A] rounded-3xl border border-slate-200/80 dark:border-slate-800 p-6 sm:p-8 shadow-sm">
+          <span className="text-xs font-bold uppercase tracking-wider text-brand-turquoise block mb-2">¡Hola, {client.first_name}!</span>
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+            Hemos preparado tu viaje soñado a {quotation.destination}
+          </h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
+            A continuación encuentras el itinerario, las condiciones y el costo estimado. Puedes aceptarla o solicitar cambios directamente desde esta página.
+          </p>
+        </div>
+
+        {/* 3. Metrics Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {/* Fechas */}
+          <div className="bg-white dark:bg-[#0D1B2A] rounded-2xl border border-slate-200/80 dark:border-slate-800 p-5 flex items-start gap-4 shadow-sm">
+            <div className="p-2.5 bg-brand-turquoise/10 text-brand-turquoise rounded-xl shrink-0">
               <Calendar className="h-5 w-5" />
             </div>
             <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-1">Fechas del Viaje</span>
-              <span className="text-sm font-semibold text-gray-800 block">Salida: {formatDate(quotation.travel_date)}</span>
-              <span className="text-sm font-semibold text-gray-800 block">Regreso: {formatDate(quotation.return_date)}</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block mb-1">Fechas del Viaje</span>
+              <span className="text-sm font-semibold text-slate-900 dark:text-white block">Salida: {formatDate(quotation.travel_date)}</span>
+              <span className="text-sm font-semibold text-slate-900 dark:text-white block">Regreso: {formatDate(quotation.return_date)}</span>
             </div>
           </div>
 
-          {/* Card Detalle 2: Personas */}
-          <div className="bg-white rounded-[16px] border border-gray-200 p-5 shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] flex items-start gap-4">
-            <div className="p-2.5 bg-blue-50 text-blue-600 rounded-[10px] shrink-0">
+          {/* Viajeros */}
+          <div className="bg-white dark:bg-[#0D1B2A] rounded-2xl border border-slate-200/80 dark:border-slate-800 p-5 flex items-start gap-4 shadow-sm">
+            <div className="p-2.5 bg-brand-turquoise/10 text-brand-turquoise rounded-xl shrink-0">
               <Users className="h-5 w-5" />
             </div>
             <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-1">Viajeros</span>
-              <span className="text-sm font-semibold text-gray-800 block">{quotation.travelers} {quotation.travelers === 1 ? 'persona' : 'personas'} cotizadas</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block mb-1">Viajeros</span>
+              <span className="text-sm font-semibold text-slate-900 dark:text-white block">
+                {quotation.travelers} {quotation.travelers === 1 ? 'persona' : 'personas'} cotizadas
+              </span>
             </div>
           </div>
 
-          {/* Card Detalle 3: Precio */}
-          <div className="bg-white rounded-[16px] border border-gray-200 p-5 shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] flex items-start gap-4">
-            <div className="p-2.5 bg-green-50 text-green-600 rounded-[10px] shrink-0">
+          {/* Precio */}
+          <div className="bg-white dark:bg-[#0D1B2A] rounded-2xl border-2 border-brand-turquoise/30 dark:border-brand-turquoise/40 p-5 flex items-start gap-4 shadow-sm relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-brand-turquoise to-brand-orange" />
+            <div className="p-2.5 bg-brand-turquoise text-white rounded-xl shrink-0">
               <DollarSign className="h-5 w-5" />
             </div>
             <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-1">Precio Total</span>
-              <span className="text-lg font-bold text-gray-900 block leading-tight">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block mb-1">Precio Total</span>
+              <span className="text-lg font-bold text-slate-900 dark:text-white block leading-tight">
                 {formatCurrency(quotation.amount, quotation.currency)}
               </span>
-              <span className="text-[10px] text-gray-400 font-semibold uppercase">{quotation.currency} total de impuestos incluidos</span>
+              <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold uppercase">{quotation.currency} impuestos incluidos</span>
             </div>
           </div>
         </div>
 
-        {/* Especificaciones / Itinerario */}
-        <div className="bg-white rounded-[16px] border border-gray-200 p-6 shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] space-y-3">
-          <h3 className="text-sm font-bold uppercase tracking-wider text-gray-900 border-b border-gray-100 pb-2 flex items-center gap-2">
-            <Info className="h-4 w-4 text-blue-600" /> Especificaciones de tu Viaje
-          </h3>
-          <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
-            {quotation.notes || "No se especificaron detalles adicionales. Por favor contacta a tu asesor para armar el plan detallado."}
-          </p>
+        {/* 4. Form Data Details (si vino del form web) */}
+        {formData && Object.keys(formData).length > 0 && (
+          <div className="bg-white dark:bg-[#0D1B2A] rounded-3xl border border-brand-turquoise/20 dark:border-brand-turquoise/30 p-6 sm:p-8 shadow-sm">
+            <div className="flex items-center gap-3 mb-5 pb-4 border-b border-slate-100 dark:border-slate-800">
+              <div className="w-10 h-10 rounded-xl bg-brand-turquoise/10 text-brand-turquoise flex items-center justify-center">
+                <FileText className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-bold text-slate-900 dark:text-white">Detalles de tu Solicitud</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Información enviada en el formulario de cotización</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+              {formData.fullName && (
+                <InfoRow icon={<User className="w-3.5 h-3.5" />} label="Nombre" value={formData.fullName} />
+              )}
+              {formData.email && (
+                <InfoRow icon={<Mail className="w-3.5 h-3.5" />} label="Email" value={formData.email} />
+              )}
+              {formData.phone && (
+                <InfoRow icon={<Phone className="w-3.5 h-3.5" />} label="Teléfono" value={formData.phone} />
+              )}
+              {formData.adultsCount !== undefined && (
+                <InfoRow icon={<Users className="w-3.5 h-3.5" />} label="Viajeros" 
+                  value={`${formData.adultsCount} adultos${formData.childrenCount > 0 ? `, ${formData.childrenCount} niños` : ''}${formData.babiesCount > 0 ? `, ${formData.babiesCount} bebés` : ''}`} />
+              )}
+              {formData.budgetRange && (
+                <InfoRow icon={<CreditCard className="w-3.5 h-3.5" />} label="Presupuesto" value={formData.budgetRange} dark />
+              )}
+              {formData.travelType && (
+                <InfoRow icon={<Briefcase className="w-3.5 h-3.5" />} label="Tipo de viaje" value={formData.travelType} />
+              )}
+              {formData.hotelCategory && (
+                <InfoRow icon={<Hotel className="w-3.5 h-3.5" />} label="Categoría hotel" value={formData.hotelCategory} />
+              )}
+              {formData.preferredHotel && (
+                <InfoRow icon={<MapPin className="w-3.5 h-3.5" />} label="Hotel preferido" value={formData.preferredHotel} />
+              )}
+              {formData.flexibleDates && (
+                <InfoRow icon={<Calendar className="w-3.5 h-3.5" />} label="Fechas flexibles" value={formData.flexibleDates} />
+              )}
+              {formData.preferredContact && (
+                <InfoRow icon={<Send className="w-3.5 h-3.5" />} label="Recibir por" 
+                  value={formData.preferredContact === 'ambos' ? 'Email y WhatsApp' : formData.preferredContact} />
+              )}
+            </div>
+            {formData.additionalServices?.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-2">Servicios requeridos</span>
+                <div className="flex flex-wrap gap-2">
+                  {formData.additionalServices.map((s, i) => (
+                    <span key={i} className="bg-brand-turquoise/10 text-brand-turquoise text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1">
+                      <Tag className="w-3 h-3" /> {s}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            {formData.comments && (
+              <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Comentarios adicionales</span>
+                <p className="text-sm text-slate-600 dark:text-slate-300 italic leading-relaxed">"{formData.comments}"</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* 5. Notas / Especificaciones */}
+        <div className="bg-white dark:bg-[#0D1B2A] rounded-3xl border border-slate-200/80 dark:border-slate-800 p-6 sm:p-8 shadow-sm">
+          <div className="flex items-center gap-3 mb-5 pb-4 border-b border-slate-100 dark:border-slate-800">
+            <div className="w-10 h-10 rounded-xl bg-brand-navy dark:bg-white/10 text-white flex items-center justify-center">
+              <Info className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="font-bold text-slate-900 dark:text-white">Resumen de la Propuesta</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Especificaciones redactadas por tu asesor</p>
+            </div>
+          </div>
+          <div className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-line bg-slate-50 dark:bg-slate-800/30 p-5 rounded-2xl border border-slate-100 dark:border-slate-800">
+            {quotation.notes || "No se han incluido especificaciones adicionales. Por favor contacta a tu asesor para más detalles."}
+          </div>
         </div>
 
-        {/* Broker Information */}
-        <div className="bg-white rounded-[16px] border border-gray-200 p-6 shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] flex items-center gap-4 flex-wrap">
-          <div className="h-12 w-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold shrink-0">
+        {/* 6. Broker Card */}
+        <div className="bg-white dark:bg-[#0D1B2A] rounded-3xl border border-slate-200/80 dark:border-slate-800 p-6 flex items-center gap-4 flex-wrap shadow-sm">
+          <div className="h-12 w-12 rounded-full bg-brand-turquoise/10 text-brand-turquoise flex items-center justify-center font-bold text-lg shrink-0">
             {broker.name[0]}
           </div>
           <div className="flex-1">
-            <span className="text-[10px] font-bold text-gray-400 uppercase block">Tu Asesor de Viajes</span>
-            <h4 className="text-sm font-bold text-gray-900">{broker.name}</h4>
-            <div className="flex gap-4 mt-0.5 text-xs text-gray-500 flex-wrap">
+            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase block">Tu Asesor de Viajes</span>
+            <h4 className="text-sm font-bold text-slate-900 dark:text-white">{broker.name}</h4>
+            <div className="flex gap-4 mt-0.5 text-xs text-slate-500 dark:text-slate-400 flex-wrap">
               <span className="flex items-center gap-1"><Mail className="h-3.5 w-3.5" /> {broker.email}</span>
-              {client.phone && <span className="flex items-center gap-1"><Phone className="h-3.5 w-3.5" /> {broker.name ? "Karabu Office" : ""}</span>}
             </div>
           </div>
         </div>
 
-        {/* Decision Panel */}
-        <div className="bg-white rounded-[16px] border border-gray-200 p-6 shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] text-center">
-          {status === "idle" && (
-            <div className="space-y-4">
-              <h3 className="text-sm font-bold text-gray-900">¿Qué te parece esta propuesta?</h3>
-              <p className="text-xs text-gray-500">Puedes aceptarla o pedirle a tu asesor que la modifique.</p>
-              
-              <div className="flex items-center justify-center gap-3 flex-wrap">
+        {/* 7. Decision Panel */}
+        <div className="w-full rounded-3xl bg-gradient-to-b from-white via-white to-slate-50 dark:from-[#0D1B2A] dark:via-[#0D1B2A] dark:to-[#070F1E] border-2 border-brand-turquoise/30 dark:border-brand-turquoise/40 p-6 sm:p-10 shadow-2xl relative overflow-hidden">
+          {/* Decorative top bar */}
+          <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-brand-turquoise via-brand-orange to-brand-navy" />
+
+          <div className="max-w-2xl mx-auto text-center space-y-5">
+
+            {/* Title */}
+            <div>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-brand-turquoise/10 text-brand-turquoise mb-3">
+                <Sparkles className="w-3.5 h-3.5" /> Panel de Decisión
+              </span>
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
+                ¿Qué deseas hacer con esta propuesta?
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-lg mx-auto mt-1.5">
+                Revisa los detalles y elige una opción. Tu asesor recibirá la confirmación en tiempo real.
+              </p>
+            </div>
+
+            {/* Accepted State */}
+            {mode === "accepted" && (
+              <div className="p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300 space-y-3">
+                <div className="w-12 h-12 mx-auto rounded-full bg-emerald-500 text-white flex items-center justify-center">
+                  <CheckCircle2 className="w-6 h-6" />
+                </div>
+                <h3 className="text-lg font-bold">¡Propuesta Aceptada con Éxito!</h3>
+                <p className="text-xs sm:text-sm max-w-md mx-auto text-emerald-800 dark:text-emerald-200">
+                  Hemos registrado tu aceptación. Tu asesor se pondrá en contacto contigo para coordinar los detalles finales.
+                </p>
                 <button
-                  onClick={() => setStatus("rejecting")}
-                  data-testid="proposal-reject-btn"
-                  className="inline-flex items-center gap-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-[10px] px-5 py-2.5 text-sm font-semibold transition-colors"
+                  onClick={() => { setMode("requesting_changes"); setComments(""); }}
+                  className="text-xs font-semibold text-slate-600 dark:text-slate-300 hover:underline inline-flex items-center gap-1"
                 >
-                  <XCircle className="h-4 w-4 text-red-500" /> Solicitar Cambios
+                  <MessageSquare className="w-3.5 h-3.5" /> ¿Necesitas agregar algún cambio posterior?
                 </button>
+              </div>
+            )}
+
+            {/* Rejected State */}
+            {mode === "rejected" && (
+              <div className="p-6 rounded-2xl bg-brand-orange/10 border border-brand-orange/30 text-brand-orange space-y-3">
+                <div className="w-12 h-12 mx-auto rounded-full bg-brand-orange text-white flex items-center justify-center">
+                  <AlertCircle className="w-6 h-6" />
+                </div>
+                <h3 className="text-lg font-bold">Solicitud de Cambios Enviada</h3>
+                <p className="text-xs sm:text-sm max-w-md mx-auto text-slate-700 dark:text-slate-300">
+                  Tus comentarios han sido notificados a tu asesor. Revisará tus preferencias y te enviará una propuesta ajustada.
+                </p>
                 <button
                   onClick={handleAccept}
                   disabled={submitting}
-                  data-testid="proposal-accept-btn"
-                  className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] px-5 py-2.5 text-sm font-semibold transition-colors shadow-sm disabled:opacity-60"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-brand-turquoise hover:bg-[#008F80] transition shadow-md disabled:opacity-50"
                 >
-                  {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
-                  Aceptar Propuesta
+                  {submitting && actionType === "accept" ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                  Cambiar de opinión y Aceptar
                 </button>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Accepted State */}
-          {status === "accepted" && (
-            <div className="py-4 space-y-3" data-testid="success-message">
-              <CheckCircle className="h-12 w-12 text-green-500 mx-auto" />
-              <h3 className="text-lg font-bold text-gray-900">¡Propuesta Aceptada!</h3>
-              <p className="text-sm text-gray-650 max-w-md mx-auto">
-                Has aceptado la propuesta de viaje. Tu asesor, <strong>{broker.name}</strong>, se pondrá en contacto contigo en breve para proceder con la reserva y concretar el pago.
-              </p>
-            </div>
-          )}
-
-          {/* Rejecting Form State */}
-          {status === "rejecting" && (
-            <form onSubmit={handleReject} className="space-y-4 text-left">
-              <div className="flex items-center justify-between border-b border-gray-100 pb-2">
-                <h4 className="text-sm font-bold text-gray-900">¿Qué te gustaría cambiar?</h4>
-                <button 
-                  type="button" 
-                  onClick={() => setStatus("idle")} 
-                  className="text-xs text-gray-400 hover:text-gray-600 font-semibold"
-                >
-                  Cancelar
-                </button>
-              </div>
-              <p className="text-xs text-gray-500">Por favor, escribe de forma detallada qué cambios prefieres (ej: cambio de fechas, categoría de hotel, aerolínea, o ajuste de presupuesto).</p>
-              
-              <textarea
-                data-testid="reject-comments-textarea"
-                required
-                rows={4}
-                value={comments}
-                onChange={(e) => setComments(e.target.value)}
-                placeholder="Escribe tus comentarios aquí..."
-                className="w-full rounded-[10px] border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-shadow"
-              />
-
-              <div className="flex justify-end gap-2">
+            {/* IDLE MODE: 2 Botones principales */}
+            {mode === "idle" && (
+              <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2.5 sm:gap-3">
+                {/* ✅ ACEPTAR */}
                 <button
-                  type="button"
-                  onClick={() => setStatus("idle")}
-                  className="px-4 py-2 text-sm font-semibold text-gray-700 border border-gray-200 rounded-[10px] hover:bg-gray-50"
-                >
-                  Volver
-                </button>
-                <button
-                  type="submit"
+                  onClick={handleAccept}
                   disabled={submitting}
-                  data-testid="reject-submit-btn"
-                  className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] px-4 py-2 text-sm font-semibold transition-colors shadow-sm disabled:opacity-60"
+                  className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3.5 rounded-2xl font-bold text-base text-white bg-gradient-to-r from-brand-turquoise to-[#02C39A] hover:from-[#008F80] hover:to-brand-turquoise shadow-lg shadow-brand-turquoise/25 hover:shadow-xl active:scale-[0.98] transition-all disabled:opacity-50"
                 >
-                  {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                  Enviar Comentarios
+                  {submitting && actionType === "accept" ? (
+                    <><Loader2 className="w-5 h-5 animate-spin" /> Procesando...</>
+                  ) : (
+                    <><CheckCircle2 className="w-5 h-5" /> ACEPTAR PROPUESTA</>
+                  )}
+                </button>
+
+                {/* ❌ SOLICITAR CAMBIOS */}
+                <button
+                  onClick={() => setMode("requesting_changes")}
+                  disabled={submitting}
+                  className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-5 sm:px-8 py-3.5 rounded-2xl font-bold text-sm text-brand-orange bg-brand-orange/10 hover:bg-brand-orange/20 border border-brand-orange/30 transition-all active:scale-[0.98] disabled:opacity-50"
+                >
+                  <XCircle className="w-5 h-5" /> SOLICITAR CAMBIOS
                 </button>
               </div>
-            </form>
-          )}
+            )}
 
-          {/* Rejected State */}
-          {status === "rejected" && (
-            <div className="py-4 space-y-3">
-              <CheckCircle className="h-12 w-12 text-blue-500 mx-auto" />
-              <h3 className="text-lg font-bold text-gray-900">Comentarios Enviados</h3>
-              <p className="text-sm text-gray-600 max-w-md mx-auto">
-                Hemos enviado tus comentarios de ajuste a tu asesor <strong>{broker.name}</strong>. Se comunicará contigo para presentarte una propuesta modificada.
+            {/* REQUESTING CHANGES: Textarea + Enviar + Cancelar */}
+            {mode === "requesting_changes" && !isFinal && (
+              <form onSubmit={handleReject} className="pt-2 text-left space-y-4 max-w-xl mx-auto">
+                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider mb-2 flex items-center gap-2">
+                    <MessageSquare className="w-4 h-4 text-brand-orange" />
+                    ¿Qué cambios deseas realizar?
+                  </label>
+                  <textarea
+                    value={comments}
+                    onChange={(e) => setComments(e.target.value)}
+                    placeholder="Escribe aquí tus observaciones (ej. ajustar fechas, cambiar hotel, modificar presupuesto)..."
+                    rows={4}
+                    required
+                    className="w-full p-3 rounded-xl text-xs sm:text-sm bg-white dark:bg-[#070F1E] text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-orange transition"
+                  />
+                  <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+                    <button
+                      type="button"
+                      onClick={() => { setMode("idle"); setComments(""); }}
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 transition"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" /> Volver
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={submitting || !comments.trim()}
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-brand-orange hover:bg-[#E85A24] shadow-md transition disabled:opacity-50"
+                    >
+                      {submitting && actionType === "reject" ? (
+                        <><Loader2 className="w-4 h-4 animate-spin" /> Enviando...</>
+                      ) : (
+                        <><Send className="w-4 h-4" /> Enviar Comentarios</>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </form>
+            )}
+
+            {/* Trust notice */}
+            <div className="pt-4 border-t border-slate-200/60 dark:border-slate-800 text-center">
+              <p className="text-[11px] text-slate-400 dark:text-slate-500 flex items-center justify-center gap-1.5">
+                <HeartHandshake className="w-3.5 h-3.5 text-brand-turquoise" />
+                Al aceptar o solicitar cambios, tu asesor recibirá una notificación instantánea sin compromisos ocultos.
               </p>
             </div>
-          )}
+          </div>
         </div>
+
       </main>
+
+      {/* ── Footer ── */}
+      <footer className="w-full border-t border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#0D1B2A] py-8 px-4 text-center text-xs text-slate-500 dark:text-slate-400 mt-12">
+        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-slate-800 dark:text-white">
+              KARABU <span className="text-brand-turquoise">VIAJES</span>
+            </span>
+            <span>— Propuesta Digital de Viaje</span>
+          </div>
+          <div className="flex items-center gap-1 text-slate-400">
+            <ShieldCheck className="w-4 h-4 text-brand-turquoise" />
+            <span>Documento seguro · Karabu Cloud</span>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+// Helper: info row with icon
+function InfoRow({ icon, label, value, dark }) {
+  return (
+    <div className="flex items-center gap-2.5 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800">
+      <span className="text-slate-400 dark:text-slate-500 shrink-0">{icon}</span>
+      <div className="min-w-0">
+        <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase block">{label}</span>
+        <span className={`text-sm font-semibold truncate block ${dark ? 'text-brand-turquoise' : 'text-slate-900 dark:text-white'}`}>{value}</span>
+      </div>
     </div>
   );
 }

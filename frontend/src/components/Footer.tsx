@@ -13,6 +13,7 @@ export default function Footer({ onNavigate, onSelectDestination }: FooterProps)
     { label: 'Inicio', id: 'inicio' },
     { label: 'Destinos', id: 'destinos' },
     { label: 'Servicios', id: 'servicios' },
+    { label: 'Cotizar', id: 'cotizacion' },
     { label: '¿Por qué elegirnos?', id: 'por-que-elegirnos' },
     { label: 'Contacto', id: 'contacto' }
   ];
@@ -64,7 +65,7 @@ export default function Footer({ onNavigate, onSelectDestination }: FooterProps)
             <Logo light showText={true} />
             
             <p className="text-slate-400 font-sans text-xs leading-relaxed max-w-sm">
-              Diseñamos experiencias de viaje únicas y personalizadas. Nos encargamos de toda la asesoría de visados y reservas logísticas para que solo te preocupes de disfrutar.
+              Diseñamos experiencias de viaje con acompañamiento personalizado. Paquetes turísticos, asesoría de visas y certificados de viaje para que solo te preocupes por disfrutar.
             </p>
 
             {/* Social Links Icons */}
@@ -141,7 +142,7 @@ export default function Footer({ onNavigate, onSelectDestination }: FooterProps)
           </div>
 
           {/* Column 5: Contact info (2 columns span on large) */}
-          <div className="lg:col-span-2 flex flex-col gap-4 text-left">
+          <div id="contacto" className="lg:col-span-2 flex flex-col gap-4 text-left scroll-mt-24">
             <h4 className="font-display font-bold text-sm text-white uppercase tracking-wider">
               Contacto
             </h4>

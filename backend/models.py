@@ -59,7 +59,7 @@ class Client(Base):
     notes = Column(Text, default="")
     status = Column(String, nullable=False, default="activo")  # activo, inactivo
     deleted_at = Column(DateTime(timezone=True), nullable=True)
-    created_by = Column(String, ForeignKey("users.id"), nullable=False)
+    created_by = Column(String, ForeignKey("users.id"), nullable=True)
     created_at = Column(DateTime(timezone=True), nullable=False, default=utcnow)
     updated_at = Column(DateTime(timezone=True), nullable=False, default=utcnow, onupdate=utcnow)
 
@@ -92,10 +92,14 @@ class Quotation(Base):
     amount = Column(Float, default=0)
     currency = Column(String, default="USD")
     notes = Column(Text, default="")
+    assigned_hotel = Column(String, default="")  # hotel assigned by advisor if client didn't specify
+    booking_price = Column(Float, nullable=True)  # comparison: Booking.com price
+    expedia_price = Column(Float, nullable=True)  # comparison: Expedia price
+    form_data = Column(JSON, default=dict)  # raw form submission data for public leads
     status = Column(String, nullable=False, default="borrador")  # borrador, enviada, aceptada, rechazada, expirada
     sent_via = Column(String, default="")
     sent_at = Column(String, default="")
-    created_by = Column(String, ForeignKey("users.id"), nullable=False)
+    created_by = Column(String, ForeignKey("users.id"), nullable=True)
     created_at = Column(DateTime(timezone=True), nullable=False, default=utcnow)
     updated_at = Column(DateTime(timezone=True), nullable=False, default=utcnow, onupdate=utcnow)
 
@@ -107,6 +111,9 @@ class Quotation(Base):
             "travel_date": self.travel_date, "return_date": self.return_date,
             "travelers": self.travelers, "amount": self.amount, "currency": self.currency,
             "notes": self.notes, "status": self.status,
+            "assigned_hotel": self.assigned_hotel,
+            "booking_price": self.booking_price, "expedia_price": self.expedia_price,
+            "form_data": self.form_data or {},
             "sent_via": self.sent_via, "sent_at": self.sent_at,
             "created_by": self.created_by,
             "created_at": self.created_at.isoformat() if self.created_at else None,
@@ -131,7 +138,7 @@ class Reservation(Base):
     status = Column(String, nullable=False, default="pendiente")  # pendiente, confirmada, pagada, en_viaje, finalizada, cancelada
     passengers = Column(JSON, default=list)
     documents = Column(JSON, default=list)
-    created_by = Column(String, ForeignKey("users.id"), nullable=False)
+    created_by = Column(String, ForeignKey("users.id"), nullable=True)
     created_at = Column(DateTime(timezone=True), nullable=False, default=utcnow)
     updated_at = Column(DateTime(timezone=True), nullable=False, default=utcnow, onupdate=utcnow)
 
@@ -165,7 +172,7 @@ class Payment(Base):
     payment_date = Column(String, default="")
     status = Column(String, nullable=False, default="completado")  # pendiente, completado, fallido, reembolsado
     notes = Column(Text, default="")
-    created_by = Column(String, ForeignKey("users.id"), nullable=False)
+    created_by = Column(String, ForeignKey("users.id"), nullable=True)
     created_at = Column(DateTime(timezone=True), nullable=False, default=utcnow)
     updated_at = Column(DateTime(timezone=True), nullable=False, default=utcnow, onupdate=utcnow)
 

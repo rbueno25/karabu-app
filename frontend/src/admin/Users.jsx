@@ -9,7 +9,7 @@ import { formatDate } from "../lib/format";
 import { useAuth } from "./AuthContext";
 
 const empty = { name: "", email: "", role: "advisor", status: "activo", password: "" };
-const inputCls = "w-full rounded-[10px] border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none";
+const inputCls = "w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none";
 const ROLE_LABELS = { super_admin: "Super Administrador", admin: "Administrador", advisor: "Asesor" };
 
 export default function Users() {
@@ -82,12 +82,12 @@ export default function Users() {
     return (
       <div data-testid="users-page">
         <PageHeader title="Usuarios" description="Administra los usuarios del sistema." />
-        <div className="bg-white rounded-[16px] border border-gray-200 p-16 flex flex-col items-center text-center">
-          <div className="h-12 w-12 rounded-full bg-yellow-50 text-yellow-700 flex items-center justify-center mb-4">
+        <div className="bg-white dark:bg-gray-900 rounded-[16px] border border-gray-200 dark:border-gray-700 p-16 flex flex-col items-center text-center">
+          <div className="h-12 w-12 rounded-full bg-yellow-50 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 flex items-center justify-center mb-4">
             <ShieldCheck className="h-5 w-5" />
           </div>
-          <h3 className="text-base font-semibold text-gray-900">Acceso restringido</h3>
-          <p className="text-sm text-gray-500 mt-1 max-w-md">Solo los administradores pueden gestionar los usuarios del sistema.</p>
+          <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">Acceso restringido</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-md">Solo los administradores pueden gestionar los usuarios del sistema.</p>
         </div>
       </div>
     );
@@ -105,19 +105,19 @@ export default function Users() {
         }
       />
 
-      <div className="bg-white rounded-[16px] border border-gray-200 shadow-[0_1px_3px_0_rgba(0,0,0,0.04)] overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200 flex items-center gap-3 flex-wrap">
+      <div className="bg-white dark:bg-gray-900 rounded-[16px] border border-gray-200 dark:border-gray-700 shadow-[0_1px_3px_0_rgba(0,0,0,0.04)] overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center gap-3 flex-wrap">
           <div className="relative flex-1 min-w-[240px]">
-            <Search className="h-4 w-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input data-testid="users-search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar por nombre o correo…" className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-[10px] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none" />
+            <Search className="h-4 w-4 text-gray-400 dark:text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" />
+            <input data-testid="users-search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar por nombre o correo…" className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-[10px] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none" />
           </div>
-          <select data-testid="users-role-filter" value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)} className="text-sm border border-gray-200 rounded-[10px] px-3 py-2 outline-none bg-white">
+          <select data-testid="users-role-filter" value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)} className="text-sm border border-gray-200 dark:border-gray-700 rounded-[10px] px-3 py-2 outline-none bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
             <option value="">Todos los roles</option>
             <option value="super_admin">Super Administrador</option>
             <option value="admin">Administrador</option>
             <option value="advisor">Asesor</option>
           </select>
-          <select data-testid="users-status-filter" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="text-sm border border-gray-200 rounded-[10px] px-3 py-2 outline-none bg-white">
+          <select data-testid="users-status-filter" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="text-sm border border-gray-200 dark:border-gray-700 rounded-[10px] px-3 py-2 outline-none bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
             <option value="">Todos los estados</option>
             <option value="activo">Activo</option>
             <option value="inactivo">Inactivo</option>
@@ -125,44 +125,44 @@ export default function Users() {
         </div>
 
         {loading ? (
-          <div className="p-10 text-center text-gray-500 flex items-center justify-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Cargando…</div>
+          <div className="p-10 text-center text-gray-500 dark:text-gray-400 flex items-center justify-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Cargando…</div>
         ) : items.length === 0 ? (
           <EmptyState title="Sin usuarios" description="Crea el primer usuario del sistema." icon={UserCog} />
         ) : (
           <>
             <table className="w-full text-sm" data-testid="users-table">
-              <thead className="bg-gray-50 border-b border-gray-200">
+              <thead className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
                 <tr>
-                  <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-                  <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Correo</th>
-                  <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Rol</th>
-                  <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                  <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Último acceso</th>
-                  <th className="text-right px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                  <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Nombre</th>
+                  <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Correo</th>
+                  <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Rol</th>
+                  <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Estado</th>
+                  <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Último acceso</th>
+                  <th className="text-right px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 {paginated.map((u) => (
-                  <tr key={u.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50">
+                  <tr key={u.id} className="border-b border-gray-100 dark:border-gray-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td className="px-6 py-3">
                       <div className="flex items-center gap-3">
                         <div className="h-8 w-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-medium">
                           {u.name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()}
                         </div>
-                        <div className="text-gray-900 font-medium">{u.name}</div>
+                        <div className="text-gray-900 dark:text-gray-100 font-medium">{u.name}</div>
                       </div>
                     </td>
-                    <td className="px-6 py-3 text-gray-700">{u.email}</td>
+                    <td className="px-6 py-3 text-gray-700 dark:text-gray-300">{u.email}</td>
                     <td className="px-6 py-3">
-                      <span className="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-2.5 py-0.5 text-xs font-medium text-gray-700">
+                      <span className="inline-flex items-center rounded-full border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-2.5 py-0.5 text-xs font-medium text-gray-700 dark:text-gray-300">
                         {ROLE_LABELS[u.role] || u.role}
                       </span>
                     </td>
                     <td className="px-6 py-3"><StatusBadge value={u.status || "activo"} /></td>
-                    <td className="px-6 py-3 text-gray-600">{u.last_login ? formatDate(u.last_login) : "—"}</td>
+                    <td className="px-6 py-3 text-gray-600 dark:text-gray-400">{u.last_login ? formatDate(u.last_login) : "—"}</td>
                     <td className="px-6 py-3 text-right">
                       <div className="inline-flex items-center gap-1">
-                        <button onClick={() => openEdit(u)} data-testid={`user-edit-${u.id}`} className="h-8 w-8 rounded-[8px] hover:bg-gray-100 flex items-center justify-center text-gray-600"><Pencil className="h-4 w-4" /></button>
+                        <button onClick={() => openEdit(u)} data-testid={`user-edit-${u.id}`} className="h-8 w-8 rounded-[8px] hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400"><Pencil className="h-4 w-4" /></button>
                         <button onClick={() => remove(u)} data-testid={`user-delete-${u.id}`} disabled={u.id === current?.id} className="h-8 w-8 rounded-[8px] hover:bg-red-50 flex items-center justify-center text-red-600 disabled:opacity-30 disabled:hover:bg-transparent"><Trash2 className="h-4 w-4" /></button>
                       </div>
                     </td>
@@ -170,12 +170,12 @@ export default function Users() {
                 ))}
               </tbody>
             </table>
-            <div className="px-6 py-3 border-t border-gray-200 flex items-center justify-between text-sm text-gray-500">
+            <div className="px-6 py-3 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
               <div>Mostrando {paginated.length} de {items.length}</div>
               <div className="flex items-center gap-2">
-                <button disabled={page === 1} onClick={() => setPage((p) => Math.max(1, p - 1))} className="px-3 py-1 border border-gray-200 rounded-[8px] disabled:opacity-40 hover:bg-gray-50">Anterior</button>
-                <span className="text-gray-700">Página {page} / {totalPages}</span>
-                <button disabled={page === totalPages} onClick={() => setPage((p) => Math.min(totalPages, p + 1))} className="px-3 py-1 border border-gray-200 rounded-[8px] disabled:opacity-40 hover:bg-gray-50">Siguiente</button>
+                <button disabled={page === 1} onClick={() => setPage((p) => Math.max(1, p - 1))} className="px-3 py-1 border border-gray-200 dark:border-gray-700 rounded-[8px] disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-800">Anterior</button>
+                <span className="text-gray-700 dark:text-gray-300">Página {page} / {totalPages}</span>
+                <button disabled={page === totalPages} onClick={() => setPage((p) => Math.min(totalPages, p + 1))} className="px-3 py-1 border border-gray-200 dark:border-gray-700 rounded-[8px] disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-800">Siguiente</button>
               </div>
             </div>
           </>
@@ -184,10 +184,10 @@ export default function Users() {
 
       {modalOpen && (
         <div data-testid="user-modal" className="fixed inset-0 z-50 flex items-start justify-center bg-gray-900/50 backdrop-blur-sm p-4 overflow-y-auto">
-          <form onSubmit={save} className="mt-16 bg-white rounded-[16px] shadow-xl border border-gray-200 w-full max-w-lg p-6">
+          <form onSubmit={save} className="mt-16 bg-white dark:bg-gray-900 rounded-[16px] shadow-xl border border-gray-200 dark:border-gray-700 w-full max-w-lg p-6">
             <div className="flex items-center justify-between mb-5">
-              <h3 className="text-lg font-semibold text-gray-900">{editingId ? "Editar usuario" : "Nuevo usuario"}</h3>
-              <button type="button" onClick={() => setModalOpen(false)} className="h-8 w-8 rounded-[8px] hover:bg-gray-100 flex items-center justify-center"><X className="h-4 w-4 text-gray-500" /></button>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{editingId ? "Editar usuario" : "Nuevo usuario"}</h3>
+              <button type="button" onClick={() => setModalOpen(false)} className="h-8 w-8 rounded-[8px] hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center"><X className="h-4 w-4 text-gray-500 dark:text-gray-400" /></button>
             </div>
             <div className="space-y-4">
               <Field label="Nombre completo" required>
@@ -216,7 +216,7 @@ export default function Users() {
               </Field>
             </div>
             <div className="mt-6 flex items-center justify-end gap-2">
-              <button type="button" onClick={() => setModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-200 rounded-[10px] hover:bg-gray-50">Cancelar</button>
+              <button type="button" onClick={() => setModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-[10px] hover:bg-gray-50 dark:hover:bg-gray-800">Cancelar</button>
               <button type="submit" disabled={saving} data-testid="user-save-btn" className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] px-4 py-2 text-sm font-medium disabled:opacity-60">
                 {saving && <Loader2 className="h-4 w-4 animate-spin" />} Guardar
               </button>
@@ -231,7 +231,7 @@ export default function Users() {
 function Field({ label, required, children }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
       {children}

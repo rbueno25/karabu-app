@@ -57,6 +57,7 @@ export interface ContactFormInput {
   phone: string;
   country: string;
   city: string;
+  preferredHotel: string;
   departureDate: string;
   returnDate: string;
   flexibleDates: string; // 'Sí' | 'No'
@@ -65,6 +66,7 @@ export interface ContactFormInput {
   babiesCount: number;
   budgetRange: string;
   additionalServices: string[];
+  preferredContact: string; // 'email' | 'whatsapp' | 'ambos'
   travelType: string;
   hotelCategory: string;
   comments: string;

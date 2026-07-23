@@ -117,6 +117,27 @@ class QuotationIn(BaseModel):
     sent_via: Optional[str] = ""
     sent_at: Optional[str] = ""
 
+class LeadIn(BaseModel):
+    """Public landing page form submission — no auth required."""
+    fullName: str
+    email: str
+    phone: str
+    country: str
+    city: str = ""
+    preferredHotel: str = ""
+    departureDate: str = ""
+    returnDate: str = ""
+    flexibleDates: str = "No"
+    adultsCount: int = 1
+    childrenCount: int = 0
+    babiesCount: int = 0
+    budgetRange: str = ""
+    additionalServices: list = []
+    travelType: str = ""
+    hotelCategory: str = ""
+    preferredContact: str = "ambos"
+    comments: str = ""
+
 class PassengerIn(BaseModel):
     name: str
     document_id: Optional[str] = ""
@@ -406,6 +427,82 @@ async def delete_quotation(qid: str, db: AsyncSession = Depends(get_db), _u=Depe
     if q:
         await db.delete(q)
     return {"ok": True}
+
+
+# -------------------- Public Leads (no auth) --------------------
+@api.post("/leads")
+async def create_lead(body: LeadIn, db: AsyncSession = Depends(get_db)):
+    """Public endpoint: landing page form → creates client + quotation."""
+    email = body.email.strip().lower()
+
+    # Find or create client
+    result = await db.execute(select(Client).where(Client.email == email, Client.deleted_at.is_(None)))
+    client = result.scalar_one_or_none()
+
+    if not client:
+        # Split fullName into first/last
+        parts = body.fullName.strip().split(" ", 1)
+        first_name = parts[0]
+        last_name = parts[1] if len(parts) > 1 else ""
+        client = Client(
+            id=new_id(), first_name=first_name, last_name=last_name,
+            email=email, phone=body.phone,
+            status="activo", created_by=None,
+        )
+        db.add(client)
+        await db.flush()
+
+    # Build rich form data
+    form_data = {
+        "fullName": body.fullName,
+        "email": body.email,
+        "phone": body.phone,
+        "country": body.country,
+        "city": body.city,
+        "preferredHotel": body.preferredHotel,
+        "departureDate": body.departureDate,
+        "returnDate": body.returnDate,
+        "flexibleDates": body.flexibleDates,
+        "adultsCount": body.adultsCount,
+        "childrenCount": body.childrenCount,
+        "babiesCount": body.babiesCount,
+        "budgetRange": body.budgetRange,
+        "additionalServices": body.additionalServices,
+        "travelType": body.travelType,
+        "hotelCategory": body.hotelCategory,
+        "preferredContact": body.preferredContact,
+        "comments": body.comments,
+    }
+
+    total_travelers = body.adultsCount + body.childrenCount + body.babiesCount
+
+    q = Quotation(
+        id=new_id(),
+        client_id=client.id,
+        destination=f"{body.country}{', ' + body.city if body.city else ''}",
+        travel_date=body.departureDate,
+        return_date=body.returnDate,
+        travelers=total_travelers,
+        amount=0,
+        currency="USD",
+        notes=body.comments or "",
+        form_data=form_data,
+        status="borrador",
+        sent_via=body.preferredContact,
+        sent_at=now_iso(),
+        created_by=None,
+    )
+    db.add(q)
+    await db.flush()
+
+    logger.info(f"New lead from {email}: {q.id}")
+
+    return {
+        "ok": True,
+        "message": "¡Gracias por tu solicitud!",
+        "lead_id": q.id,
+        "client_id": client.id,
+    }
 
 
 # -------------------- Reservations --------------------

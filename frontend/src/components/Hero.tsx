@@ -9,7 +9,7 @@ interface HeroProps {
 
 export default function Hero({ onExploreDestinations, onContact }: HeroProps) {
   // URLs of high quality assets as displayed in the UI mockups
-  const beachImage = "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&q=80&w=1000&h=800";
+  const beachImage = "/hero-main.jpg";
   const veniceImage = "https://images.unsplash.com/photo-1520175480921-4edfa2983e0f?auto=format&fit=crop&q=80&w=600&h=450";
   const cruiseImage = "https://images.unsplash.com/photo-1548574505-5e239809ee19?auto=format&fit=crop&q=80&w=600&h=450";
 
@@ -33,7 +33,7 @@ export default function Hero({ onExploreDestinations, onContact }: HeroProps) {
               className="flex items-center gap-2 self-center lg:self-start bg-brand-turquoise/10 text-brand-turquoise font-bold text-xs uppercase tracking-wider px-3.5 py-2 rounded-full"
             >
               <Sparkles className="w-3.5 h-3.5" />
-              <span>DISEÑO DE EXPERIENCIAS ÚNICAS</span>
+              <span>VIAJES · VISAS · CERTIFICADOS</span>
             </motion.div>
 
             {/* Main Headline */}
@@ -43,8 +43,8 @@ export default function Hero({ onExploreDestinations, onContact }: HeroProps) {
               transition={{ duration: 0.6, delay: 0.1 }}
               className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold text-brand-navy tracking-tight leading-tight"
             >
-              Viajes a medida,<br />
-              <span className="text-brand-turquoise">recuerdos para siempre</span>
+              Cotiza el viaje de<br />
+              tus sueños <span className="text-brand-turquoise">en minutos</span>
             </motion.h1>
 
             {/* Description Paragraph */}
@@ -54,7 +54,7 @@ export default function Hero({ onExploreDestinations, onContact }: HeroProps) {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="text-slate-600 text-base sm:text-lg max-w-xl mx-auto lg:mx-0 leading-relaxed font-sans"
             >
-              En Karabu Visas y Viajes diseñamos experiencias únicas con paquetes personalizados, atención experta y el respaldo que necesitas en cada paso del camino.
+              Completa el formulario y recibe una propuesta personalizada con paquetes de viaje, asesoría de visas y acompañamiento en todo el proceso.
             </motion.p>
 
             {/* 3 Horizontally Aligned Badges with precise styles */}
@@ -64,47 +64,47 @@ export default function Hero({ onExploreDestinations, onContact }: HeroProps) {
               transition={{ duration: 0.6, delay: 0.3 }}
               className="grid grid-cols-1 sm:grid-cols-3 gap-4 my-2 text-left"
             >
-              {/* Item 1: Atención Personalizada */}
+              {/* Item 1: Paquetes de viaje */}
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-full bg-brand-turquoise/10 flex items-center justify-center text-brand-turquoise flex-shrink-0">
                   <Users className="w-4.5 h-4.5" />
                 </div>
                 <div className="flex flex-col">
                   <span className="font-display font-extrabold text-[13px] text-brand-navy leading-tight">
-                    Atención
+                    Paquetes
                   </span>
                   <span className="font-sans text-xs text-slate-500 leading-tight">
-                    personalizada
+                    de viaje
                   </span>
                 </div>
               </div>
 
-              {/* Item 2: Asesoría experta en visas */}
+              {/* Item 2: Asesoría de visas */}
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-full bg-brand-turquoise/10 flex items-center justify-center text-brand-turquoise flex-shrink-0">
                   <Award className="w-4.5 h-4.5" />
                 </div>
                 <div className="flex flex-col">
                   <span className="font-display font-extrabold text-[13px] text-brand-navy leading-tight">
-                    Asesoría experta
+                    Asesoría
                   </span>
                   <span className="font-sans text-xs text-slate-500 leading-tight">
-                    en visas
+                    de visas
                   </span>
                 </div>
               </div>
 
-              {/* Item 3: Soporte 24/7 */}
+              {/* Item 3: Certificados de viaje */}
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-full bg-brand-turquoise/10 flex items-center justify-center text-brand-turquoise flex-shrink-0">
                   <Headphones className="w-4.5 h-4.5" />
                 </div>
                 <div className="flex flex-col">
                   <span className="font-display font-extrabold text-[13px] text-brand-navy leading-tight">
-                    Soporte 24/7
+                    Certificados
                   </span>
                   <span className="font-sans text-xs text-slate-500 leading-tight">
-                    antes y durante tu viaje
+                    de viaje
                   </span>
                 </div>
               </div>
@@ -121,17 +121,15 @@ export default function Hero({ onExploreDestinations, onContact }: HeroProps) {
                 onClick={onExploreDestinations}
                 className="w-full sm:w-auto bg-brand-navy hover:bg-brand-navy/90 text-white font-bold px-8 py-4 rounded-md shadow-lg transition-all transform hover:scale-[1.03] active:scale-[0.97]"
               >
-                Explorar destinos
+                Ver destinos
               </button>
               
-              <a
-                href="https://wa.me/18093062424?text=Hola,%20quisiera%20solicitar%20información%20sobre%20sus%20viajes%20y%20paquetes."
-                target="_blank"
-                rel="noreferrer"
+              <button
+                onClick={onContact}
                 className="w-full sm:w-auto flex items-center justify-center gap-2.5 bg-brand-orange hover:bg-brand-orange/90 text-white font-bold px-8 py-4 rounded-md shadow-lg transition-all transform hover:scale-[1.03] active:scale-[0.97]"
               >
                 <span>Solicitar cotización</span>
-              </a>
+              </button>
             </motion.div>
 
             {/* Trusted Stamp Badge - matching reference image */}
@@ -146,10 +144,10 @@ export default function Hero({ onExploreDestinations, onContact }: HeroProps) {
               </div>
               <div className="text-left">
                 <span className="font-display font-extrabold text-xs text-brand-navy block leading-tight">
-                  Agencia de viajes confiable y registrada
+                  Agencia de viajes con acompañamiento personalizado
                 </span>
                 <span className="text-[10px] text-slate-500 block leading-tight mt-0.5 font-sans">
-                  Tu seguridad y satisfacción son nuestra prioridad.
+                  Viaja con confianza — te guiamos en cada paso.
                 </span>
               </div>
             </motion.div>
@@ -164,17 +162,13 @@ export default function Hero({ onExploreDestinations, onContact }: HeroProps) {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8 }}
-              className="relative w-full max-w-[540px] h-[420px] sm:h-[510px] overflow-hidden shadow-2xl z-0"
-              style={{
-                borderRadius: '32% 68% 41% 59% / 54% 39% 61% 46%'
-              }}
+              className="relative w-full max-w-[580px] h-[440px] sm:h-[540px] overflow-hidden shadow-2xl z-0 rounded-3xl"
             >
               {/* Image inside */}
               <img
                 src={beachImage}
                 alt="Playa tropical espectacular"
                 className="w-full h-full object-cover select-none pointer-events-none"
-                referrerPolicy="no-referrer"
               />
               
               {/* Subtle glass overlay to blend with the white card edges */}

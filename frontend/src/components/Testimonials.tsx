@@ -6,15 +6,15 @@ export default function Testimonials() {
   const reviews = [
     {
       id: 1,
-      quote: "Karabu hizo de nuestras vacaciones algo inolvidable. La atención fue excepcional y todo salió perfecto.",
-      name: "Maria G.",
+      quote: "Cotizamos nuestro viaje a Punta Cana y en menos de 24 horas teníamos una propuesta completa. Todo salió perfecto.",
+      name: "María G.",
       destination: "Punta Cana",
       stars: 5,
       avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=120&h=120"
     },
     {
       id: 2,
-      quote: "Gracias a su asesoría obtuvimos nuestra visa de turista sin contratiempos. Altamente recomendados.",
+      quote: "Gracias a su asesoría de visas preparamos nuestros documentos sin errores. El proceso fue mucho más fácil de lo que esperábamos.",
       name: "Carlos R.",
       destination: "Viaje a España",
       stars: 5,
@@ -22,7 +22,7 @@ export default function Testimonials() {
     },
     {
       id: 3,
-      quote: "El crucero fue espectacular. Desde la reserva hasta el regreso, todo estuvo increíble.",
+      quote: "Organizaron nuestro crucero familiar con un precio increíble. Desde la reserva hasta el regreso, todo impecable.",
       name: "Laura M.",
       destination: "Crucero por el Caribe",
       stars: 5,
@@ -31,11 +31,12 @@ export default function Testimonials() {
   ];
 
   const partners = [
-    { name: "IATA", sub: "MEMBER" },
-    { name: "AWAVIT", sub: "ASOCIADO" },
-    { name: "ADAVIT", sub: "REGISTRADO" },
-    { name: "MINISTERIO DE TURISMO", sub: "LICENCIA OFICIAL" },
-    { name: "CLIK", sub: "GARANTÍA" }
+    { name: "Club Viajemos", sub: "B2B", logo: "/certificaciones/clubviajemos.jpg", url: "https://clubviajemos.com" },
+    { name: "Dividelo", sub: "PAGOS", logo: "/certificaciones/dividelo.png", url: "https://dividelo.com" },
+    { name: "American Airlines", sub: "AEROLÍNEA", logo: "/certificaciones/american-airlines.webp", url: "https://aa.com" },
+    { name: "Bedsonline", sub: "HOTELES", logo: "/certificaciones/bedsonline.webp", url: "https://bedsonline.com" },
+    { name: "Ratehawk", sub: "HOTELES B2B", logo: "/certificaciones/ratehawk.png", url: "https://ratehawk.com" },
+    { name: "Certiviajes", sub: "CERTIFICACIÓN", logo: "/certificaciones/certiviajes.svg", url: "https://certiviajes.com" }
   ];
 
   return (
@@ -116,21 +117,22 @@ export default function Testimonials() {
             {/* Grid of stylized, ultra-crisp vector-like logo cards */}
             <div className="grid grid-cols-2 gap-4 flex-grow justify-center items-center">
               {partners.map((partner, idx) => (
-                <motion.div
+                <motion.a
                   key={idx}
+                  href={partner.url}
+                  target="_blank"
+                  rel="noreferrer"
                   initial={{ opacity: 0, scale: 0.95 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true, margin: '-40px' }}
                   transition={{ duration: 0.5, delay: idx * 0.05 }}
-                  className="bg-slate-50 border border-slate-200/60 rounded-xl p-4 flex flex-col items-center justify-center text-center h-24 hover:bg-brand-navy/5 transition-colors duration-300"
+                  className="bg-white border border-slate-200/60 rounded-xl p-3 flex flex-col items-center justify-end text-center h-24 hover:border-brand-turquoise/40 hover:shadow-md transition-all duration-300 relative overflow-hidden"
+                  style={{ backgroundImage: `url(${partner.logo})`, backgroundSize: 'contain', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}
                 >
-                  <span className="font-display font-black text-xl tracking-wider text-brand-navy">
-                    {partner.name}
-                  </span>
-                  <span className="text-[8px] font-mono font-bold text-slate-400 uppercase tracking-widest mt-1 block">
+                  <span className="text-[8px] font-mono font-bold text-slate-400 uppercase tracking-widest bg-white/80 px-2 py-0.5 rounded-full">
                     {partner.sub}
                   </span>
-                </motion.div>
+                </motion.a>
               ))}
               
               {/* Trust stamp */}

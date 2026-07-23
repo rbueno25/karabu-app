@@ -6,14 +6,14 @@ export default function WhyChooseUs() {
   const leftFeatures = [
     {
       id: 'asesoria',
-      title: "Asesoría integral",
-      description: "Te guiamos antes, durante y después de tu viaje.",
+      title: "Acompañamiento real",
+      description: "Te guiamos antes, durante y después de tu viaje, sin soltarte.",
       icon: <Users className="w-6 h-6 text-brand-turquoise" />
     },
     {
       id: 'precios',
-      title: "Precios competitivos",
-      description: "Ofrecemos las mejores tarifas del mercado.",
+      title: "Precios claros",
+      description: "Sin costos ocultos. Te explicamos cada detalle de tu cotización.",
       icon: <DollarSign className="w-6 h-6 text-brand-turquoise" />
     }
   ];
@@ -21,14 +21,14 @@ export default function WhyChooseUs() {
   const rightFeatures = [
     {
       id: 'seguridad',
-      title: "Seguridad y confianza",
-      description: "Trabajamos con aliados certificados y seguros de viaje.",
+      title: "Procesos seguros",
+      description: "Manejo confidencial de tus documentos y datos personales.",
       icon: <ShieldCheck className="w-6 h-6 text-brand-turquoise" />
     },
     {
       id: 'soporte',
-      title: "Soporte 24/7",
-      description: "Estamos contigo en cada momento de tu aventura.",
+      title: "Respuesta rápida",
+      description: "WhatsApp directo. Te respondemos en minutos, no en días.",
       icon: <Clock className="w-6 h-6 text-brand-turquoise" />
     }
   ];
@@ -248,7 +248,7 @@ export default function WhyChooseUs() {
                   Asesoría Integral
                 </span>
                 <span className="font-sans text-slate-500 text-[11px] mt-0.5">
-                  de principio a fin
+                  De principio a fin
                 </span>
               </div>
             </div>

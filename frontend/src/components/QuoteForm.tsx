@@ -20,7 +20,9 @@ import {
   Star,
   MapPin,
   HelpCircle,
-  Lock
+  Lock,
+  Mail,
+  Smartphone
 } from 'lucide-react';
 import { ContactFormInput } from '../types';
 
@@ -36,6 +38,7 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
     phone: '',
     country: '',
     city: '',
+    preferredHotel: '',
     departureDate: '',
     returnDate: '',
     flexibleDates: 'No',
@@ -44,6 +47,7 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
     babiesCount: 0,
     budgetRange: 'US$1,000–2,000',
     additionalServices: [],
+    preferredContact: 'ambos',
     travelType: 'Vacaciones',
     hotelCategory: '4 estrellas',
     comments: ''
@@ -53,10 +57,28 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  // Sync preselected destination from other components to the "country" field
+  // Map destination names to country + city for auto-fill
+  const destinationMap: Record<string, { country: string; city: string }> = {
+    'República Dominicana': { country: 'República Dominicana', city: '' },
+    'Punta Cana': { country: 'República Dominicana', city: 'Punta Cana' },
+    'Miami': { country: 'Estados Unidos', city: 'Miami' },
+    'New York': { country: 'Estados Unidos', city: 'New York' },
+    'Cancún': { country: 'México', city: 'Cancún' },
+    'Bogotá': { country: 'Colombia', city: 'Bogotá' },
+    'París': { country: 'Francia', city: 'París' },
+    'Orlando': { country: 'Estados Unidos', city: 'Orlando' },
+  };
+
+  // Sync preselected destination: fills country AND city
   useEffect(() => {
     if (preselectedDestination && preselectedDestination !== 'Todos' && preselectedDestination !== 'Todas') {
-      setFormData((prev) => ({ ...prev, country: preselectedDestination }));
+      const mapped = destinationMap[preselectedDestination];
+      if (mapped) {
+        setFormData((prev) => ({ ...prev, country: mapped.country, city: mapped.city }));
+      } else {
+        // Unknown destination — fill as country
+        setFormData((prev) => ({ ...prev, country: preselectedDestination }));
+      }
       onClearPreselected();
     }
   }, [preselectedDestination, onClearPreselected]);
@@ -112,17 +134,49 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
     return Object.keys(tempErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
 
     setIsSubmitting(true);
     
-    // Simulate API request
-    setTimeout(() => {
+    try {
+      const payload = {
+        fullName: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        country: formData.country,
+        city: formData.city,
+        preferredHotel: formData.preferredHotel,
+        departureDate: formData.departureDate,
+        returnDate: formData.returnDate,
+        flexibleDates: formData.flexibleDates,
+        adultsCount: formData.adultsCount,
+        childrenCount: formData.childrenCount,
+        babiesCount: formData.babiesCount,
+        budgetRange: formData.budgetRange,
+        additionalServices: formData.additionalServices,
+        travelType: formData.travelType,
+        hotelCategory: formData.hotelCategory,
+        preferredContact: formData.preferredContact,
+        comments: formData.comments,
+      };
+
+      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const res = await fetch(`${API_BASE}/api/leads`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) throw new Error('Error al enviar');
+
       setIsSubmitting(false);
       setIsSuccess(true);
-    }, 1500);
+    } catch (err) {
+      setIsSubmitting(false);
+      alert('Hubo un error al enviar tu cotización. Intenta de nuevo o escríbenos por WhatsApp.');
+    }
   };
 
   // Helper to generate a prefilled WhatsApp link with the customer's detailed quote
@@ -135,12 +189,13 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
 📧 Email: ${formData.email}
 📞 WhatsApp: ${formData.phone}
 
-🌎 Destino: ${formData.country}${formData.city ? `, ${formData.city}` : ''}
+🌎 Destino: ${formData.country}${formData.city ? `, ${formData.city}` : ''}${formData.preferredHotel ? `\n🏨 Preferencia: ${formData.preferredHotel}` : ''}
 📅 Fechas: del ${formData.departureDate} al ${formData.returnDate} (${formData.flexibleDates === 'Sí' ? 'Fechas flexibles' : 'Fechas exactas'})
 👥 Viajeros: ${formData.adultsCount} Adulto(s), ${formData.childrenCount} Niño(s), ${formData.babiesCount} Bebé(s)
 💰 Presupuesto: ${formData.budgetRange}
 🏨 Categoría de Hotel: ${formData.hotelCategory}
 🗺️ Tipo de viaje: ${formData.travelType}${servicesText}
+📬 Recibir cotización por: ${formData.preferredContact === 'ambos' ? 'Email y WhatsApp' : formData.preferredContact === 'email' ? 'Email' : 'WhatsApp'}
 📝 Comentarios: ${formData.comments || 'Sin comentarios'}`;
 
     return `https://wa.me/18093062424?text=${encodeURIComponent(text)}`;
@@ -162,7 +217,7 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
   const hotelCategoryOptions = ['3 estrellas', '4 estrellas', '5 estrellas', 'Todo incluido'];
 
   return (
-    <section id="contacto" className="py-20 bg-slate-100 relative scroll-mt-20">
+    <section id="cotizacion" className="py-20 bg-slate-100 relative scroll-mt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Full Split Container Card */}
@@ -174,14 +229,13 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
             {/* Background Travel Scene Image with smooth slow zoom effect */}
             <div className="absolute inset-0 z-0">
               <img
-                src="https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&q=80&w=800"
+                src="/hero-main.jpg"
                 alt="Fondo de viajes Karabu"
-                className="w-full h-full object-cover transition-transform duration-[10000ms] ease-out group-hover:scale-110"
+                className="w-full h-full object-cover"
                 referrerPolicy="no-referrer"
               />
-              {/* Premium dark gradient overlay blending navy and turquoise with a hint of warm sunset */}
-              <div className="absolute inset-0 bg-gradient-to-b from-brand-navy-dark/95 via-brand-navy/90 to-brand-turquoise/80 mix-blend-multiply" />
-              <div className="absolute inset-0 bg-gradient-to-t from-brand-navy-dark via-transparent to-transparent opacity-90" />
+              {/* Light overlay to keep text readable */}
+              <div className="absolute inset-0 bg-brand-navy/40" />
             </div>
 
             {/* Glowing neon accent for high-end depth */}
@@ -193,19 +247,19 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
                 SOLICITA TU COTIZACIÓN
               </span>
               <h3 className="font-display text-3xl sm:text-4xl font-extrabold text-white leading-tight">
-                Tu próximo viaje comienza aquí
+                Cotiza tu viaje en minutos
               </h3>
               <p className="text-slate-200 font-sans text-sm leading-relaxed opacity-95">
-                Completa el formulario con tus planes de viaje y uno de nuestros expertos en visas y destinos diseñará una experiencia premium a tu medida.
+                Completa el formulario y recibe una propuesta personalizada con paquetes de viaje, asesoría de visas y acompañamiento en cada paso.
               </p>
               
               {/* Trust checklist */}
               <div className="flex flex-col gap-4 mt-6">
                 {[
-                  'Respuesta rápida y personalizada',
-                  'Asesoría integral sin compromiso',
+                  'Cotización clara y sin compromiso',
+                  'Precios transparentes, sin letra pequeña',
                   'La mejor opción para tu presupuesto',
-                  'Atención por expertos en viajes y visas'
+                  'Acompañamiento antes y durante tu viaje'
                 ].map((item, idx) => (
                   <div key={idx} className="flex items-center gap-3">
                     <div className="flex-shrink-0 w-5 h-5 rounded-full bg-brand-turquoise/20 flex items-center justify-center text-brand-turquoise border border-brand-turquoise/30">
@@ -228,16 +282,13 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
 
           {/* Right Column - Interactive Form Panel (White) */}
           <div className="lg:col-span-8 p-6 sm:p-10 md:p-12 flex flex-col justify-center">
-            <AnimatePresence mode="wait">
-              {!isSuccess ? (
-                <motion.form
-                  key="quote-form"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  onSubmit={handleSubmit}
-                  className="flex flex-col gap-8"
-                >
+            <motion.form
+              key="quote-form"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              onSubmit={handleSubmit}
+              className="flex flex-col gap-8"
+            >
                   
                   {/* --- SECTION 1: DATOS PERSONALES --- */}
                   <div className="flex flex-col gap-4 pb-6 border-b border-slate-100">
@@ -352,6 +403,22 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
                           className="font-sans text-sm px-3.5 py-2.5 rounded-lg border bg-slate-50 border-slate-200 focus:border-brand-turquoise focus:bg-white focus:outline-none transition-colors"
                         />
                       </div>
+                    </div>
+
+                    {/* Preferred Hotel / Destination */}
+                    <div className="flex flex-col gap-1.5">
+                      <label htmlFor="preferredHotel" className="font-display font-bold text-[11px] text-slate-500 uppercase tracking-wide">
+                        ¿Tiene algún hotel o destino de preferencia?
+                      </label>
+                      <input
+                        type="text"
+                        id="preferredHotel"
+                        name="preferredHotel"
+                        value={formData.preferredHotel}
+                        onChange={handleInputChange}
+                        placeholder="Ej: Hotel Riu, Bahía Príncipe, etc."
+                        className="font-sans text-sm px-3.5 py-2.5 rounded-lg border bg-slate-50 border-slate-200 focus:border-brand-turquoise focus:bg-white focus:outline-none transition-colors"
+                      />
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-2">
@@ -641,6 +708,46 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
                     </div>
                   </div>
 
+                  {/* --- SECTION 6: PREFERENCIA DE CONTACTO --- */}
+                  <div className="flex flex-col gap-4 pb-6 border-b border-slate-100">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-5 bg-brand-turquoise rounded-full" />
+                      <h4 className="font-display font-bold text-base text-brand-navy">
+                        ¿Por dónde recibes tu cotización?
+                      </h4>
+                    </div>
+                    <div className="grid grid-cols-3 gap-3">
+                      {[
+                        { value: 'email', label: 'Email', icon: <Mail className="w-4 h-4" /> },
+                        { value: 'whatsapp', label: 'WhatsApp', icon: (
+                          <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/>
+                          </svg>
+                        ) },
+                        { value: 'ambos', label: 'Ambos', icon: <Smartphone className="w-4 h-4" /> },
+                      ].map((opt) => {
+                        const isSelected = formData.preferredContact === opt.value;
+                        return (
+                          <button
+                            type="button"
+                            key={opt.value}
+                            onClick={() => setFormData((prev) => ({ ...prev, preferredContact: opt.value }))}
+                            className={`flex items-center justify-center gap-2 p-3 rounded-xl border text-sm font-sans font-semibold transition-all ${
+                              isSelected
+                                ? 'bg-brand-turquoise/10 border-brand-turquoise text-brand-navy'
+                                : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100'
+                            }`}
+                          >
+                            <span className={isSelected ? 'text-brand-turquoise' : 'text-slate-400'}>
+                              {opt.icon}
+                            </span>
+                            {opt.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
                   {/* Comments / Details */}
                   <div className="flex flex-col gap-2">
                     <label htmlFor="comments" className="font-display font-bold text-[11px] text-slate-500 uppercase tracking-wide">
@@ -681,108 +788,76 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
                     </button>
                   </div>
                 </motion.form>
-              ) : (
-                // Success Confirmation Handoff Box
-                <motion.div
-                  key="success-box"
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ type: 'spring', damping: 20 }}
-                  className="flex flex-col items-center text-center py-8 px-4"
-                >
-                  <div className="w-16 h-16 rounded-full bg-brand-turquoise/10 text-brand-turquoise flex items-center justify-center mb-6">
-                    <CheckCircle2 className="w-12 h-12" />
-                  </div>
-
-                  <h3 className="font-display text-2xl font-black text-brand-navy mb-3">
-                    ¡Solicitud Recibida con Éxito!
-                  </h3>
-                  
-                  <p className="text-slate-600 font-sans text-sm leading-relaxed max-w-md mb-8">
-                    Muchas gracias <strong className="text-brand-navy">{formData.fullName}</strong>. Hemos registrado tu interés para viajar a <strong className="text-brand-turquoise">{formData.country}</strong>. Uno de nuestros expertos de Karabu revisará tu propuesta y se contactará contigo por email o WhatsApp.
-                  </p>
-
-                  <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200 w-full max-w-md text-left flex flex-col gap-3.5 mb-8">
-                    <span className="font-display font-extrabold text-xs text-brand-navy uppercase tracking-wider block border-b border-slate-200 pb-2">
-                      Resumen de tu Cotización
-                    </span>
-                    <div className="grid grid-cols-2 gap-4 text-xs font-sans text-slate-600">
-                      <div>
-                        <span className="text-slate-400 block font-medium">Destino</span>
-                        <span className="font-semibold text-brand-navy">{formData.country}{formData.city ? `, ${formData.city}` : ''}</span>
-                      </div>
-                      <div>
-                        <span className="text-slate-400 block font-medium">Salida / Regreso</span>
-                        <span className="font-semibold text-brand-navy">{formData.departureDate} al {formData.returnDate} ({formData.flexibleDates === 'Sí' ? 'Flexibles' : 'Exactas'})</span>
-                      </div>
-                      <div>
-                        <span className="text-slate-400 block font-medium">Viajeros</span>
-                        <span className="font-semibold text-brand-navy">{formData.adultsCount} Ad, {formData.childrenCount} Ni, {formData.babiesCount} Be</span>
-                      </div>
-                      <div>
-                        <span className="text-slate-400 block font-medium">Presupuesto</span>
-                        <span className="font-semibold text-brand-navy">{formData.budgetRange}</span>
-                      </div>
-                      <div>
-                        <span className="text-slate-400 block font-medium">Hotel</span>
-                        <span className="font-semibold text-brand-navy">{formData.hotelCategory}</span>
-                      </div>
-                      <div>
-                        <span className="text-slate-400 block font-medium">Tipo de Viaje</span>
-                        <span className="font-semibold text-brand-navy">{formData.travelType}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* WhatsApp handoff button to expedite */}
-                  <div className="flex flex-col sm:flex-row items-center gap-4 w-full max-w-md">
-                    <a
-                      href={getWhatsAppHandoffLink()}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="w-full bg-[#25D366] hover:bg-[#20ba59] text-white font-bold py-3 px-6 rounded-xl shadow-md flex items-center justify-center gap-2.5 transition-all transform hover:scale-[1.02]"
-                    >
-                      <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                        <path d="M12.001 2c-5.514 0-10 4.486-10 10 0 1.956.57 3.779 1.554 5.316L2 22l4.814-1.48C8.28 21.411 9.982 22 11.999 22c5.514 0 10-4.486 10-10s-4.486-10-10-10zm5.405 14.154c-.217.61-1.246 1.15-1.812 1.205-.5.05-1.153.228-3.353-.684-2.809-1.164-4.577-4.02-4.718-4.208-.14-.189-1.148-1.529-1.148-2.914 0-1.385.727-2.067 1.011-2.35.284-.284.62-.355.827-.355.207 0 .414.002.595.01.189.008.441-.073.689.526.255.618.871 2.126.946 2.277.075.151.125.327.025.528-.099.201-.15.327-.299.502-.15.176-.316.392-.451.527-.151.151-.309.316-.134.618.176.302.783 1.285 1.68 2.083.156.14.292.203.468.203.176 0 .327-.083.428-.203.1-.121.428-.503.541-.679.113-.176.226-.151.377-.095.151.055.955.451 1.118.532.163.081.272.121.312.189.04.068.04.397-.177 1.007z"/>
-                      </svg>
-                      <span>Acelerar por WhatsApp</span>
-                    </a>
-
-                    <button
-                      onClick={() => {
-                        setIsSuccess(false);
-                        setFormData({
-                          fullName: '',
-                          email: '',
-                          phone: '',
-                          country: '',
-                          city: '',
-                          departureDate: '',
-                          returnDate: '',
-                          flexibleDates: 'No',
-                          adultsCount: 2,
-                          childrenCount: 0,
-                          babiesCount: 0,
-                          budgetRange: 'US$1,000–2,000',
-                          additionalServices: [],
-                          travelType: 'Vacaciones',
-                          hotelCategory: '4 estrellas',
-                          comments: ''
-                        });
-                      }}
-                      className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 px-6 rounded-xl transition-all font-sans text-sm"
-                    >
-                      Enviar otra cotización
-                    </button>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
           </div>
 
         </div>
 
       </div>
+
+      {/* Success Modal — full screen overlay */}
+      <AnimatePresence>
+        {isSuccess && (
+          <motion.div
+            key="success-modal"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-brand-navy/60 backdrop-blur-sm"
+            onClick={() => setIsSuccess(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-3xl shadow-2xl p-10 flex flex-col items-center text-center max-w-md mx-4"
+            >
+              <div className="w-16 h-16 rounded-full bg-brand-turquoise/10 text-brand-turquoise flex items-center justify-center mb-6">
+                <CheckCircle2 className="w-12 h-12" />
+              </div>
+
+              <h3 className="font-display text-2xl font-black text-brand-navy mb-3">
+                ¡Gracias por tu solicitud!
+              </h3>
+              
+              <p className="text-slate-600 font-sans text-sm leading-relaxed mb-8">
+                Hemos recibido tu información. Un asesor de Karabú Viajes y Visas preparará una cotización personalizada y te contactará por WhatsApp o correo electrónico en menos de 24 horas.
+              </p>
+
+              <button
+                onClick={() => {
+                  setIsSuccess(false);
+                  setFormData({
+                    fullName: '',
+                    email: '',
+                    phone: '',
+                    country: '',
+                    city: '',
+                    preferredHotel: '',
+                    departureDate: '',
+                    returnDate: '',
+                    flexibleDates: 'No',
+                    adultsCount: 2,
+                    childrenCount: 0,
+                    babiesCount: 0,
+                    budgetRange: 'US$1,000–2,000',
+                    additionalServices: [],
+                    preferredContact: 'ambos',
+                    travelType: 'Vacaciones',
+                    hotelCategory: '4 estrellas',
+                    comments: ''
+                  });
+                }}
+                className="bg-brand-navy hover:bg-brand-navy/90 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition-all transform hover:scale-[1.03] active:scale-[0.97]"
+              >
+                Enviar otra cotización
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }

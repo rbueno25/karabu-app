@@ -6,26 +6,26 @@ export default function Steps() {
   const steps = [
     {
       id: 1,
-      title: "Cuéntanos tu idea",
-      description: "Llena el formulario de cotización o escríbenos directamente por WhatsApp compartiéndonos tu destino soñado e ideas de viaje.",
+      title: "Cuéntanos tu plan",
+      description: "Llena el formulario o escríbenos por WhatsApp con tu destino, fechas y presupuesto.",
       icon: <MessageSquare className="w-5 h-5" />
     },
     {
       id: 2,
       title: "Recibe tu cotización",
-      description: "En tiempo récord, te enviamos una propuesta a medida, detallada y totalmente personalizada según tus gustos, fechas y presupuesto.",
+      description: "Te enviamos una propuesta clara y detallada, con precios transparentes y sin sorpresas.",
       icon: <FileText className="w-5 h-5" />
     },
     {
       id: 3,
       title: "Confirma y reserva",
-      description: "Una vez que la propuesta sea perfecta para ti, aseguramos tus reservas de vuelos, hoteles y traslados con absoluta transparencia y respaldo.",
+      description: "Aparta tu viaje con un monto inicial. Nos encargamos de vuelos, hoteles y traslados.",
       icon: <CalendarCheck className="w-5 h-5" />
     },
     {
       id: 4,
-      title: "Disfruta tu aventura",
-      description: "Viaja con total tranquilidad y desconexión absoluta. Nosotros nos encargamos de todo el soporte y logística antes y durante el trayecto.",
+      title: "Viaja con confianza",
+      description: "Disfruta tu viaje. Te acompañamos con soporte antes y durante toda tu experiencia.",
       icon: <Compass className="w-5 h-5" />
     }
   ];
@@ -40,7 +40,7 @@ export default function Steps() {
             ASÍ DE FÁCIL
           </span>
           <h2 className="font-display text-3xl sm:text-4xl font-extrabold text-brand-navy tracking-tight">
-            Tu viaje en 4 simples pasos
+            Cotiza tu viaje en 4 pasos
           </h2>
           <div className="h-1 w-16 bg-brand-turquoise mx-auto rounded-full mt-1" />
         </div>
