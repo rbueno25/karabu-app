@@ -1,0 +1,36 @@
+services:
+  - type: web
+    name: karabu-api
+    env: docker
+    dockerfilePath: ./backend/Dockerfile
+    rootDir: backend
+    plan: free
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: karabu-db
+          property: connectionString
+      - key: JWT_SECRET
+        value: karabu-secret-key-2026
+      - key: ADMIN_EMAIL
+        value: admin@karabu.com
+      - key: ADMIN_PASSWORD
+        value: admin123
+
+  - type: web
+    name: karabu-frontend
+    env: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    plan: free
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+  - type: pserv
+    name: karabu-db
+    plan: free
+    databaseName: karabu
+    ipAllowList: []
