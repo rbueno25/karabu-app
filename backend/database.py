@@ -10,14 +10,17 @@ if DATABASE_URL.startswith("postgresql://"):
     DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
 elif DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+asyncpg://", 1)
+# Add sslmode=require for Render PostgreSQL
+if "sslmode" not in DATABASE_URL:
+    DATABASE_URL += "?sslmode=require" if "?" not in DATABASE_URL else "&sslmode=require"
 
 # Create engine with connection retry on startup
+# asyncpg handles SSL natively via ?sslmode=require in DATABASE_URL
 engine = create_async_engine(
     DATABASE_URL,
     echo=False,
     pool_size=10,
     max_overflow=5,
-    connect_args={"timeout": 10, "ssl": "require"},
 )
 AsyncSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
