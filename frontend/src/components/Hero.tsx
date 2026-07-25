@@ -15,6 +15,7 @@ export default function Hero({ onExploreDestinations, onContact }: HeroProps) {
   return (
     <section id="inicio" className="relative overflow-hidden bg-white pt-8 pb-16 lg:py-0 min-h-screen lg:min-h-0">
 
+
       {/* Mobile-only: full background image with dark overlay */}
       <div className="absolute inset-0 z-0 lg:hidden">
         <img
@@ -25,14 +26,91 @@ export default function Hero({ onExploreDestinations, onContact }: HeroProps) {
         <div className="absolute inset-0 bg-gradient-to-b from-brand-navy/65 via-brand-navy/55 to-brand-navy/75" />
       </div>
 
+      {/* Desktop: right-half full-bleed image — outside container, absolute to section */}
+      <div className="absolute top-0 right-0 bottom-0 w-1/2 hidden lg:block z-10">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8 }}
+          className="absolute inset-0 overflow-hidden"
+        >
+          <img
+            src={beachImage}
+            alt="Playa tropical espectacular"
+            className="w-full h-full object-cover select-none pointer-events-none"
+          />
+          <div className="absolute inset-0 bg-gradient-to-tr from-brand-navy/20 via-transparent to-white/5 mix-blend-overlay pointer-events-none" />
+        </motion.div>
+
+        {/* Flight Curve */}
+        <svg
+          className="absolute inset-0 w-full h-full pointer-events-none z-10"
+          viewBox="0 0 500 500"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M 100 200 Q 220 90 320 190 T 450 350"
+            stroke="#00A896"
+            strokeWidth="2"
+            strokeDasharray="4 6"
+            opacity="0.6"
+          />
+        </svg>
+
+        {/* Airplane */}
+        <motion.div
+          initial={{ opacity: 0, x: -20, y: 10 }}
+          animate={{ opacity: 1, x: 0, y: 0 }}
+          transition={{ delay: 1, duration: 1, type: 'spring' }}
+          className="absolute top-[18%] left-[42%] text-brand-turquoise z-20 flex items-center justify-center transform -rotate-12"
+        >
+          <Plane className="w-5 h-5 fill-current" />
+        </motion.div>
+
+        {/* Polaroid 1: Venice */}
+        <motion.div
+          initial={{ opacity: 0, x: -40, y: -20, rotate: -20 }}
+          animate={{ opacity: 1, x: 0, y: 0, rotate: -6 }}
+          transition={{ duration: 0.8, delay: 0.3 }}
+          className="absolute top-[12%] left-[-2%] w-[200px] bg-white p-3 rounded-2xl shadow-[0_15px_30px_rgba(0,0,0,0.18)] border border-slate-100 z-30 transform transition-transform hover:scale-105 duration-300"
+        >
+          <div className="overflow-hidden rounded-xl aspect-[4/3]">
+            <img
+              src={veniceImage}
+              alt="Canal de Venecia"
+              className="w-full h-full object-cover pointer-events-none"
+              referrerPolicy="no-referrer"
+            />
+          </div>
+        </motion.div>
+
+        {/* Polaroid 2: Cruise */}
+        <motion.div
+          initial={{ opacity: 0, x: -30, y: 40, rotate: 20 }}
+          animate={{ opacity: 1, x: 0, y: 0, rotate: 4 }}
+          transition={{ duration: 0.8, delay: 0.5 }}
+          className="absolute bottom-[8%] left-[6%] w-[220px] bg-white p-3 rounded-2xl shadow-[0_15px_35px_rgba(0,0,0,0.22)] border border-slate-100 z-40 transform transition-transform hover:scale-105 duration-300"
+        >
+          <div className="overflow-hidden rounded-xl aspect-[4/3]">
+            <img
+              src={cruiseImage}
+              alt="Crucero por el Caribe"
+              className="w-full h-full object-cover pointer-events-none"
+              referrerPolicy="no-referrer"
+            />
+          </div>
+        </motion.div>
+      </div>
+
       {/* Desktop-only: decorative grid pattern */}
       <div className="absolute top-0 right-0 w-[40%] h-[40%] opacity-[0.03] bg-[radial-gradient(#00A896_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none z-0 hidden lg:block" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:pl-8 lg:pr-0 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-0 items-center lg:items-stretch">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:pl-8 lg:pr-0 relative z-20">
+        <div className="grid grid-cols-1 lg:grid-cols-2 items-center lg:items-stretch">
 
           {/* Text Content */}
-          <div className="lg:col-span-6 flex flex-col gap-6 text-center lg:text-left lg:justify-center lg:py-24">
+          <div className="flex flex-col gap-6 text-center lg:text-left lg:justify-center lg:py-24">
 
             {/* Tagline */}
             <motion.div
@@ -133,84 +211,6 @@ export default function Hero({ onExploreDestinations, onContact }: HeroProps) {
                 <span className="text-[10px] text-white/60 lg:text-slate-500 block leading-tight mt-0.5 font-sans">
                   Viaja con confianza — te guiamos en cada paso.
                 </span>
-              </div>
-            </motion.div>
-
-          </div>
-
-          {/* Right Column: Desktop only — full-bleed image */}
-          <div className="lg:col-span-6 relative hidden lg:flex min-h-[500px]">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8 }}
-              className="absolute inset-0 overflow-hidden"
-            >
-              <img
-                src={beachImage}
-                alt="Playa tropical espectacular"
-                className="w-full h-full object-cover select-none pointer-events-none"
-              />
-              <div className="absolute inset-0 bg-gradient-to-tr from-brand-navy/20 via-transparent to-white/5 mix-blend-overlay pointer-events-none" />
-            </motion.div>
-
-            {/* Flight Curve */}
-            <svg
-              className="absolute inset-0 w-full h-full pointer-events-none z-10"
-              viewBox="0 0 500 500"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M 100 200 Q 220 90 320 190 T 450 350"
-                stroke="#00A896"
-                strokeWidth="2"
-                strokeDasharray="4 6"
-                opacity="0.6"
-              />
-            </svg>
-
-            {/* Airplane */}
-            <motion.div
-              initial={{ opacity: 0, x: -20, y: 10 }}
-              animate={{ opacity: 1, x: 0, y: 0 }}
-              transition={{ delay: 1, duration: 1, type: 'spring' }}
-              className="absolute top-[18%] left-[42%] text-brand-turquoise z-20 flex items-center justify-center transform -rotate-12"
-            >
-              <Plane className="w-5 h-5 fill-current" />
-            </motion.div>
-
-            {/* Polaroid 1: Venice */}
-            <motion.div
-              initial={{ opacity: 0, x: -40, y: -20, rotate: -20 }}
-              animate={{ opacity: 1, x: 0, y: 0, rotate: -6 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-              className="absolute top-[12%] left-[-2%] w-[200px] bg-white p-3 rounded-2xl shadow-[0_15px_30px_rgba(0,0,0,0.18)] border border-slate-100 z-30 transform transition-transform hover:scale-105 duration-300"
-            >
-              <div className="overflow-hidden rounded-xl aspect-[4/3]">
-                <img
-                  src={veniceImage}
-                  alt="Canal de Venecia"
-                  className="w-full h-full object-cover pointer-events-none"
-                  referrerPolicy="no-referrer"
-                />
-              </div>
-            </motion.div>
-
-            {/* Polaroid 2: Cruise */}
-            <motion.div
-              initial={{ opacity: 0, x: -30, y: 40, rotate: 20 }}
-              animate={{ opacity: 1, x: 0, y: 0, rotate: 4 }}
-              transition={{ duration: 0.8, delay: 0.5 }}
-              className="absolute bottom-[8%] left-[6%] w-[220px] bg-white p-3 rounded-2xl shadow-[0_15px_35px_rgba(0,0,0,0.22)] border border-slate-100 z-40 transform transition-transform hover:scale-105 duration-300"
-            >
-              <div className="overflow-hidden rounded-xl aspect-[4/3]">
-                <img
-                  src={cruiseImage}
-                  alt="Crucero por el Caribe"
-                  className="w-full h-full object-cover pointer-events-none"
-                  referrerPolicy="no-referrer"
-                />
               </div>
             </motion.div>
 
