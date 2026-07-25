@@ -223,8 +223,8 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
         {/* Full Split Container Card */}
         <div className="bg-white rounded-3xl shadow-xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 border border-slate-200">
           
-          {/* Left Column - Brand Info & Trust Seals (Navy Blue with Travel Background Overlay) */}
-          <div className="lg:col-span-4 relative p-8 sm:p-12 text-white flex flex-col justify-between overflow-hidden group min-h-[400px] lg:min-h-full">
+          {/* Left Column - Brand Info (hidden on mobile to prioritize form) */}
+          <div className="hidden lg:flex lg:col-span-4 relative p-8 sm:p-12 text-white flex-col justify-between overflow-hidden group min-h-[400px] lg:min-h-full">
             
             {/* Background Travel Scene Image with smooth slow zoom effect */}
             <div className="absolute inset-0 z-0">
@@ -281,13 +281,20 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
           </div>
 
           {/* Right Column - Interactive Form Panel (White) */}
-          <div className="lg:col-span-8 p-6 sm:p-10 md:p-12 flex flex-col justify-center">
+          <div className="lg:col-span-8 p-4 sm:p-10 md:p-12 flex flex-col justify-center">
+
+            {/* Mobile-only header */}
+            <div className="lg:hidden text-center mb-4">
+              <span className="text-brand-turquoise text-xs font-extrabold uppercase tracking-[0.15em]">Solicita tu cotización</span>
+              <h3 className="font-display text-xl font-extrabold text-brand-navy mt-1">Cotiza tu viaje en minutos</h3>
+            </div>
+
             <motion.form
               key="quote-form"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               onSubmit={handleSubmit}
-              className="flex flex-col gap-8"
+              className="flex flex-col gap-4 lg:gap-8"
             >
                   
                   {/* --- SECTION 1: DATOS PERSONALES --- */}

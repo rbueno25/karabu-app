@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { PhoneCall, Calendar } from 'lucide-react';
+import { Calendar } from 'lucide-react';
 
 interface CTAProps {
   onContactClick: () => void;
@@ -53,31 +53,21 @@ export default function CTA({ onContactClick }: CTAProps) {
           Contáctanos hoy y recibe una cotización personalizada con paquetes de viaje, asesoría de visas y acompañamiento en cada paso.
         </motion.p>
 
-        {/* CTA Buttons Row */}
+        {/* CTA Button */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.3 }}
-          className="flex flex-col sm:flex-row items-center gap-4 mt-6 w-full sm:w-auto"
+          className="mt-6"
         >
-          {/* Solicitar cotización Button */}
           <button
             onClick={onContactClick}
-            className="w-full sm:w-auto flex items-center justify-center gap-2.5 bg-brand-orange hover:bg-brand-orange/90 text-white font-bold px-8 py-4 rounded-md shadow-lg transition-all transform hover:scale-[1.03] active:scale-[0.97]"
+            className="bg-brand-orange hover:bg-brand-orange/90 text-white font-bold px-8 py-4 rounded-md shadow-lg transition-all transform hover:scale-[1.03] active:scale-[0.97] inline-flex items-center gap-2.5"
           >
             <Calendar className="w-4.5 h-4.5" />
             <span>Solicitar cotización</span>
           </button>
-
-          {/* Llamar ahora Button */}
-          <a
-            href="tel:8093062424"
-            className="w-full sm:w-auto flex items-center justify-center gap-2.5 bg-brand-navy hover:bg-brand-navy/90 text-white font-bold px-8 py-4 rounded-md shadow-lg transition-all transform hover:scale-[1.03] active:scale-[0.97]"
-          >
-            <PhoneCall className="w-4.5 h-4.5" />
-            <span>Llamar ahora</span>
-          </a>
         </motion.div>
 
       </div>

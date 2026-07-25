@@ -21,7 +21,7 @@ export default function Stats() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-50px' }}
               transition={{ duration: 0.5, delay: idx * 0.1 }}
-              className="flex flex-col items-center gap-2 text-center px-1"
+              className="flex flex-col items-center gap-2 text-center px-2 border-r border-white/10 last:border-r-0"
             >
               <div className="p-2 lg:p-3 rounded-full bg-white/5 text-brand-turquoise">
                 {stat.icon}

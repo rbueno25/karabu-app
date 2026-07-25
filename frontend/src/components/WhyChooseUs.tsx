@@ -90,7 +90,20 @@ export default function WhyChooseUs() {
               </div>
             </div>
 
-            {/* Mobile: 2x2 grid — no center logo */}
+            {/* Mobile logo — centered above features */}
+            <div className="lg:hidden flex justify-center mb-4">
+              <motion.div
+                initial={{ scale: 0.85, opacity: 0 }}
+                whileInView={{ scale: 1, opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ type: 'spring', stiffness: 90, damping: 15 }}
+                className="w-24 h-24 rounded-full bg-white/10 p-2"
+              >
+                <img src="/colibri-square.svg" alt="Karabu" className="w-full h-full object-contain" />
+              </motion.div>
+            </div>
+
+            {/* Mobile: 2x2 grid */}
             <div className="lg:hidden grid grid-cols-2 gap-3">
               {allFeatures.map((feat, idx) => (
                 <motion.div key={feat.id} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4, delay: idx * 0.08 }}
