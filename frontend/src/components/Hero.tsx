@@ -71,7 +71,7 @@ export default function Hero({ onExploreDestinations, onContact }: HeroProps) {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
-              className="grid grid-cols-1 sm:grid-cols-3 gap-4 my-2 text-left"
+              className="grid grid-cols-3 gap-3 my-2 text-left"
             >
               {[
                 { icon: Users, title: 'Paquetes', sub: 'de viaje' },
@@ -99,18 +99,18 @@ export default function Hero({ onExploreDestinations, onContact }: HeroProps) {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start mt-2"
+              className="flex flex-row items-center gap-3 justify-center lg:justify-start mt-2"
             >
               <button
                 onClick={onExploreDestinations}
-                className="w-full sm:w-auto bg-white lg:bg-brand-navy text-brand-navy lg:text-white hover:bg-white/90 lg:hover:bg-brand-navy/90 font-bold px-8 py-4 rounded-md shadow-lg transition-all transform hover:scale-[1.03] active:scale-[0.97]"
+                className="flex-1 lg:flex-none bg-white lg:bg-brand-navy text-brand-navy lg:text-white hover:bg-white/90 lg:hover:bg-brand-navy/90 font-bold text-sm lg:text-base px-4 lg:px-8 py-3 lg:py-4 rounded-md shadow-lg transition-all transform hover:scale-[1.03] active:scale-[0.97] text-center"
               >
                 Ver destinos
               </button>
 
               <button
                 onClick={onContact}
-                className="w-full sm:w-auto flex items-center justify-center gap-2.5 bg-brand-orange hover:bg-brand-orange/90 text-white font-bold px-8 py-4 rounded-md shadow-lg transition-all transform hover:scale-[1.03] active:scale-[0.97]"
+                className="flex-1 lg:flex-none flex items-center justify-center gap-2 bg-brand-orange hover:bg-brand-orange/90 text-white font-bold text-sm lg:text-base px-4 lg:px-8 py-3 lg:py-4 rounded-md shadow-lg transition-all transform hover:scale-[1.03] active:scale-[0.97]"
               >
                 <span>Solicitar cotización</span>
               </button>
