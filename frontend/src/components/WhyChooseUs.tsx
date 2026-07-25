@@ -97,7 +97,7 @@ export default function WhyChooseUs() {
                 whileInView={{ scale: 1, opacity: 1 }}
                 viewport={{ once: true }}
                 transition={{ type: 'spring', stiffness: 90, damping: 15 }}
-                className="w-24 h-24 rounded-full bg-white/10 p-2"
+                className="w-32 h-32 rounded-full bg-white p-3 shadow-lg"
               >
                 <img src="/colibri-square.svg" alt="Karabu" className="w-full h-full object-contain" />
               </motion.div>
