@@ -29,10 +29,10 @@ export default function Hero({ onExploreDestinations, onContact }: HeroProps) {
       <div className="absolute top-0 right-0 w-[40%] h-[40%] opacity-[0.03] bg-[radial-gradient(#00A896_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none z-0 hidden lg:block" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-0 items-center lg:items-stretch">
 
           {/* Text Content */}
-          <div className="lg:col-span-6 flex flex-col gap-6 text-center lg:text-left">
+          <div className="lg:col-span-6 flex flex-col gap-6 text-center lg:text-left lg:justify-center">
 
             {/* Tagline */}
             <motion.div
@@ -138,21 +138,20 @@ export default function Hero({ onExploreDestinations, onContact }: HeroProps) {
 
           </div>
 
-          {/* Right Column: Desktop only — image + polaroids */}
-          <div className="lg:col-span-6 relative h-[580px] items-center justify-center lg:justify-end z-10 hidden lg:flex">
-
+          {/* Right Column: Desktop only — full-bleed image */}
+          <div className="lg:col-span-6 relative hidden lg:block h-full min-h-[500px]">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8 }}
-              className="relative w-full max-w-[580px] h-[540px] overflow-hidden shadow-2xl z-0 rounded-3xl"
+              className="absolute inset-0 overflow-hidden rounded-3xl shadow-2xl"
             >
               <img
                 src={beachImage}
                 alt="Playa tropical espectacular"
                 className="w-full h-full object-cover select-none pointer-events-none"
               />
-              <div className="absolute inset-0 bg-gradient-to-tr from-brand-navy/10 via-transparent to-white/10 mix-blend-overlay pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-tr from-brand-navy/20 via-transparent to-white/5 mix-blend-overlay pointer-events-none" />
             </motion.div>
 
             {/* Flight Curve */}
