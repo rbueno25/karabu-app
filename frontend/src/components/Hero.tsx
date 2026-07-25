@@ -139,7 +139,7 @@ export default function Hero({ onExploreDestinations, onContact }: HeroProps) {
           </div>
 
           {/* Right Column: Desktop only — full-bleed image */}
-          <div className="lg:col-span-6 relative hidden lg:block h-full min-h-[500px]">
+          <div className="lg:col-span-6 relative hidden lg:flex min-h-[500px]">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
