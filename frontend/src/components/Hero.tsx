@@ -13,7 +13,7 @@ export default function Hero({ onExploreDestinations, onContact }: HeroProps) {
   const cruiseImage = "https://images.unsplash.com/photo-1548574505-5e239809ee19?auto=format&fit=crop&q=80&w=600&h=450";
 
   return (
-    <section id="inicio" className="relative overflow-hidden bg-white pt-8 pb-16 lg:py-24 min-h-screen lg:min-h-0">
+    <section id="inicio" className="relative overflow-hidden bg-white pt-8 pb-16 lg:py-0 min-h-screen lg:min-h-0">
 
       {/* Mobile-only: full background image with dark overlay */}
       <div className="absolute inset-0 z-0 lg:hidden">
@@ -28,11 +28,11 @@ export default function Hero({ onExploreDestinations, onContact }: HeroProps) {
       {/* Desktop-only: decorative grid pattern */}
       <div className="absolute top-0 right-0 w-[40%] h-[40%] opacity-[0.03] bg-[radial-gradient(#00A896_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none z-0 hidden lg:block" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:pl-8 lg:pr-0 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-0 items-center lg:items-stretch">
 
           {/* Text Content */}
-          <div className="lg:col-span-6 flex flex-col gap-6 text-center lg:text-left lg:justify-center">
+          <div className="lg:col-span-6 flex flex-col gap-6 text-center lg:text-left lg:justify-center lg:py-24">
 
             {/* Tagline */}
             <motion.div
@@ -144,7 +144,7 @@ export default function Hero({ onExploreDestinations, onContact }: HeroProps) {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8 }}
-              className="absolute inset-0 overflow-hidden rounded-3xl shadow-2xl"
+              className="absolute inset-0 overflow-hidden"
             >
               <img
                 src={beachImage}
