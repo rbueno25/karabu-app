@@ -473,7 +473,9 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
                               onSelect={(range) => {
                                 if (range?.from) {
                                   const departure = range.from.toISOString().split('T')[0];
-                                  const return_ = range.to ? range.to.toISOString().split('T')[0] : '';
+                                  // Only set return if it's a different day than departure
+                                  const sameDay = range.to && range.to.toDateString() === range.from.toDateString();
+                                  const return_ = (range.to && !sameDay) ? range.to.toISOString().split('T')[0] : '';
                                   setFormData(prev => ({
                                     ...prev,
                                     departureDate: departure,
