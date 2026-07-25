@@ -59,6 +59,7 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
+  const [calendarKey, setCalendarKey] = useState(0);
 
   // Map destination names to country + city for auto-fill
   const destinationMap: Record<string, { country: string; city: string }> = {
@@ -441,7 +442,7 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
                       <div className="relative">
                         <button
                           type="button"
-                          onClick={() => setShowCalendar(!showCalendar)}
+                          onClick={() => { setShowCalendar(!showCalendar); if (!showCalendar) setCalendarKey(k => k + 1); }}
                           className={`w-full flex items-center gap-3 font-sans text-sm px-3.5 py-2.5 rounded-lg border bg-slate-50 hover:bg-white focus:bg-white focus:outline-none transition-colors text-left ${
                             (errors.departureDate || errors.returnDate) ? 'border-red-500 ring-1 ring-red-200' : 'border-slate-200 focus:border-brand-turquoise'
                           }`}
@@ -461,11 +462,11 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
 
                         {/* Calendar popover */}
                         {showCalendar && (
-                          <div className="absolute z-50 mt-2 bg-white rounded-2xl shadow-2xl border border-slate-200 p-3 w-fit">
+                          <div className="absolute left-0 sm:left-auto sm:right-0 z-50 mt-2 bg-white rounded-2xl shadow-2xl border border-slate-200 p-3 w-fit max-w-[calc(100vw-2rem)]">
                             <DayPicker
-                              key={showCalendar ? 'cal-open' : 'cal-closed'}
+                              key={calendarKey}
                               mode="range"
-                              selected={{
+                              defaultSelected={{
                                 from: formData.departureDate ? new Date(formData.departureDate + 'T12:00') : undefined,
                                 to: formData.returnDate ? new Date(formData.returnDate + 'T12:00') : undefined,
                               }}
@@ -479,23 +480,31 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
                                     returnDate: return_,
                                   }));
                                   setErrors(prev => ({ ...prev, departureDate: undefined, returnDate: undefined }));
-                                  if (range.to) setShowCalendar(false);
                                 }
                               }}
                               numberOfMonths={1}
                               disabled={{ before: new Date() }}
                               className="rdp-compact"
                             />
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setFormData(prev => ({ ...prev, departureDate: '', returnDate: '' }));
-                                setShowCalendar(false);
-                              }}
-                              className="w-full mt-2 text-xs text-slate-400 hover:text-slate-600 py-1.5"
-                            >
-                              Limpiar fechas
-                            </button>
+                            <div className="flex gap-2 mt-2">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setFormData(prev => ({ ...prev, departureDate: '', returnDate: '' }));
+                                  setShowCalendar(false);
+                                }}
+                                className="flex-1 text-xs text-slate-400 hover:text-slate-600 py-1.5"
+                              >
+                                Limpiar
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setShowCalendar(false)}
+                                className="flex-1 text-xs font-semibold bg-brand-turquoise text-white rounded-lg py-1.5 hover:bg-brand-turquoise/90 transition-colors"
+                              >
+                                {formData.departureDate && formData.returnDate ? 'Listo ✓' : 'Cerrar'}
+                              </button>
+                            </div>
                           </div>
                         )}
 
