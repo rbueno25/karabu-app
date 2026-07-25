@@ -25,6 +25,8 @@ import {
   Smartphone
 } from 'lucide-react';
 import { ContactFormInput } from '../types';
+import { DayPicker } from 'react-day-picker';
+import 'react-day-picker/style.css';
 
 interface QuoteFormProps {
   preselectedDestination: string;
@@ -56,6 +58,7 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
   const [errors, setErrors] = useState<Partial<Record<keyof ContactFormInput, string>>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
 
   // Map destination names to country + city for auto-fill
   const destinationMap: Record<string, { country: string; city: string }> = {
@@ -428,49 +431,91 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
                       />
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-2">
-                      {/* Departure Date */}
-                      <div className="flex flex-col gap-1.5">
-                        <label htmlFor="departureDate" className="font-display font-bold text-[11px] text-slate-500 uppercase tracking-wide">
-                          Fecha de salida *
-                        </label>
-                        <input
-                          type="date"
-                          id="departureDate"
-                          name="departureDate"
-                          value={formData.departureDate}
-                          onChange={handleInputChange}
-                          className={`font-sans text-sm px-3.5 py-2.5 rounded-lg border bg-slate-50 focus:bg-white focus:outline-none transition-colors ${
-                            errors.departureDate ? 'border-red-500 ring-1 ring-red-200' : 'border-slate-200 focus:border-brand-turquoise'
+                    {/* Date Range Picker */}
+                    <div className="flex flex-col gap-1.5">
+                      <label className="font-display font-bold text-[11px] text-slate-500 uppercase tracking-wide">
+                        Fechas de viaje *
+                      </label>
+                      
+                      {/* Trigger button */}
+                      <div className="relative">
+                        <button
+                          type="button"
+                          onClick={() => setShowCalendar(!showCalendar)}
+                          className={`w-full flex items-center gap-3 font-sans text-sm px-3.5 py-2.5 rounded-lg border bg-slate-50 hover:bg-white focus:bg-white focus:outline-none transition-colors text-left ${
+                            (errors.departureDate || errors.returnDate) ? 'border-red-500 ring-1 ring-red-200' : 'border-slate-200 focus:border-brand-turquoise'
                           }`}
-                        />
-                        {errors.departureDate && <span className="text-[10px] text-red-500 font-sans">{errors.departureDate}</span>}
+                        >
+                          <Calendar className="w-4 h-4 text-brand-turquoise flex-shrink-0" />
+                          {formData.departureDate && formData.returnDate ? (
+                            <span className="text-brand-navy font-medium">
+                              {new Date(formData.departureDate + 'T12:00').toLocaleDateString('es-DO', { day: 'numeric', month: 'short' })} → {new Date(formData.returnDate + 'T12:00').toLocaleDateString('es-DO', { day: 'numeric', month: 'short', year: 'numeric' })}
+                              <span className="text-slate-400 font-normal ml-1">
+                                ({Math.round((new Date(formData.returnDate + 'T12:00').getTime() - new Date(formData.departureDate + 'T12:00').getTime()) / 86400000)} noches)
+                              </span>
+                            </span>
+                          ) : (
+                            <span className="text-slate-400">Selecciona ida y vuelta</span>
+                          )}
+                        </button>
+
+                        {/* Calendar popover */}
+                        {showCalendar && (
+                          <div className="absolute z-50 mt-2 bg-white rounded-2xl shadow-2xl border border-slate-200 p-3 w-full min-w-[300px]">
+                            <DayPicker
+                              mode="range"
+                              selected={{
+                                from: formData.departureDate ? new Date(formData.departureDate + 'T12:00') : undefined,
+                                to: formData.returnDate ? new Date(formData.returnDate + 'T12:00') : undefined,
+                              }}
+                              onSelect={(range) => {
+                                if (range?.from) {
+                                  setFormData(prev => ({
+                                    ...prev,
+                                    departureDate: range.from!.toISOString().split('T')[0],
+                                    returnDate: '',
+                                  }));
+                                  setErrors(prev => ({ ...prev, departureDate: undefined, returnDate: undefined }));
+                                }
+                                if (range?.to) {
+                                  setFormData(prev => ({
+                                    ...prev,
+                                    returnDate: range.to!.toISOString().split('T')[0],
+                                  }));
+                                  setShowCalendar(false);
+                                }
+                              }}
+                              numberOfMonths={1}
+                              disabled={{ before: new Date() }}
+                              className="rdp-compact"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setFormData(prev => ({ ...prev, departureDate: '', returnDate: '' }));
+                                setShowCalendar(false);
+                              }}
+                              className="w-full mt-2 text-xs text-slate-400 hover:text-slate-600 py-1.5"
+                            >
+                              Limpiar fechas
+                            </button>
+                          </div>
+                        )}
+
+                        {/* Backdrop to close */}
+                        {showCalendar && (
+                          <div className="fixed inset-0 z-40" onClick={() => setShowCalendar(false)} />
+                        )}
                       </div>
 
-                      {/* Return Date */}
-                      <div className="flex flex-col gap-1.5">
-                        <label htmlFor="returnDate" className="font-display font-bold text-[11px] text-slate-500 uppercase tracking-wide">
-                          Fecha de regreso *
-                        </label>
-                        <input
-                          type="date"
-                          id="returnDate"
-                          name="returnDate"
-                          value={formData.returnDate}
-                          onChange={handleInputChange}
-                          className={`font-sans text-sm px-3.5 py-2.5 rounded-lg border bg-slate-50 focus:bg-white focus:outline-none transition-colors ${
-                            errors.returnDate ? 'border-red-500 ring-1 ring-red-200' : 'border-slate-200 focus:border-brand-turquoise'
-                          }`}
-                        />
-                        {errors.returnDate && <span className="text-[10px] text-red-500 font-sans">{errors.returnDate}</span>}
-                      </div>
+                      {/* Error messages */}
+                      {errors.departureDate && <span className="text-[10px] text-red-500 font-sans">{errors.departureDate}</span>}
+                      {!errors.departureDate && errors.returnDate && <span className="text-[10px] text-red-500 font-sans">{errors.returnDate}</span>}
 
-                      {/* ¿Fechas flexibles? */}
-                      <div className="flex flex-col gap-1.5">
-                        <span className="font-display font-bold text-[11px] text-slate-500 uppercase tracking-wide">
-                          ¿Fechas flexibles?
-                        </span>
-                        <div className="grid grid-cols-2 gap-2 h-[42px]">
+                      {/* Flexible dates toggle */}
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="font-display font-bold text-[10px] text-slate-400 uppercase tracking-wide">¿Fechas flexibles?</span>
+                        <div className="flex gap-1">
                           {['Sí', 'No'].map((val) => {
                             const isSelected = formData.flexibleDates === val;
                             return (
@@ -478,7 +523,7 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
                                 type="button"
                                 key={val}
                                 onClick={() => handleSelectPill('flexibleDates', val)}
-                                className={`rounded-lg font-sans text-xs font-semibold border transition-all flex items-center justify-center ${
+                                className={`rounded-md font-sans text-[11px] font-semibold border transition-all px-3 py-1 ${
                                   isSelected 
                                     ? 'bg-brand-turquoise/10 border-brand-turquoise text-brand-navy' 
                                     : 'bg-slate-50 border-slate-200 hover:bg-slate-100 text-slate-600'
