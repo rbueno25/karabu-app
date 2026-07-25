@@ -461,8 +461,9 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
 
                         {/* Calendar popover */}
                         {showCalendar && (
-                          <div className="absolute z-50 mt-2 bg-white rounded-2xl shadow-2xl border border-slate-200 p-3 w-full min-w-[300px]">
+                          <div className="absolute z-50 mt-2 bg-white rounded-2xl shadow-2xl border border-slate-200 p-3 w-fit">
                             <DayPicker
+                              key={showCalendar ? 'cal-open' : 'cal-closed'}
                               mode="range"
                               selected={{
                                 from: formData.departureDate ? new Date(formData.departureDate + 'T12:00') : undefined,
