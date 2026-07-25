@@ -470,19 +470,15 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
                               }}
                               onSelect={(range) => {
                                 if (range?.from) {
+                                  const departure = range.from.toISOString().split('T')[0];
+                                  const return_ = range.to ? range.to.toISOString().split('T')[0] : '';
                                   setFormData(prev => ({
                                     ...prev,
-                                    departureDate: range.from!.toISOString().split('T')[0],
-                                    returnDate: '',
+                                    departureDate: departure,
+                                    returnDate: return_,
                                   }));
                                   setErrors(prev => ({ ...prev, departureDate: undefined, returnDate: undefined }));
-                                }
-                                if (range?.to) {
-                                  setFormData(prev => ({
-                                    ...prev,
-                                    returnDate: range.to!.toISOString().split('T')[0],
-                                  }));
-                                  setShowCalendar(false);
+                                  if (range.to) setShowCalendar(false);
                                 }
                               }}
                               numberOfMonths={1}
