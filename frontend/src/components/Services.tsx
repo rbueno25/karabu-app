@@ -62,7 +62,7 @@ export default function Services() {
         </div>
 
         {/* 6 Services Row - Horizontal Layout as shown in image.png */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 xl:gap-5">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 lg:gap-5">
           {servicesList.map((service, idx) => (
             <motion.div
               key={service.id}
@@ -70,22 +70,22 @@ export default function Services() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-20px' }}
               transition={{ duration: 0.5, delay: idx * 0.06 }}
-              className="bg-white p-6 rounded-[24px] border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] hover:shadow-[0_10px_30px_rgba(0,0,0,0.06)] transition-all duration-300 flex flex-col items-center text-center group transform hover:-translate-y-1 h-full"
+              className="bg-white p-4 lg:p-6 rounded-[20px] lg:rounded-[24px] border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] hover:shadow-[0_10px_30px_rgba(0,0,0,0.06)] transition-all duration-300 flex flex-col items-center text-center group transform hover:-translate-y-1 h-full"
             >
               {/* Centered Large Turquoise Icon */}
-              <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mb-5 group-hover:bg-[#00A896]/10 transition-colors duration-300">
+              <div className="w-12 h-12 lg:w-16 lg:h-16 rounded-full bg-slate-50 flex items-center justify-center mb-3 lg:mb-5 group-hover:bg-[#00A896]/10 transition-colors duration-300">
                 <div className="transform group-hover:scale-110 transition-transform duration-300">
                   {service.icon}
                 </div>
               </div>
 
               {/* Title - Bold navy color with elegant tracking */}
-              <h3 className="font-display font-extrabold text-sm sm:text-base text-brand-navy mb-3 group-hover:text-[#00A896] transition-colors duration-300 px-1 leading-tight">
+              <h3 className="font-display font-extrabold text-xs lg:text-base text-brand-navy mb-1.5 lg:mb-3 group-hover:text-[#00A896] transition-colors duration-300 px-1 leading-tight">
                 {service.title}
               </h3>
               
               {/* Short Description */}
-              <p className="text-slate-500 font-sans text-xs leading-relaxed mt-auto">
+              <p className="text-slate-500 font-sans text-[10px] lg:text-xs leading-relaxed mt-auto">
                 {service.description}
               </p>
             </motion.div>

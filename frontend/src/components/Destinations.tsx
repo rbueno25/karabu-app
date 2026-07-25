@@ -100,7 +100,7 @@ export default function Destinations({ onSelectDestination }: DestinationsProps)
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
             onClick={() => onSelectDestination(tallDestination.name)}
-            className="lg:col-span-3 group relative overflow-hidden rounded-3xl cursor-pointer shadow-lg hover:shadow-xl transition-all duration-500 flex flex-col justify-end min-h-[360px] lg:min-h-full h-full transform hover:-translate-y-1"
+            className="lg:col-span-3 group relative overflow-hidden rounded-3xl cursor-pointer shadow-lg hover:shadow-xl transition-all duration-500 flex flex-col justify-end min-h-[220px] lg:min-h-full h-full transform hover:-translate-y-1"
           >
             {/* Background Zoom Image */}
             <div className="absolute inset-0 z-0">
@@ -141,7 +141,7 @@ export default function Destinations({ onSelectDestination }: DestinationsProps)
           <div className="lg:col-span-9 flex flex-col gap-6">
             
             {/* Top Row: 4 smaller cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 lg:gap-6">
               {topDestinations.map((dest, idx) => (
                 <motion.div
                   key={dest.id}
@@ -150,7 +150,7 @@ export default function Destinations({ onSelectDestination }: DestinationsProps)
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: idx * 0.08 }}
                   onClick={() => onSelectDestination(dest.name)}
-                  className="group relative overflow-hidden rounded-2xl cursor-pointer h-[180px] sm:h-[190px] xl:h-[200px] shadow-sm hover:shadow-lg transition-all duration-500 transform hover:-translate-y-1"
+                  className="group relative overflow-hidden rounded-2xl cursor-pointer h-[130px] sm:h-[150px] xl:h-[200px] shadow-sm hover:shadow-lg transition-all duration-500 transform hover:-translate-y-1"
                 >
                   <div className="absolute inset-0 z-0">
                     <img
@@ -175,7 +175,7 @@ export default function Destinations({ onSelectDestination }: DestinationsProps)
             </div>
 
             {/* Bottom Row: 3 slightly wider cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div className="grid grid-cols-3 gap-3 lg:gap-6">
               {bottomDestinations.map((dest, idx) => (
                 <motion.div
                   key={dest.id}
@@ -184,7 +184,7 @@ export default function Destinations({ onSelectDestination }: DestinationsProps)
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: idx * 0.1 }}
                   onClick={() => onSelectDestination(dest.name)}
-                  className="group relative overflow-hidden rounded-2xl cursor-pointer h-[180px] sm:h-[190px] xl:h-[200px] shadow-sm hover:shadow-lg transition-all duration-500 transform hover:-translate-y-1"
+                  className="group relative overflow-hidden rounded-2xl cursor-pointer h-[130px] sm:h-[150px] xl:h-[200px] shadow-sm hover:shadow-lg transition-all duration-500 transform hover:-translate-y-1"
                 >
                   <div className="absolute inset-0 z-0">
                     <img

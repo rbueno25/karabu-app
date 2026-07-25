@@ -22,7 +22,7 @@ export default function Hero({ onExploreDestinations, onContact }: HeroProps) {
           alt=""
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-brand-navy/85 via-brand-navy/75 to-brand-navy/90" />
+        <div className="absolute inset-0 bg-gradient-to-b from-brand-navy/65 via-brand-navy/55 to-brand-navy/75" />
       </div>
 
       {/* Desktop-only: decorative grid pattern */}
@@ -78,15 +78,15 @@ export default function Hero({ onExploreDestinations, onContact }: HeroProps) {
                 { icon: Award, title: 'Asesoría', sub: 'de visas' },
                 { icon: Headphones, title: 'Certificados', sub: 'de viaje' },
               ].map((item, i) => (
-                <div key={i} className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-brand-turquoise/20 lg:bg-brand-turquoise/10 flex items-center justify-center text-brand-turquoise flex-shrink-0">
-                    <item.icon className="w-4.5 h-4.5" />
+                <div key={i} className="flex items-center gap-2 lg:gap-3">
+                  <div className="w-7 h-7 lg:w-9 lg:h-9 rounded-full bg-brand-turquoise/20 lg:bg-brand-turquoise/10 flex items-center justify-center text-brand-turquoise flex-shrink-0">
+                    <item.icon className="w-3 h-3 lg:w-4.5 lg:h-4.5" />
                   </div>
                   <div className="flex flex-col">
-                    <span className="font-display font-extrabold text-[13px] text-white lg:text-brand-navy leading-tight">
+                    <span className="font-display font-extrabold text-[11px] lg:text-[13px] text-white lg:text-brand-navy leading-tight">
                       {item.title}
                     </span>
-                    <span className="font-sans text-xs text-white/60 lg:text-slate-500 leading-tight">
+                    <span className="font-sans text-[9px] lg:text-xs text-white/60 lg:text-slate-500 leading-tight">
                       {item.sub}
                     </span>
                   </div>
