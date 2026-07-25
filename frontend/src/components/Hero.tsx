@@ -110,7 +110,7 @@ export default function Hero({ onExploreDestinations, onContact }: HeroProps) {
         <div className="grid grid-cols-1 lg:grid-cols-2 items-center lg:items-stretch">
 
           {/* Text Content */}
-          <div className="flex flex-col gap-6 text-center lg:text-left lg:justify-center lg:py-24">
+          <div className="flex flex-col gap-6 text-center lg:text-left lg:justify-center lg:py-24 lg:pr-12">
 
             {/* Tagline */}
             <motion.div
