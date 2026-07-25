@@ -154,15 +154,15 @@ export default function Hero({ onExploreDestinations, onContact }: HeroProps) {
 
           </div>
 
-          {/* Right Column: Custom Organic Curve Container & White Polaroid Overlay Pictures */}
-          <div className="lg:col-span-6 relative h-[500px] sm:h-[580px] flex items-center justify-center lg:justify-end mt-12 lg:mt-0 z-10">
+          {/* Right Column: beach image — appears first on mobile, right side on desktop */}
+          <div className="lg:col-span-6 relative h-auto sm:h-[580px] flex items-center justify-center lg:justify-end mt-6 sm:mt-12 lg:mt-0 z-10 order-first lg:order-none">
             
             {/* The Big Organic Wave Mask/Background Container as seen in the image */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8 }}
-              className="relative w-full max-w-[580px] h-[440px] sm:h-[540px] overflow-hidden shadow-2xl z-0 rounded-3xl"
+              className="relative w-full max-w-[580px] h-[250px] sm:h-[440px] lg:h-[540px] overflow-hidden shadow-2xl z-0 rounded-3xl"
             >
               {/* Image inside */}
               <img
@@ -175,9 +175,9 @@ export default function Hero({ onExploreDestinations, onContact }: HeroProps) {
               <div className="absolute inset-0 bg-gradient-to-tr from-brand-navy/10 via-transparent to-white/10 mix-blend-overlay pointer-events-none" />
             </motion.div>
 
-            {/* Flight Curve / Dotted Path Path */}
+            {/* Flight Curve / Dotted Path Path — hidden on mobile */}
             <svg
-              className="absolute inset-0 w-full h-full pointer-events-none z-10"
+              className="absolute inset-0 w-full h-full pointer-events-none z-10 hidden sm:block"
               viewBox="0 0 500 500"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -192,22 +192,22 @@ export default function Hero({ onExploreDestinations, onContact }: HeroProps) {
               />
             </svg>
 
-            {/* Small decorative airplane traveling along the dotted path */}
+            {/* Small decorative airplane traveling along the dotted path — hidden on mobile */}
             <motion.div
               initial={{ opacity: 0, x: -20, y: 10 }}
               animate={{ opacity: 1, x: 0, y: 0 }}
               transition={{ delay: 1, duration: 1, type: 'spring' }}
-              className="absolute top-[18%] left-[42%] text-brand-turquoise z-20 flex items-center justify-center transform -rotate-12"
+              className="absolute top-[18%] left-[42%] text-brand-turquoise z-20 items-center justify-center transform -rotate-12 hidden sm:flex"
             >
               <Plane className="w-5 h-5 fill-current" />
             </motion.div>
 
-            {/* WHITE-BORDERED PICTURE 1: Venice Canal (Floating on Top Left) */}
+            {/* WHITE-BORDERED PICTURE 1: Venice Canal — hidden on mobile */}
             <motion.div
               initial={{ opacity: 0, x: -40, y: -20, rotate: -20 }}
               animate={{ opacity: 1, x: 0, y: 0, rotate: -6 }}
               transition={{ duration: 0.8, delay: 0.3 }}
-              className="absolute top-[12%] left-[-4%] sm:left-[-2%] w-[160px] sm:w-[200px] bg-white p-2.5 sm:p-3 rounded-2xl shadow-[0_15px_30px_rgba(0,0,0,0.18)] border border-slate-100 z-30 transform transition-transform hover:scale-105 duration-300"
+              className="absolute top-[12%] left-[-4%] sm:left-[-2%] w-[160px] sm:w-[200px] bg-white p-2.5 sm:p-3 rounded-2xl shadow-[0_15px_30px_rgba(0,0,0,0.18)] border border-slate-100 z-30 transform transition-transform hover:scale-105 duration-300 hidden sm:block"
             >
               <div className="overflow-hidden rounded-xl aspect-[4/3]">
                 <img
@@ -219,12 +219,12 @@ export default function Hero({ onExploreDestinations, onContact }: HeroProps) {
               </div>
             </motion.div>
 
-            {/* WHITE-BORDERED PICTURE 2: Cruise Ship (Floating on Bottom Left) */}
+            {/* WHITE-BORDERED PICTURE 2: Cruise Ship — hidden on mobile */}
             <motion.div
               initial={{ opacity: 0, x: -30, y: 40, rotate: 20 }}
               animate={{ opacity: 1, x: 0, y: 0, rotate: 4 }}
               transition={{ duration: 0.8, delay: 0.5 }}
-              className="absolute bottom-[8%] left-[2%] sm:left-[6%] w-[170px] sm:w-[220px] bg-white p-2.5 sm:p-3 rounded-2xl shadow-[0_15px_35px_rgba(0,0,0,0.22)] border border-slate-100 z-40 transform transition-transform hover:scale-105 duration-300"
+              className="absolute bottom-[8%] left-[2%] sm:left-[6%] w-[170px] sm:w-[220px] bg-white p-2.5 sm:p-3 rounded-2xl shadow-[0_15px_35px_rgba(0,0,0,0.22)] border border-slate-100 z-40 transform transition-transform hover:scale-105 duration-300 hidden sm:block"
             >
               <div className="overflow-hidden rounded-xl aspect-[4/3]">
                 <img
