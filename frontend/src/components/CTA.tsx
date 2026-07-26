@@ -8,7 +8,7 @@ interface CTAProps {
 
 export default function CTA({ onContactClick }: CTAProps) {
   return (
-    <section className="relative py-24 overflow-hidden text-white">
+    <section className="relative py-16 lg:py-24 overflow-hidden text-white">
       {/* Background image with deep brand-navy overlay */}
       <div className="absolute inset-0 z-0">
         <img

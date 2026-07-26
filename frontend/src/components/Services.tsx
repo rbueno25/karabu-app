@@ -43,7 +43,7 @@ export default function Services() {
   ];
 
   return (
-    <section id="servicios" className="py-20 bg-[#f9fbfd] relative scroll-mt-20">
+    <section id="servicios" className="py-14 lg:py-20 bg-[#f9fbfd] relative scroll-mt-20">
       
       {/* Soft top border or subtle shadow transition */}
       <div className="absolute top-0 inset-x-0 h-px bg-slate-100" />

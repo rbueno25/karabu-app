@@ -221,7 +221,7 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
   const hotelCategoryOptions = ['3 estrellas', '4 estrellas', '5 estrellas', 'Todo incluido'];
 
   return (
-    <section id="cotizacion" className="py-20 bg-slate-100 relative scroll-mt-20">
+    <section id="cotizacion" className="py-14 lg:py-20 bg-slate-100 relative scroll-mt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Full Split Container Card */}

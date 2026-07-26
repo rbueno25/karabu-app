@@ -62,7 +62,7 @@ export default function Destinations({ onSelectDestination }: DestinationsProps)
   ];
 
   return (
-    <section id="destinos" className="py-20 bg-white relative scroll-mt-20">
+    <section id="destinos" className="py-14 lg:py-20 bg-white relative scroll-mt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header Block matching the design with Hand-drawn paper plane sketch */}

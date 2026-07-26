@@ -11,7 +11,7 @@ export default function WhyChooseUs() {
   ];
 
   return (
-    <section id="por-que-elegirnos" className="py-16 lg:py-24 bg-brand-navy relative overflow-hidden scroll-mt-20 border-b border-white/5">
+    <section id="por-que-elegirnos" className="py-12 lg:py-24 bg-brand-navy relative overflow-hidden scroll-mt-20 border-b border-white/5">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(0,168,150,0.15)_0%,_transparent_60%)] pointer-events-none" />
       <div className="absolute inset-0 opacity-[0.03] bg-[linear-gradient(to_right,#808080_1px,transparent_1px),linear-gradient(to_bottom,#808080_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
 
