@@ -226,60 +226,28 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
         {/* Full Split Container Card */}
         <div className="bg-white rounded-3xl shadow-xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 border border-slate-200">
           
-          {/* Left Column - Brand Info (hidden on mobile to prioritize form) */}
-          <div className="hidden lg:flex lg:col-span-4 relative p-8 sm:p-12 text-white flex-col justify-between overflow-hidden group min-h-[400px] lg:min-h-full">
+          {/* Left Column - Full-bleed image, minimal overlay */}
+          <div className="hidden lg:flex lg:col-span-4 relative text-white flex-col justify-end overflow-hidden min-h-[400px] lg:min-h-full">
             
-            {/* Background Travel Scene Image with smooth slow zoom effect */}
+            {/* Background Image */}
             <div className="absolute inset-0 z-0">
               <img
-                src="/hero-main.jpg"
+                src="/form-bg.jpg"
                 alt="Fondo de viajes Karabu"
                 className="w-full h-full object-cover"
                 referrerPolicy="no-referrer"
               />
-              {/* Light overlay to keep text readable */}
-              <div className="absolute inset-0 bg-brand-navy/40" />
+              {/* Subtle gradient at bottom for text readability */}
+              <div className="absolute inset-0 bg-gradient-to-t from-brand-navy/70 via-brand-navy/20 to-transparent" />
             </div>
-
-            {/* Glowing neon accent for high-end depth */}
-            <div className="absolute -top-12 -right-12 w-72 h-72 bg-brand-turquoise/20 rounded-full blur-3xl pointer-events-none z-10" />
-            <div className="absolute -bottom-12 -left-12 w-64 h-64 bg-brand-orange/10 rounded-full blur-3xl pointer-events-none z-10" />
             
-            <div className="flex flex-col gap-6 relative z-10">
+            <div className="relative z-10 p-8 sm:p-10 pb-8">
               <span className="text-brand-turquoise text-xs font-extrabold uppercase tracking-[0.15em]">
                 SOLICITA TU COTIZACIÓN
               </span>
-              <h3 className="font-display text-3xl sm:text-4xl font-extrabold text-white leading-tight">
+              <h3 className="font-display text-3xl sm:text-4xl font-extrabold text-white leading-tight mt-3">
                 Cotiza tu viaje en minutos
               </h3>
-              <p className="text-slate-200 font-sans text-sm leading-relaxed opacity-95">
-                Completa el formulario y recibe una propuesta personalizada con paquetes de viaje, asesoría de visas y acompañamiento en cada paso.
-              </p>
-              
-              {/* Trust checklist */}
-              <div className="flex flex-col gap-4 mt-6">
-                {[
-                  'Cotización clara y sin compromiso',
-                  'Precios transparentes, sin letra pequeña',
-                  'La mejor opción para tu presupuesto',
-                  'Acompañamiento antes y durante tu viaje'
-                ].map((item, idx) => (
-                  <div key={idx} className="flex items-center gap-3">
-                    <div className="flex-shrink-0 w-5 h-5 rounded-full bg-brand-turquoise/20 flex items-center justify-center text-brand-turquoise border border-brand-turquoise/30">
-                      <Check className="w-3.5 h-3.5 stroke-[3]" />
-                    </div>
-                    <span className="font-sans text-sm text-slate-100 font-medium">{item}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Footer notice within left card */}
-            <div className="mt-12 pt-6 border-t border-white/15 flex items-start gap-3 relative z-10">
-              <Info className="w-5 h-5 text-brand-turquoise flex-shrink-0 mt-0.5" />
-              <p className="text-[11px] text-slate-200 leading-relaxed font-sans opacity-90">
-                La información enviada será recibida en el correo del propietario del proyecto para brindarte una atención personalizada de inmediato.
-              </p>
             </div>
           </div>
 
