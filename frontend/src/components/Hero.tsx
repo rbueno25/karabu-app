@@ -13,7 +13,7 @@ export default function Hero({ onExploreDestinations, onContact }: HeroProps) {
   const cruiseImage = "https://images.unsplash.com/photo-1548574505-5e239809ee19?auto=format&fit=crop&q=80&w=600&h=450";
 
   return (
-    <section id="inicio" className="relative overflow-hidden bg-white pt-8 pb-10 lg:py-0 min-h-screen lg:min-h-0">
+    <section id="inicio" className="relative overflow-hidden bg-white pt-8 pb-10 lg:py-0 min-h-[80vh] lg:min-h-0">
 
 
       {/* Mobile-only: full background image with dark overlay */}
