@@ -8,7 +8,7 @@ interface HeroProps {
 }
 
 export default function Hero({ onExploreDestinations, onContact }: HeroProps) {
-  const beachImage = "/hero-main.jpg";
+  const beachImage = "/screen.png";
   const veniceImage = "https://images.unsplash.com/photo-1520175480921-4edfa2983e0f?auto=format&fit=crop&q=80&w=600&h=450";
   const cruiseImage = "https://images.unsplash.com/photo-1548574505-5e239809ee19?auto=format&fit=crop&q=80&w=600&h=450";
 
