@@ -453,7 +453,6 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
                                 type="button"
                                 onClick={() => {
                                   setFormData(prev => ({ ...prev, departureDate: '', returnDate: '' }));
-                                  setShowCalendar(false);
                                 }}
                                 className="flex-1 text-xs text-slate-400 hover:text-slate-600 py-1.5"
                               >

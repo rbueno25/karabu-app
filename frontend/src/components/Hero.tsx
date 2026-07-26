@@ -28,6 +28,8 @@ export default function Hero({ onExploreDestinations, onContact }: HeroProps) {
 
       {/* Desktop: right-half full-bleed image — outside container, absolute to section */}
       <div className="absolute top-0 right-0 bottom-0 w-1/2 hidden lg:block z-10">
+        {/* Gradient fade on left edge so blend is smooth */}
+        <div className="absolute inset-y-0 left-0 w-24 z-30 bg-gradient-to-r from-white to-transparent pointer-events-none" />
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
