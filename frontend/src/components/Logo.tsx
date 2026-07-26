@@ -21,7 +21,7 @@ export default function Logo({ light = false, className = '', showText = true }:
 
       {/* 2. Texto debajo */}
       {showText && (
-        <div className="flex flex-col items-start">
+        <div className="flex flex-col items-start mt-1.5">
           {/* KΛRΛBU */}
           <span className={`font-display text-base font-black tracking-[0.14em] leading-none uppercase ${textColor}`}>
             K<span className="font-sans font-extrabold">Λ</span>R<span className="font-sans font-extrabold">Λ</span>BU

@@ -44,32 +44,6 @@ export default function Hero({ onExploreDestinations, onContact }: HeroProps) {
           <div className="absolute inset-0 bg-gradient-to-tr from-brand-navy/20 via-transparent to-white/5 mix-blend-overlay pointer-events-none" />
         </motion.div>
 
-        {/* Flight Curve */}
-        <svg
-          className="absolute inset-0 w-full h-full pointer-events-none z-10"
-          viewBox="0 0 500 500"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M 100 200 Q 220 90 320 190 T 450 350"
-            stroke="#00A896"
-            strokeWidth="2"
-            strokeDasharray="4 6"
-            opacity="0.6"
-          />
-        </svg>
-
-        {/* Airplane */}
-        <motion.div
-          initial={{ opacity: 0, x: -20, y: 10 }}
-          animate={{ opacity: 1, x: 0, y: 0 }}
-          transition={{ delay: 1, duration: 1, type: 'spring' }}
-          className="absolute top-[18%] left-[42%] text-brand-turquoise z-20 flex items-center justify-center transform -rotate-12"
-        >
-          <Plane className="w-5 h-5 fill-current" />
-        </motion.div>
-
         {/* Polaroid 1: Venice */}
         <motion.div
           initial={{ opacity: 0, x: -40, y: -20, rotate: -20 }}
@@ -143,7 +117,7 @@ export default function Hero({ onExploreDestinations, onContact }: HeroProps) {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="text-white/80 lg:text-slate-600 text-base sm:text-lg max-w-xl mx-auto lg:mx-0 leading-relaxed font-sans"
             >
-              Completa el formulario y recibe una propuesta personalizada con paquetes de viaje, asesoría de visas y acompañamiento en todo el proceso.
+              Completa el formulario y recibe una propuesta personalizada con acompañamiento en todo el proceso.
             </motion.p>
 
             {/* 3 Badges */}
@@ -174,6 +148,26 @@ export default function Hero({ onExploreDestinations, onContact }: HeroProps) {
               ))}
             </motion.div>
 
+            {/* Trust Badge */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.35 }}
+              className="flex items-center gap-3 self-center lg:self-start max-w-sm"
+            >
+              <div className="w-8 h-8 rounded-full bg-white/20 lg:bg-brand-navy flex items-center justify-center text-white flex-shrink-0">
+                <ShieldCheck className="w-4.5 h-4.5" />
+              </div>
+              <div className="text-left">
+                <span className="font-display font-extrabold text-xs text-white lg:text-brand-navy block leading-tight">
+                  Agencia de viajes con acompañamiento personalizado
+                </span>
+                <span className="text-[10px] text-white/60 lg:text-slate-500 block leading-tight mt-0.5 font-sans">
+                  Viaja con confianza — te guiamos en cada paso.
+                </span>
+              </div>
+            </motion.div>
+
             {/* CTA Buttons */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -194,26 +188,6 @@ export default function Hero({ onExploreDestinations, onContact }: HeroProps) {
               >
                 <span>Solicitar cotización</span>
               </button>
-            </motion.div>
-
-            {/* Trust Badge */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.5 }}
-              className="flex items-center gap-3 self-center lg:self-start mt-4 max-w-sm"
-            >
-              <div className="w-8 h-8 rounded-full bg-white/20 lg:bg-brand-navy flex items-center justify-center text-white flex-shrink-0">
-                <ShieldCheck className="w-4.5 h-4.5" />
-              </div>
-              <div className="text-left">
-                <span className="font-display font-extrabold text-xs text-white lg:text-brand-navy block leading-tight">
-                  Agencia de viajes con acompañamiento personalizado
-                </span>
-                <span className="text-[10px] text-white/60 lg:text-slate-500 block leading-tight mt-0.5 font-sans">
-                  Viaja con confianza — te guiamos en cada paso.
-                </span>
-              </div>
             </motion.div>
 
           </div>
