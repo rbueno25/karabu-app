@@ -59,7 +59,6 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
-  const [calendarKey, setCalendarKey] = useState(0);
 
   // Map destination names to country + city for auto-fill
   const destinationMap: Record<string, { country: string; city: string }> = {
@@ -442,7 +441,7 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
                       <div className="relative">
                         <button
                           type="button"
-                          onClick={() => { setShowCalendar(!showCalendar); if (!showCalendar) setCalendarKey(k => k + 1); }}
+                          onClick={() => setShowCalendar(!showCalendar)}
                           className={`w-full flex items-center gap-3 font-sans text-sm px-3.5 py-2.5 rounded-lg border bg-slate-50 hover:bg-white focus:bg-white focus:outline-none transition-colors text-left ${
                             (errors.departureDate || errors.returnDate) ? 'border-red-500 ring-1 ring-red-200' : 'border-slate-200 focus:border-brand-turquoise'
                           }`}
@@ -464,25 +463,18 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
                         {showCalendar && (
                           <div className="absolute left-0 sm:left-auto sm:right-0 z-50 mt-2 bg-white rounded-2xl shadow-2xl border border-slate-200 p-3 w-fit max-w-[calc(100vw-2rem)]">
                             <DayPicker
-                              key={calendarKey}
                               mode="range"
-                              defaultSelected={{
+                              selected={{
                                 from: formData.departureDate ? new Date(formData.departureDate + 'T12:00') : undefined,
                                 to: formData.returnDate ? new Date(formData.returnDate + 'T12:00') : undefined,
                               }}
                               onSelect={(range) => {
-                                if (range?.from) {
-                                  const departure = range.from.toISOString().split('T')[0];
-                                  // Only set return if it's a different day than departure
-                                  const sameDay = range.to && range.to.toDateString() === range.from.toDateString();
-                                  const return_ = (range.to && !sameDay) ? range.to.toISOString().split('T')[0] : '';
-                                  setFormData(prev => ({
-                                    ...prev,
-                                    departureDate: departure,
-                                    returnDate: return_,
-                                  }));
-                                  setErrors(prev => ({ ...prev, departureDate: undefined, returnDate: undefined }));
-                                }
+                                setFormData(prev => ({
+                                  ...prev,
+                                  departureDate: range?.from ? range.from.toISOString().split('T')[0] : '',
+                                  returnDate: range?.to ? range.to.toISOString().split('T')[0] : '',
+                                }));
+                                setErrors(prev => ({ ...prev, departureDate: undefined, returnDate: undefined }));
                               }}
                               numberOfMonths={1}
                               disabled={{ before: new Date() }}
