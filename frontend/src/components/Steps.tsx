@@ -11,7 +11,7 @@ export default function Steps() {
   ];
 
   return (
-    <section className="py-12 lg:py-20 bg-slate-50 relative border-b border-slate-150/60">
+    <section className="pt-12 pb-2 lg:py-20 bg-slate-50 relative border-b border-slate-150/60">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         
         <div className="text-center max-w-2xl mx-auto mb-8 lg:mb-20 flex flex-col gap-2 lg:gap-3">
