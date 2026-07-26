@@ -36,6 +36,12 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Global cursor pointer for interactive elements */
+button, a, select, [role="button"], input[type="submit"], input[type="button"] {
+  cursor: pointer;
+}
+
+
 /* Compact DayPicker for mobile forms */
 .rdp-compact {
   --rdp-day-size: 36px;
