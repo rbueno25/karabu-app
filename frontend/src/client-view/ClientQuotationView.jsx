@@ -21,6 +21,7 @@ export default function ClientQuotationView() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [darkMode, setDarkMode] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const [showChangeForm, setShowChangeForm] = useState(false);
   const [changeNotes, setChangeNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -31,6 +32,12 @@ export default function ClientQuotationView() {
     if (darkMode) document.documentElement.classList.add('dark');
     else document.documentElement.classList.remove('dark');
   }, [darkMode]);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 50);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleSelectId = (newId) => {
     setCurrentId(newId);
@@ -145,41 +152,70 @@ export default function ClientQuotationView() {
   return (
     <div className="min-h-screen bg-white dark:bg-[#070F1E] text-slate-900 dark:text-slate-100 transition-colors duration-300 font-sans selection:bg-[#0D9387] selection:text-white">
 
-      {/* ═══════════════ SECTION 1 — HERO PANTALLA COMPLETA ═══════════════ */}
-      <section className="relative w-full h-screen max-h-screen flex flex-col justify-between overflow-hidden bg-[#0F2A4A]">
-        <img src={heroBgImage} alt={destination} className="absolute inset-0 w-full h-full object-cover object-center transform scale-105 transition-transform duration-1000" />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0F2A4A]/70 via-black/30 to-black/85 pointer-events-none" />
-
-        {/* NAVBAR FLOTANTE */}
-        <header className="relative z-30 w-full max-w-7xl mx-auto px-4 sm:px-8 py-4 flex items-center justify-between shrink-0">
+      {/* ═══════════════ NAVBAR STICKY GLOBAL ═══════════════ */}
+      <header className={`fixed top-0 inset-x-0 z-40 transition-all duration-300 ${
+        scrolled
+          ? 'bg-white/95 dark:bg-[#0F2A4A]/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shadow-sm'
+          : 'bg-transparent'
+      }`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Logo light={true} showText={true} className="scale-[0.65] origin-left" />
+            <Logo light={!scrolled} showText={true} className="scale-[0.85] origin-left" />
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
-            <span className="hidden sm:inline-flex text-xs font-mono font-medium px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-slate-200 shadow-sm">#{currentId}</span>
-            <span className={`text-xs font-bold px-3 py-1.5 rounded-full border shadow-sm backdrop-blur-md flex items-center gap-1.5 ${
-              status === 'aceptada' ? 'bg-emerald-500/25 text-emerald-300 border-emerald-500/40' :
-              status === 'cambios_solicitados' || status === 'rechazada' ? 'bg-[#FF6B35]/25 text-orange-300 border-[#FF6B35]/40' :
-              'bg-[#0D9387]/25 text-teal-300 border-[#0D9387]/40'
+            <span className={`hidden sm:inline-flex text-xs font-mono font-medium px-3 py-1 rounded-full transition-all duration-300 ${
+              scrolled
+                ? 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
+                : 'bg-white/10 backdrop-blur-md border border-white/20 text-slate-200 shadow-sm'
+            }`}>#{currentId}</span>
+            <span className={`text-xs font-bold px-3 py-1.5 rounded-full border shadow-sm flex items-center gap-1.5 transition-all duration-300 ${
+              scrolled
+                ? status === 'aceptada' ? 'bg-emerald-100 text-emerald-700 border-emerald-300' :
+                  status === 'cambios_solicitados' || status === 'rechazada' ? 'bg-orange-100 text-orange-700 border-orange-300' :
+                  'bg-teal-100 text-teal-700 border-teal-300'
+                : status === 'aceptada' ? 'bg-emerald-500/25 text-emerald-300 border-emerald-500/40' :
+                  status === 'cambios_solicitados' || status === 'rechazada' ? 'bg-[#FF6B35]/25 text-orange-300 border-[#FF6B35]/40' :
+                  'bg-[#0D9387]/25 text-teal-300 border-[#0D9387]/40'
             }`}>
               {status === 'aceptada' ? <><CheckCircle2 className="w-3.5 h-3.5" /> Aceptada</> :
                status === 'cambios_solicitados' || status === 'rechazada' ? <><RotateCcw className="w-3.5 h-3.5" /> Cambios</> :
                <><Sparkles className="w-3.5 h-3.5 text-teal-300" /> Lista</>}
             </span>
-            <button onClick={handleShare} className="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white transition shadow-md flex items-center gap-1 text-xs font-medium" title="Compartir">
-              {copiedLink ? <Check className="w-4 h-4 text-emerald-300" /> : <Share2 className="w-4 h-4 text-teal-200" />}
+            <button onClick={handleShare} className={`p-2.5 rounded-xl transition-all duration-300 shadow-md flex items-center gap-1 text-xs font-medium ${
+              scrolled
+                ? 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700'
+                : 'bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white'
+            }`} title="Compartir">
+              {copiedLink ? <Check className={`w-4 h-4 ${scrolled ? 'text-emerald-600' : 'text-emerald-300'}`} /> : <Share2 className={`w-4 h-4 ${scrolled ? 'text-slate-500' : 'text-teal-200'}`} />}
               <span className="hidden md:inline">{copiedLink ? 'Copiado' : 'Compartir'}</span>
             </button>
-            <a href={`/#/factura/${currentId}`} className="p-2.5 rounded-xl bg-[#0D9387]/30 hover:bg-[#0D9387]/50 backdrop-blur-md border border-[#0D9387]/50 text-white transition shadow-md flex items-center gap-1.5 text-xs font-bold" title="Ver Factura">
-              <CreditCard className="w-4 h-4 text-teal-200" />
+            <a href={`/#/factura/${currentId}`} className={`p-2.5 rounded-xl transition-all duration-300 shadow-md flex items-center gap-1.5 text-xs font-bold ${
+              scrolled
+                ? 'bg-[#0D9387]/10 hover:bg-[#0D9387]/20 text-[#0D9387] border border-[#0D9387]/30'
+                : 'bg-[#0D9387]/30 hover:bg-[#0D9387]/50 backdrop-blur-md border border-[#0D9387]/50 text-white'
+            }`} title="Ver Factura">
+              <CreditCard className={`w-4 h-4 ${scrolled ? 'text-[#0D9387]' : 'text-teal-200'}`} />
               <span className="hidden sm:inline">Factura</span>
             </a>
-            <button onClick={() => setDarkMode(!darkMode)} className="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white transition shadow-md" title="Tema">
-              {darkMode ? <Sun className="w-4 h-4 text-amber-300" /> : <Moon className="w-4 h-4 text-teal-200" />}
+            <button onClick={() => setDarkMode(!darkMode)} className={`p-2.5 rounded-xl transition-all duration-300 shadow-md ${
+              scrolled
+                ? 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
+                : 'bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20'
+            }`} title="Tema">
+              {darkMode ? <Sun className={`w-4 h-4 ${scrolled ? 'text-amber-500' : 'text-amber-300'}`} /> : <Moon className={`w-4 h-4 ${scrolled ? 'text-slate-600' : 'text-teal-200'}`} />}
             </button>
           </div>
-        </header>
+        </div>
+      </header>
+
+      {/* ═══════════════ SECTION 1 — HERO PANTALLA COMPLETA ═══════════════ */}
+      <section className="relative w-full h-screen max-h-screen flex flex-col justify-between overflow-hidden bg-[#0F2A4A]">
+        <img src={heroBgImage} alt={destination} className="absolute inset-0 w-full h-full object-cover object-center transform scale-105 transition-transform duration-1000" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0F2A4A]/70 via-black/30 to-black/85 pointer-events-none" />
+
+        {/* Spacer para compensar el navbar fixed */}
+        <div className="shrink-0 h-20" />
 
         {/* SALUDO FLOTANTE */}
         <div className="relative z-20 w-full max-w-5xl mx-auto px-4 sm:px-6 my-auto text-center sm:text-left">
