@@ -37,9 +37,9 @@ export default function Sidebar() {
   return (
     <aside
       data-testid="sidebar"
-      className="fixed inset-y-0 left-0 z-40 w-64 border-r border-gray-200 dark:border-[#1A3356] bg-white dark:bg-[#0A1628] flex flex-col"
+      className="fixed inset-y-0 left-0 z-40 w-64 border-r border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 flex flex-col"
     >
-      <div className="h-16 flex items-center gap-2 px-6 border-b border-gray-200 dark:border-[#1A3356]">
+      <div className="h-16 flex items-center gap-2 px-6 border-b border-gray-200 dark:border-zinc-800">
         <div className="h-8 w-8 rounded-[10px] bg-blue-600 text-white flex items-center justify-center">
           <Plane className="h-4 w-4" />
         </div>
@@ -71,7 +71,7 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      <div className="p-3 border-t border-gray-200 dark:border-[#1A3356]">
+      <div className="p-3 border-t border-gray-200 dark:border-zinc-800">
               <button
                 onClick={handleLogout}
                 data-testid="sidebar-logout-btn"

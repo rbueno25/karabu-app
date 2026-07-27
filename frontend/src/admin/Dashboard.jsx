@@ -64,7 +64,7 @@ export default function Dashboard() {
 
       {/* ── Cotizaciones: Enviadas + Aceptadas + Ventas ── */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <Link to="/admin/cotizaciones?status=enviada" className="bg-white dark:bg-[#0F2444] rounded-2xl border border-gray-200 dark:border-[#1A3356] p-5 shadow-sm hover:border-blue-300 hover:shadow-md transition-all cursor-pointer">
+        <Link to="/admin/cotizaciones?status=enviada" className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 p-5 shadow-sm hover:border-blue-300 hover:shadow-md transition-all cursor-pointer">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-600 flex items-center justify-center">
               <Send className="w-5 h-5" />
@@ -75,7 +75,7 @@ export default function Dashboard() {
             </div>
           </div>
         </Link>
-        <Link to="/admin/cotizaciones?status=aceptada" className="bg-white dark:bg-[#0F2444] rounded-2xl border border-green-200 dark:border-green-800 p-5 shadow-sm hover:border-green-400 hover:shadow-md transition-all cursor-pointer">
+        <Link to="/admin/cotizaciones?status=aceptada" className="bg-white dark:bg-zinc-900 rounded-2xl border border-green-200 dark:border-green-800 p-5 shadow-sm hover:border-green-400 hover:shadow-md transition-all cursor-pointer">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-green-100 dark:bg-green-900/30 text-green-600 flex items-center justify-center">
               <CheckCircle2 className="w-5 h-5" />
@@ -86,7 +86,7 @@ export default function Dashboard() {
             </div>
           </div>
         </Link>
-        <Link to="/admin/reservas" className="bg-white dark:bg-[#0F2444] rounded-2xl border border-orange-200 dark:border-orange-800 p-5 shadow-sm hover:border-orange-400 hover:shadow-md transition-all cursor-pointer">
+        <Link to="/admin/reservas" className="bg-white dark:bg-zinc-900 rounded-2xl border border-orange-200 dark:border-orange-800 p-5 shadow-sm hover:border-orange-400 hover:shadow-md transition-all cursor-pointer">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-orange-100 dark:bg-orange-900/30 text-brand-orange flex items-center justify-center">
               <TrendingUp className="w-5 h-5" />
@@ -101,7 +101,7 @@ export default function Dashboard() {
 
       {/* ── Income Chart + Upcoming Trips ── */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <div className="xl:col-span-2 bg-white dark:bg-[#0F2444] rounded-2xl border border-gray-200 dark:border-[#1A3356] p-6 shadow-sm">
+        <div className="xl:col-span-2 bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">Ingresos</h3>
@@ -112,7 +112,7 @@ export default function Dashboard() {
             {RANGES.map((r) => (
               <button key={r.key} onClick={() => setRange(r.key)}
                 className={`px-3 py-1 text-xs font-medium rounded-lg transition-colors ${
-                  range === r.key ? "bg-brand-turquoise text-white" : "bg-gray-100 dark:bg-[#132D52] text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+                  range === r.key ? "bg-brand-turquoise text-white" : "bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
                 }`}>
                 {r.label}
               </button>
@@ -138,7 +138,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="bg-white dark:bg-[#0F2444] rounded-2xl border border-gray-200 dark:border-[#1A3356] p-6 shadow-sm">
+        <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">Próximos viajes</h3>
             <Plane className="h-4 w-4 text-gray-400 dark:text-gray-400" />
@@ -148,7 +148,7 @@ export default function Dashboard() {
           ) : (
             <ul className="space-y-3">
               {data.upcoming_trips.map((t) => (
-                <li key={t.id} className="flex items-center justify-between gap-3 py-2 border-b border-gray-100 dark:border-[#1A3356] last:border-0">
+                <li key={t.id} className="flex items-center justify-between gap-3 py-2 border-b border-gray-100 dark:border-zinc-800 last:border-0">
                   <div className="min-w-0">
                     <div className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{t.destination}</div>
                     <div className="text-xs text-gray-500 dark:text-gray-300 truncate">{t.client_name}</div>
@@ -164,7 +164,7 @@ export default function Dashboard() {
       {/* ── Top Destinos + Top Brokers ── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
         {/* Top Destinos */}
-        <div className="bg-white dark:bg-[#0F2444] rounded-2xl border border-gray-200 dark:border-[#1A3356] p-6 shadow-sm">
+        <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-5">
             <MapPin className="w-5 h-5 text-brand-turquoise" />
             <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">Destinos más vendidos</h3>
@@ -178,11 +178,11 @@ export default function Dashboard() {
                   <span className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold ${
                     i === 0 ? 'bg-brand-turquoise text-white' :
                     i === 1 ? 'bg-brand-turquoise/20 text-brand-turquoise' :
-                    'bg-gray-100 dark:bg-[#132D52] text-gray-500'
+                    'bg-gray-100 dark:bg-zinc-800 text-gray-500'
                   }`}>{i + 1}</span>
                   <div className="flex-1 min-w-0">
                     <span className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate block">{d.destination}</span>
-                    <div className="h-1.5 mt-1.5 bg-gray-100 dark:bg-[#132D52] rounded-full overflow-hidden">
+                    <div className="h-1.5 mt-1.5 bg-gray-100 dark:bg-zinc-800 rounded-full overflow-hidden">
                       <div className="h-full bg-gradient-to-r from-brand-turquoise to-brand-navy rounded-full transition-all"
                         style={{ width: `${(d.count / data.top_destinations[0].count) * 100}%` }} />
                     </div>
@@ -195,7 +195,7 @@ export default function Dashboard() {
         </div>
 
         {/* Top Brokers */}
-        <div className="bg-white dark:bg-[#0F2444] rounded-2xl border border-gray-200 dark:border-[#1A3356] p-6 shadow-sm">
+        <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-5">
             <Trophy className="w-5 h-5 text-brand-orange" />
             <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">Asesores con mejor desempeño</h3>
@@ -222,8 +222,8 @@ export default function Dashboard() {
       </div>
 
       {/* ── Recent Reservations Table ── */}
-      <div className="bg-white dark:bg-[#0F2444] rounded-2xl border border-gray-200 dark:border-[#1A3356] mt-6 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-[#1A3356] flex items-center justify-between">
+      <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 mt-6 shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-200 dark:border-zinc-800 flex items-center justify-between">
           <div>
             <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">Reservas recientes</h3>
             <p className="text-xs text-gray-500 dark:text-gray-300 mt-0.5">Últimas 5 reservas creadas</p>
@@ -233,7 +233,7 @@ export default function Dashboard() {
           <EmptyState title="Aún no hay reservas" description="Crea una cotización y conviértela en reserva." />
         ) : (
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 dark:bg-[#132D52] border-b border-gray-200 dark:border-[#1A3356]">
+            <thead className="bg-gray-50 dark:bg-zinc-800 border-b border-gray-200 dark:border-zinc-800">
               <tr>
                 <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Cliente</th>
                 <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Destino</th>
@@ -244,7 +244,7 @@ export default function Dashboard() {
             </thead>
             <tbody>
               {data.recent_reservations.map((r) => (
-                <tr key={r.id} className="border-b border-gray-100 dark:border-[#1A3356] last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800">
+                <tr key={r.id} className="border-b border-gray-100 dark:border-zinc-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800">
                   <td className="px-6 py-3 text-gray-900 dark:text-gray-100 font-medium">{r.client_name}</td>
                   <td className="px-6 py-3 text-gray-700 dark:text-gray-300">{r.destination}</td>
                   <td className="px-6 py-3 text-gray-600 dark:text-gray-300">{formatDate(r.departure_date)}</td>

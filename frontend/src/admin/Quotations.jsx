@@ -20,8 +20,8 @@ const emptyQuote = {
   status: "borrador",
 };
 
-const inputCls = "w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#132D52] text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none";
-const selectCls = "text-sm border border-gray-200 dark:border-[#1A3356] rounded-[10px] px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none bg-white dark:bg-[#0F2444] text-gray-900 dark:text-gray-100";
+const inputCls = "w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none";
+const selectCls = "text-sm border border-gray-200 dark:border-zinc-800 rounded-[10px] px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100";
 
 export default function Quotations() {
   const [searchParams] = useSearchParams();
@@ -160,15 +160,15 @@ export default function Quotations() {
         }
       />
 
-      <div className="bg-white dark:bg-[#0F2444] rounded-[16px] border border-gray-200 dark:border-[#1A3356] shadow-[0_1px_3px_0_rgba(0,0,0,0.04)] overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-[#1A3356] flex items-center gap-3 flex-wrap">
+      <div className="bg-white dark:bg-zinc-900 rounded-[16px] border border-gray-200 dark:border-zinc-800 shadow-[0_1px_3px_0_rgba(0,0,0,0.04)] overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-200 dark:border-zinc-800 flex items-center gap-3 flex-wrap">
           <div className="relative flex-1 min-w-[240px]">
             <Search className="h-4 w-4 text-gray-400 dark:text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               value={q}
               onChange={(e) => { setQ(e.target.value); setPage(1); }}
               placeholder="Buscar por cliente o destino…"
-              className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 dark:border-[#1A3356] bg-white dark:bg-[#0F2444] text-gray-900 dark:text-gray-100 rounded-[10px] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none"
+              className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100 rounded-[10px] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none"
             />
           </div>
           <select
@@ -198,7 +198,7 @@ export default function Quotations() {
         ) : (
           <>
             <table className="w-full text-sm" data-testid="quotations-table">
-              <thead className="bg-gray-50 dark:bg-[#132D52] border-b border-gray-200 dark:border-[#1A3356]">
+              <thead className="bg-gray-50 dark:bg-zinc-800 border-b border-gray-200 dark:border-zinc-800">
                 <tr>
                   <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Cliente</th>
                   <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Destino</th>
@@ -210,7 +210,7 @@ export default function Quotations() {
               </thead>
               <tbody>
                 {paginated.map((q) => (
-                  <tr key={q.id} className="border-b border-gray-100 dark:border-[#1A3356] last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800">
+                  <tr key={q.id} className="border-b border-gray-100 dark:border-zinc-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td className="px-6 py-3 text-gray-900 dark:text-gray-100 font-medium">{q.client_name}</td>
                     <td className="px-6 py-3">
                       <Link
@@ -264,12 +264,12 @@ export default function Quotations() {
                 ))}
               </tbody>
             </table>
-            <div className="px-6 py-3 border-t border-gray-200 dark:border-[#1A3356] flex items-center justify-between text-sm text-gray-500 dark:text-gray-300">
+            <div className="px-6 py-3 border-t border-gray-200 dark:border-zinc-800 flex items-center justify-between text-sm text-gray-500 dark:text-gray-300">
               <div>Mostrando {paginated.length} de {filtered.length}</div>
               <div className="flex items-center gap-2">
-                <button disabled={page === 1} onClick={() => setPage((p) => Math.max(1, p - 1))} className="px-3 py-1 border border-gray-200 dark:border-[#1A3356] rounded-[8px] disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-800">Anterior</button>
+                <button disabled={page === 1} onClick={() => setPage((p) => Math.max(1, p - 1))} className="px-3 py-1 border border-gray-200 dark:border-zinc-800 rounded-[8px] disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-800">Anterior</button>
                 <span className="text-gray-700 dark:text-gray-300">Página {page} / {totalPages}</span>
-                <button disabled={page === totalPages} onClick={() => setPage((p) => Math.min(totalPages, p + 1))} className="px-3 py-1 border border-gray-200 dark:border-[#1A3356] rounded-[8px] disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-800">Siguiente</button>
+                <button disabled={page === totalPages} onClick={() => setPage((p) => Math.min(totalPages, p + 1))} className="px-3 py-1 border border-gray-200 dark:border-zinc-800 rounded-[8px] disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-800">Siguiente</button>
               </div>
             </div>
           </>
@@ -278,7 +278,7 @@ export default function Quotations() {
 
       {modalOpen && (
         <div data-testid="quotation-modal" className="fixed inset-0 z-50 flex items-start justify-center bg-gray-900/50 backdrop-blur-sm p-4 overflow-y-auto">
-          <form onSubmit={save} className="mt-16 bg-white dark:bg-[#0F2444] rounded-[16px] shadow-xl border border-gray-200 dark:border-[#1A3356] w-full max-w-lg p-6">
+          <form onSubmit={save} className="mt-16 bg-white dark:bg-zinc-900 rounded-[16px] shadow-xl border border-gray-200 dark:border-zinc-800 w-full max-w-lg p-6">
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{editingId ? "Editar cotización" : "Nueva cotización"}</h3>
               <button type="button" onClick={() => setModalOpen(false)} className="h-8 w-8 rounded-[8px] hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center">
@@ -337,7 +337,7 @@ export default function Quotations() {
             </div>
 
             <div className="mt-6 flex items-center justify-end gap-2">
-              <button type="button" onClick={() => setModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-[#1A3356] rounded-[10px] hover:bg-gray-50 dark:hover:bg-gray-800">
+              <button type="button" onClick={() => setModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-zinc-800 rounded-[10px] hover:bg-gray-50 dark:hover:bg-gray-800">
                 Cancelar
               </button>
               <button type="submit" disabled={saving} data-testid="quotation-save-btn" className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] px-4 py-2 text-sm font-medium disabled:opacity-60">

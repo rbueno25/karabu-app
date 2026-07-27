@@ -11,7 +11,7 @@ import {
   Plus, Trash2, AlertTriangle, CheckCircle, Sparkles, Layers, Eye
 } from "lucide-react";
 
-const inputCls = "w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#132D52] text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-shadow";
+const inputCls = "w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-shadow";
 
 export default function QuotationSheet() {
   const { id } = useParams();
@@ -153,7 +153,7 @@ export default function QuotationSheet() {
         <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-brand-navy/3 dark:bg-brand-navy/6 rounded-full blur-3xl" />
       </div>
       <div className="flex items-center gap-3">
-        <Link to="/admin/cotizaciones" className="h-9 w-9 border border-gray-200 dark:border-[#1A3356] rounded-[10px] bg-white dark:bg-[#0F2444] flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors" data-testid="quotation-back-btn"><ArrowLeft className="h-4 w-4" /></Link>
+        <Link to="/admin/cotizaciones" className="h-9 w-9 border border-gray-200 dark:border-zinc-800 rounded-[10px] bg-white dark:bg-zinc-900 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors" data-testid="quotation-back-btn"><ArrowLeft className="h-4 w-4" /></Link>
         <div className="flex-1">
           <div className="flex items-center gap-2.5"><h1 className="text-2xl font-semibold tracking-tight text-gray-900 dark:text-gray-100">Cotización</h1><StatusBadge value={form.status} /></div>
           <p className="text-xs text-gray-500 dark:text-gray-300">ID Cotización: {quotation.id}</p>
@@ -167,7 +167,7 @@ export default function QuotationSheet() {
       </div>
 
       <div className="grid grid-cols-12 gap-6">
-        <form onSubmit={handleSave} className="col-span-12 lg:col-span-8 bg-white dark:bg-[#0F2444] rounded-[20px] shadow-[0_4px_24px_rgba(15,42,74,0.06),0_1px_4px_rgba(0,168,150,0.04)] border border-brand-turquoise/10 overflow-hidden relative">
+        <form onSubmit={handleSave} className="col-span-12 lg:col-span-8 bg-white dark:bg-zinc-900 rounded-[20px] shadow-[0_4px_24px_rgba(15,42,74,0.06),0_1px_4px_rgba(0,168,150,0.04)] border border-brand-turquoise/10 overflow-hidden relative">
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-navy via-brand-turquoise to-brand-orange" />
           <div className="p-8 border-b border-brand-turquoise/10 dark:border-brand-turquoise/20 bg-gradient-to-br from-brand-navy/3 via-white to-brand-turquoise/5 dark:from-brand-navy/15 dark:via-brand-navy/10 dark:to-brand-turquoise/10 flex justify-between items-start flex-wrap gap-4">
             <div>
@@ -212,7 +212,7 @@ export default function QuotationSheet() {
 
             {/* Destino y Fechas */}
             <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-[#1A3356] pb-2">Destino y Fechas</h3>
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-zinc-800 pb-2">Destino y Fechas</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Field label="Destino del Viaje" required><input data-testid="quotation-destination" required value={form.destination} onChange={(e) => setForm({ ...form, destination: e.target.value })} className={inputCls} /></Field>
                 <Field label="Cantidad de Viajeros" required><input data-testid="quotation-travelers" type="number" min={1} required value={form.travelers} onChange={(e) => setForm({ ...form, travelers: e.target.value })} className={inputCls} /></Field>
@@ -241,7 +241,7 @@ export default function QuotationSheet() {
 
             {/* DESGLOSE POR SERVICIO */}
             <div className="space-y-4 pt-2">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-100 dark:border-[#1A3356] pb-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-100 dark:border-zinc-800 pb-2">
                 <div>
                   <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2"><Layers className="h-4 w-4 text-[#0D9387]" />Desglose por Servicio</h3>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Agrega servicios individuales con nombre y precio. El total se calcula automáticamente.</p>
@@ -255,7 +255,7 @@ export default function QuotationSheet() {
                 </div>
               </div>
 
-              <div className="p-3.5 bg-gray-50 dark:bg-[#132D52]/50 rounded-[12px] border border-gray-200 dark:border-gray-700 space-y-3">
+              <div className="p-3.5 bg-gray-50 dark:bg-zinc-800/50 rounded-[12px] border border-gray-200 dark:border-gray-700 space-y-3">
                 <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
                   <div className="sm:col-span-7"><label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">Nombre del Servicio</label><input data-testid="service-name-input" value={newServiceName} onChange={(e) => setNewServiceName(e.target.value)} placeholder="Ej: Vuelos ida y vuelta, Hospedaje..." className={inputCls} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddService(); } }} /></div>
                   <div className="sm:col-span-3"><label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">Precio Individual ($)</label><div className="relative"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">$</span><input data-testid="service-price-input" type="number" step="0.01" min="0" value={newServicePrice} onChange={(e) => setNewServicePrice(e.target.value)} placeholder="0.00" className={`${inputCls} pl-6`} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddService(); } }} /></div></div>
@@ -264,12 +264,12 @@ export default function QuotationSheet() {
               </div>
 
               {form.services && form.services.length > 0 ? (
-                <div className="space-y-2 border border-gray-200 dark:border-gray-700/80 rounded-[12px] p-3 bg-white dark:bg-[#0F2444]">
+                <div className="space-y-2 border border-gray-200 dark:border-gray-700/80 rounded-[12px] p-3 bg-white dark:bg-zinc-900">
                   {form.services.map((srv, index) => (
-                    <div key={srv.id || index} className="flex flex-col sm:flex-row sm:items-center gap-2 p-2.5 rounded-lg bg-gray-50 dark:bg-[#132D52] border border-gray-150 dark:border-gray-700/50">
+                    <div key={srv.id || index} className="flex flex-col sm:flex-row sm:items-center gap-2 p-2.5 rounded-lg bg-gray-50 dark:bg-zinc-800 border border-gray-150 dark:border-gray-700/50">
                       <div className="flex-1"><input value={srv.name} onChange={(e) => handleUpdateService(index, "name", e.target.value)} className="w-full bg-transparent font-medium text-sm text-gray-900 dark:text-gray-100 border-b border-transparent hover:border-gray-300 focus:border-blue-500 outline-none px-1 py-0.5" /></div>
                       <div className="flex items-center gap-2 shrink-0">
-                        <div className="relative w-32"><span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs">$</span><input type="number" step="0.01" min="0" value={srv.price} onChange={(e) => handleUpdateService(index, "price", e.target.value)} className="w-full pl-6 pr-2 py-1 text-right font-bold text-sm bg-white dark:bg-[#0F2444] border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:text-gray-100 outline-none focus:border-blue-500" /></div>
+                        <div className="relative w-32"><span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs">$</span><input type="number" step="0.01" min="0" value={srv.price} onChange={(e) => handleUpdateService(index, "price", e.target.value)} className="w-full pl-6 pr-2 py-1 text-right font-bold text-sm bg-white dark:bg-zinc-900 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:text-gray-100 outline-none focus:border-blue-500" /></div>
                         <span className="text-xs text-gray-400 font-semibold">{form.currency}</span>
                         <button type="button" onClick={() => handleRemoveService(index)} title="Eliminar servicio" className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition"><Trash2 className="h-4 w-4" /></button>
                       </div>
@@ -303,7 +303,7 @@ export default function QuotationSheet() {
 
             {/* Precio de la Propuesta */}
             <div className="space-y-4 pt-2">
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-[#1A3356] pb-2">Precio de la Propuesta</h3>
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-zinc-800 pb-2">Precio de la Propuesta</h3>
               <div className="grid grid-cols-3 gap-4">
                 <div className="col-span-2"><Field label="Monto Cotizado" required><input data-testid="quotation-amount" type="number" step="0.01" min={0} required value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} className={inputCls} /></Field></div>
                 <div><Field label="Moneda" required><select data-testid="quotation-currency" value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })} className={inputCls}><option>USD</option><option>COP</option><option>EUR</option><option>MXN</option></select></Field></div>
@@ -312,7 +312,7 @@ export default function QuotationSheet() {
 
             {/* Comparativa de Precios */}
             <div className="space-y-4 pt-2">
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-[#1A3356] pb-2">Comparativa de Precios</h3>
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-zinc-800 pb-2">Comparativa de Precios</h3>
               <div className="grid grid-cols-2 gap-4">
                 <Field label="Precio en Booking.com"><div className="relative"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span><input data-testid="quotation-booking-price" type="number" step="0.01" min={0} value={form.booking_price} onChange={(e) => setForm({ ...form, booking_price: e.target.value })} placeholder="0.00" className={`${inputCls} pl-7`} /></div></Field>
                 <Field label="Precio en Expedia"><div className="relative"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span><input data-testid="quotation-expedia-price" type="number" step="0.01" min={0} value={form.expedia_price} onChange={(e) => setForm({ ...form, expedia_price: e.target.value })} placeholder="0.00" className={`${inputCls} pl-7`} /></div></Field>
@@ -357,7 +357,7 @@ export default function QuotationSheet() {
         {/* Sidebar */}
         <div className="col-span-12 lg:col-span-4 space-y-6">
           {quotation.form_data && Object.keys(quotation.form_data).length > 0 && (
-            <div className="bg-white dark:bg-[#0F2444] rounded-[16px] border border-green-200 dark:border-green-800 p-6 shadow-[0_1px_3px_0_rgba(0,0,0,0.05)]">
+            <div className="bg-white dark:bg-zinc-900 rounded-[16px] border border-green-200 dark:border-green-800 p-6 shadow-[0_1px_3px_0_rgba(0,0,0,0.05)]">
               <h3 className="text-sm font-semibold text-green-700 dark:text-green-400 border-b border-green-100 dark:border-green-800 pb-3 mb-4 flex items-center gap-2"><User className="h-4 w-4" /> Datos del Formulario Web</h3>
               <div className="space-y-3 text-sm">
                 {quotation.form_data.fullName && <div className="flex justify-between"><span className="text-gray-400 dark:text-gray-400 font-medium">Nombre:</span><span className="text-gray-900 dark:text-gray-100 font-semibold">{quotation.form_data.fullName}</span></div>}
@@ -369,8 +369,8 @@ export default function QuotationSheet() {
             </div>
           )}
 
-          <div className="bg-white dark:bg-[#0F2444] rounded-[20px] shadow-[0_2px_12px_rgba(15,42,74,0.04)] border border-brand-turquoise/8 p-6">
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-[#1A3356] pb-3 mb-4">Información del Sistema</h3>
+          <div className="bg-white dark:bg-zinc-900 rounded-[20px] shadow-[0_2px_12px_rgba(15,42,74,0.04)] border border-brand-turquoise/8 p-6">
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-zinc-800 pb-3 mb-4">Información del Sistema</h3>
             <div className="space-y-3.5 text-sm">
               <div className="flex justify-between"><span className="text-gray-400 dark:text-gray-400 font-medium">Estado actual:</span><StatusBadge value={quotation.status} /></div>
               <div className="flex justify-between"><span className="text-gray-400 dark:text-gray-400 font-medium">Última actualización:</span><span className="text-gray-700 dark:text-gray-300 font-medium">{formatDate(quotation.updated_at)}</span></div>
@@ -382,7 +382,7 @@ export default function QuotationSheet() {
       {/* Send Modal */}
       {sendModalOpen && (
         <div data-testid="send-modal" className="fixed inset-0 z-50 flex items-start justify-center bg-gray-900/50 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="mt-16 bg-white dark:bg-[#0F2444] rounded-[16px] shadow-xl border border-gray-200 dark:border-[#1A3356] w-full max-w-sm p-6">
+          <div className="mt-16 bg-white dark:bg-zinc-900 rounded-[16px] shadow-xl border border-gray-200 dark:border-zinc-800 w-full max-w-sm p-6">
             <div className="flex items-center justify-between mb-5"><h3 className="text-base font-bold text-gray-900 dark:text-gray-100">Enviar Cotización</h3><button type="button" onClick={() => setSendModalOpen(false)} className="h-8 w-8 rounded-[8px] hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center"><X className="h-4 w-4 text-gray-500 dark:text-gray-300" /></button></div>
             <p className="text-sm text-gray-500 dark:text-gray-300 mb-5">Elige el canal por el cual deseas enviarle la propuesta interactiva al cliente.</p>
             <div className="space-y-3">
@@ -396,18 +396,18 @@ export default function QuotationSheet() {
       {/* Success Modal */}
       {successModalOpen && (
         <div data-testid="success-modal" className="fixed inset-0 z-50 flex items-start justify-center bg-gray-900/50 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="mt-16 bg-white dark:bg-[#0F2444] rounded-[16px] shadow-xl border border-gray-200 dark:border-[#1A3356] w-full max-w-md p-6 space-y-4">
+          <div className="mt-16 bg-white dark:bg-zinc-900 rounded-[16px] shadow-xl border border-gray-200 dark:border-zinc-800 w-full max-w-md p-6 space-y-4">
             <div className="flex items-center justify-between mb-2"><h3 className="text-base font-bold text-gray-900 dark:text-gray-100">Propuesta Generada Correctamente</h3><button type="button" onClick={() => setSuccessModalOpen(false)} className="h-8 w-8 rounded-[8px] hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center"><X className="h-4 w-4 text-gray-500 dark:text-gray-300" /></button></div>
             <p className="text-sm text-gray-600 dark:text-gray-300">La cotización ha sido guardada con el estado <strong>"Enviada"</strong>. Ya se puede compartir el enlace con el cliente.</p>
             <div className="space-y-2"><span className="text-xs font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wider block">Enlace Público de la Propuesta</span>
-              <div className="flex items-center gap-1.5"><input readOnly value={clientLink} className="flex-1 bg-gray-50 dark:bg-[#132D52] border border-gray-200 dark:border-[#1A3356] rounded-[8px] px-3 py-2 text-xs text-gray-600 dark:text-gray-300 font-mono focus:outline-none" /><button onClick={copyClientLink} className="h-9 w-9 bg-gray-100 dark:bg-[#132D52] hover:bg-gray-250 rounded-[8px] flex items-center justify-center text-gray-600 dark:text-gray-300 shrink-0 transition-colors"><Clipboard className="h-4 w-4" /></button></div>
+              <div className="flex items-center gap-1.5"><input readOnly value={clientLink} className="flex-1 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-800 rounded-[8px] px-3 py-2 text-xs text-gray-600 dark:text-gray-300 font-mono focus:outline-none" /><button onClick={copyClientLink} className="h-9 w-9 bg-gray-100 dark:bg-zinc-800 hover:bg-gray-250 rounded-[8px] flex items-center justify-center text-gray-600 dark:text-gray-300 shrink-0 transition-colors"><Clipboard className="h-4 w-4" /></button></div>
             </div>
             {sendingPlatform === "whatsapp" ? (
               <div className="pt-2"><a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="w-full inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white rounded-[10px] py-2.5 text-sm font-semibold transition-colors"><ExternalLink className="h-4 w-4" /> Abrir WhatsApp Web</a></div>
             ) : (
-              <div className="pt-2 bg-gray-50 dark:bg-[#132D52] p-4 rounded-[10px] border"><span className="text-xs font-bold text-gray-600 dark:text-gray-300 block mb-1">Correo Preparado</span><p className="text-xs text-gray-500 dark:text-gray-300">Puedes copiar el enlace y redactar el correo a <strong>{client.email}</strong>.</p></div>
+              <div className="pt-2 bg-gray-50 dark:bg-zinc-800 p-4 rounded-[10px] border"><span className="text-xs font-bold text-gray-600 dark:text-gray-300 block mb-1">Correo Preparado</span><p className="text-xs text-gray-500 dark:text-gray-300">Puedes copiar el enlace y redactar el correo a <strong>{client.email}</strong>.</p></div>
             )}
-            <div className="flex justify-end pt-2"><button type="button" onClick={() => setSuccessModalOpen(false)} className="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-[#1A3356] rounded-[10px] hover:bg-gray-50 dark:hover:bg-gray-800">Cerrar</button></div>
+            <div className="flex justify-end pt-2"><button type="button" onClick={() => setSuccessModalOpen(false)} className="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-zinc-800 rounded-[10px] hover:bg-gray-50 dark:hover:bg-gray-800">Cerrar</button></div>
           </div>
         </div>
       )}
@@ -415,11 +415,11 @@ export default function QuotationSheet() {
       {/* Delete Modal */}
       {deleteModalOpen && (
         <div data-testid="delete-confirm-modal" className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm p-4">
-          <div className="bg-white dark:bg-[#0F2444] rounded-[16px] shadow-2xl border border-gray-200 dark:border-[#1A3356] w-full max-w-md p-6 space-y-4">
+          <div className="bg-white dark:bg-zinc-900 rounded-[16px] shadow-2xl border border-gray-200 dark:border-zinc-800 w-full max-w-md p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3"><div className="flex items-center gap-2 text-red-600 dark:text-red-400 font-bold text-lg"><AlertTriangle className="h-5 w-5" /><span>Eliminar Cotización</span></div><button type="button" onClick={() => setDeleteModalOpen(false)} className="h-8 w-8 rounded-[8px] hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center"><X className="h-4 w-4 text-gray-500 dark:text-gray-300" /></button></div>
             <p className="text-sm text-gray-700 dark:text-gray-300">¿Estás seguro de que deseas eliminar esta cotización? Esta acción es irreversible.</p>
             <div className="flex items-center justify-end gap-3 pt-2">
-              <button type="button" onClick={() => setDeleteModalOpen(false)} disabled={deleting} className="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-[#1A3356] rounded-[10px] hover:bg-gray-50 dark:hover:bg-gray-800">Cancelar</button>
+              <button type="button" onClick={() => setDeleteModalOpen(false)} disabled={deleting} className="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-zinc-800 rounded-[10px] hover:bg-gray-50 dark:hover:bg-gray-800">Cancelar</button>
               <button type="button" onClick={handleDeleteQuotation} disabled={deleting} data-testid="confirm-delete-btn" className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white rounded-[10px] px-4 py-2 text-sm font-semibold transition-colors shadow-sm disabled:opacity-50">{deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}Sí, eliminar</button>
             </div>
           </div>

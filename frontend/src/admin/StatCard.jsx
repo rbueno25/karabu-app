@@ -14,7 +14,7 @@ export default function StatCard({ title, value, icon: Icon, hint, testId, color
   const card = (
     <div
       data-testid={testId}
-      className={`bg-white dark:bg-[#0F2444] rounded-[16px] border border-gray-200 dark:border-[#1A3356] p-6 shadow-[0_1px_3px_0_rgba(0,0,0,0.04)] ${
+      className={`bg-white dark:bg-zinc-900 rounded-[16px] border border-gray-200 dark:border-zinc-800 p-6 shadow-[0_1px_3px_0_rgba(0,0,0,0.04)] ${
         to ? "hover:border-brand-turquoise/40 hover:shadow-md transition-all cursor-pointer group" : ""
       }`}
     >
