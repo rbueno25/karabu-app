@@ -44,14 +44,14 @@ export function Navbar({ id, status, darkMode, onToggleDarkMode }) {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-white/80 dark:bg-[#070F1E]/85 border-b border-slate-200/80 dark:border-slate-800/80 transition-colors">
+    <header className="fixed top-0 left-0 right-0 z-50 w-full backdrop-blur-md bg-black/25 border-b border-white/10 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         
         {/* Brand — usa el mismo Logo de la página principal */}
         <div className="flex items-center gap-3">
           <Logo light={darkMode} showText={true} className="scale-[0.7] origin-left" />
           <div className="hidden sm:block">
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+            <p className="text-[11px] text-white/70 font-medium">
               Cotización Personalizada #{id}
             </p>
           </div>
@@ -59,8 +59,8 @@ export function Navbar({ id, status, darkMode, onToggleDarkMode }) {
 
         {/* Center / Status */}
         <div className="hidden md:flex items-center gap-2">
-          <FileCheck2 className="w-4 h-4 text-slate-400" />
-          <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Estado:</span>
+          <FileCheck2 className="w-4 h-4 text-white/50" />
+          <span className="text-xs text-white/70 font-medium">Estado:</span>
           {getStatusBadge()}
         </div>
 
@@ -68,7 +68,7 @@ export function Navbar({ id, status, darkMode, onToggleDarkMode }) {
         <div className="flex items-center gap-2 sm:gap-3">
           <button
             onClick={handleShare}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-700 dark:text-slate-200 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 transition"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-white/80 bg-white/10 hover:bg-white/20 border border-white/10 transition"
             title="Copiar enlace de cotización"
           >
             {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Share2 className="w-3.5 h-3.5" />}
@@ -77,10 +77,10 @@ export function Navbar({ id, status, darkMode, onToggleDarkMode }) {
 
           <button
             onClick={onToggleDarkMode}
-            className="p-2 rounded-lg text-slate-600 dark:text-slate-300 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 transition"
+            className="p-2 rounded-lg text-white/70 bg-white/10 hover:bg-white/20 border border-white/10 transition"
             aria-label="Cambiar tema"
           >
-            {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
+            {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-white" />}
           </button>
         </div>
       </div>

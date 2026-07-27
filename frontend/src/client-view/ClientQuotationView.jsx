@@ -2,13 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { getQuotation, updateQuotationStatus } from './api-adapter';
 import { Navbar } from './components/Navbar';
 import { HeroBanner } from './components/HeroBanner';
-import { MetricsCards } from './components/MetricsCards';
-import { FormDataDetails } from './components/FormDataDetails';
-import { ItinerarySection } from './components/ItinerarySection';
-import { DestinationGallery } from './components/DestinationGallery';
-import { BrokerCard } from './components/BrokerCard';
-import { DecisionPanel } from './components/DecisionPanel';
-import { PriceComparison } from './components/PriceComparison';
+import { PriceBreakdown } from './components/PriceBreakdown';
 import { Compass, Loader2, AlertCircle, RefreshCw, ShieldCheck } from 'lucide-react';
 
 export default function ClientQuotationView() {
@@ -23,7 +17,6 @@ export default function ClientQuotationView() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
   const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
@@ -67,10 +60,16 @@ export default function ClientQuotationView() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#070F1E] text-slate-900 dark:text-slate-100 flex flex-col transition-colors duration-300">
-      <Navbar id={currentId} status={data?.quotation.status || 'enviada'} darkMode={darkMode}
-        onToggleDarkMode={() => setDarkMode(!darkMode)} onSelectQuotation={handleSelectId} />
+      {/* Navbar — flotante sobre el hero, mismo diseño de siempre */}
+      <Navbar
+        id={currentId}
+        status={data?.quotation.status || 'enviada'}
+        darkMode={darkMode}
+        onToggleDarkMode={() => setDarkMode(!darkMode)}
+        onSelectQuotation={handleSelectId}
+      />
 
-      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <main className="flex-1">
         {loading ? (
           <div className="min-h-[500px] flex flex-col items-center justify-center gap-4 text-center">
             <div className="w-16 h-16 rounded-2xl bg-[#00A896]/10 text-[#00A896] flex items-center justify-center animate-pulse">
@@ -88,30 +87,31 @@ export default function ClientQuotationView() {
               <h3 className="text-xl font-bold text-slate-900 dark:text-white">No pudimos cargar la cotización #{currentId}</h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mt-1">{error}</p>
             </div>
-            <button onClick={() => loadQuotationData(currentId)}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-[#00A896] hover:bg-[#008F80] transition shadow-md">
+            <button
+              onClick={() => loadQuotationData(currentId)}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-[#00A896] hover:bg-[#008F80] transition shadow-md"
+            >
               <RefreshCw className="w-4 h-4" />Reintentar
             </button>
           </div>
         ) : data ? (
-          <div className="space-y-6">
-            <HeroBanner data={data} />
-            <MetricsCards quotation={data.quotation} formData={data.quotation.form_data} />
-            <FormDataDetails formData={data.quotation.form_data} />
-            <PriceComparison quotation={data.quotation} />
-            <ItinerarySection quotation={data.quotation} />
-            <DestinationGallery destination={data.quotation.destination} images={data.quotation.gallery_images} />
-            <BrokerCard broker={data.broker} quotationId={data.quotation.id} />
-            <DecisionPanel quotationId={data.quotation.id} currentStatus={data.quotation.status}
-              currentNotes={data.quotation.notes} onUpdateStatus={handleUpdateStatus} />
-          </div>
+          <>
+            {/* SECCIÓN 1 — Hero full-screen con toda la info + botones */}
+            <HeroBanner data={data} onUpdateStatus={handleUpdateStatus} />
+
+            {/* SECCIÓN 2 — Desglose de pago */}
+            <PriceBreakdown data={data} />
+          </>
         ) : null}
       </main>
 
+      {/* Footer */}
       <footer className="w-full border-t border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#070F1E] py-8 px-4 text-center text-xs text-slate-500 dark:text-slate-400 mt-12">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-slate-800 dark:text-white">KARABU <span className="text-[#00A896]">VIAJES</span></span>
+            <span className="font-bold text-slate-800 dark:text-white">
+              KARABU <span className="text-[#00A896]">VIAJES</span>
+            </span>
             <span>— Propuesta Digital de Viaje</span>
           </div>
           <div className="flex items-center gap-1 text-slate-400">
