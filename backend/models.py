@@ -101,6 +101,8 @@ class Quotation(Base):
     currency = Column(String, default="USD")
     notes = Column(Text, default="")
     assigned_hotel = Column(String, default="")  # hotel assigned by advisor if client didn't specify
+    room_type = Column(String, default="")  # tipo de habitación (ej: Doble Deluxe, Suite)
+    services = Column(JSON, default=list)  # desglose por servicio [{name, price}, ...]
     booking_price = Column(Float, nullable=True)  # comparison: Booking.com price
     expedia_price = Column(Float, nullable=True)  # comparison: Expedia price
     form_data = Column(JSON, default=dict)  # raw form submission data for public leads
@@ -120,6 +122,8 @@ class Quotation(Base):
             "travelers": self.travelers, "amount": self.amount, "currency": self.currency,
             "notes": self.notes, "status": self.status,
             "assigned_hotel": self.assigned_hotel,
+            "room_type": self.room_type,
+            "services": self.services or [],
             "booking_price": self.booking_price, "expedia_price": self.expedia_price,
             "form_data": self.form_data or {},
             "sent_via": self.sent_via, "sent_at": self.sent_at,

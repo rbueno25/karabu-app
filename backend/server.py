@@ -138,6 +138,8 @@ class QuotationIn(BaseModel):
     currency: str = "USD"
     notes: Optional[str] = ""
     assigned_hotel: Optional[str] = ""
+    room_type: Optional[str] = ""
+    services: Optional[list] = []
     booking_price: Optional[float] = None
     expedia_price: Optional[float] = None
     status: str = "borrador"
@@ -447,8 +449,8 @@ class ClientStatusUpdate(BaseModel):
 @api.patch("/quotations/{qid}/status")
 async def client_update_status(qid: str, body: ClientStatusUpdate, db: AsyncSession = Depends(get_db)):
     """Public: client accepts or rejects their quotation."""
-    if body.status not in ("aceptada", "rechazada"):
-        raise HTTPException(status_code=400, detail="Estado inválido. Usa 'aceptada' o 'rechazada'")
+    if body.status not in ("aceptada", "rechazada", "cambios_solicitados"):
+        raise HTTPException(status_code=400, detail="Estado invalido")
     result = await db.execute(select(Quotation).where(Quotation.id == qid))
     q = result.scalar_one_or_none()
     if not q:
@@ -1505,6 +1507,16 @@ async def geo_lugares(slug: str = "punta_cana", db: AsyncSession = Depends(get_d
 @app.on_event("startup")
 async def startup():
     await init_db()
+
+    # Migración: agregar columnas nuevas si no existen
+    async with engine.begin() as conn:
+        await conn.run_sync(lambda sync_conn: sync_conn.execute(
+            __import__('sqlalchemy').text("ALTER TABLE quotations ADD COLUMN IF NOT EXISTS room_type VARCHAR DEFAULT ''")
+        ))
+        await conn.run_sync(lambda sync_conn: sync_conn.execute(
+            __import__('sqlalchemy').text("ALTER TABLE quotations ADD COLUMN IF NOT EXISTS services JSONB DEFAULT '[]'")
+        ))
+        logger.info("Migration: room_type and services columns ensured")
 
     async with AsyncSessionLocal() as session:
         # Seed admin user — only from env vars, no defaults

@@ -39,6 +39,7 @@ const Payments = lazy(() => import('./admin/Payments'));
 const AdminDestinations = lazy(() => import('./admin/Destinations'));
 const UsersPage = lazy(() => import('./admin/Users'));
 const Settings = lazy(() => import('./admin/Settings'));
+const InvoiceView = lazy(() => import('./admin/InvoiceView'));
 
 function AdminLoader() {
   return (
@@ -136,6 +137,8 @@ export default function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
           {/* Public client quotation view — no auth required */}
           <Route path="/cotizacion/:id" element={<Suspense fallback={<AdminLoader />}><ClientQuotationView /></Suspense>} />
+          {/* Public invoice view — no auth required */}
+          <Route path="/factura/:id" element={<Suspense fallback={<AdminLoader />}><InvoiceView /></Suspense>} />
         </Routes>
       </AuthProvider>
       </ThemeProvider>
