@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import Logo from '../components/Logo';
 import { getQuotation, updateQuotationStatus } from './api-adapter';
 import {
   Compass, Loader2, AlertCircle, RefreshCw, ShieldCheck,
@@ -152,13 +153,7 @@ export default function ClientQuotationView() {
         {/* NAVBAR FLOTANTE */}
         <header className="relative z-30 w-full max-w-7xl mx-auto px-4 sm:px-8 py-4 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center p-1.5 shadow-lg">
-              <img src="/colibri.svg" alt="Karabu" className="w-full h-full object-contain filter drop-shadow" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-base sm:text-lg font-extrabold text-white tracking-wider leading-none drop-shadow-md">KARABU <span className="text-[#0D9387]">VIAJES</span></span>
-              <span className="text-[10px] uppercase tracking-widest text-teal-200 font-semibold drop-shadow-sm">Cotización de Viaje</span>
-            </div>
+            <Logo light={true} showText={true} className="scale-[0.65] origin-left" />
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
@@ -343,7 +338,7 @@ export default function ClientQuotationView() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               <div className="rounded-2xl border-2 border-[#0D9387] bg-white dark:bg-[#0F2A4A] overflow-hidden shadow-xl flex flex-col items-center p-5 text-center">
-                <div className="w-full h-36 rounded-xl bg-[#0F2A4A] flex items-center justify-center p-3 mb-4 shadow-inner"><img src="/karabu-logo.svg" alt="Karabu" className="h-full w-full object-contain rounded-lg" /></div>
+                <div className="w-full h-36 rounded-xl bg-[#0F2A4A] flex items-center justify-center p-3 mb-4 shadow-inner"><img src="/karabu-comparador.jpeg" alt="Karabu" className="h-full w-full object-contain rounded-lg" /></div>
                 <div className="text-sm font-extrabold text-[#0F2A4A] dark:text-white uppercase tracking-wider mb-1">Karabu Viajes</div>
                 <div className="text-2xl sm:text-3xl font-black text-[#0D9387]">${totalAmount.toLocaleString()} <span className="text-xs font-bold text-slate-500">USD</span></div>
               </div>
