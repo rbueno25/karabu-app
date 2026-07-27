@@ -243,18 +243,21 @@ export default function QuotationSheet() {
               </Field>
             </div>
 
-            {/* Impuesto + Imagen Hero */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-              <Field label="Impuesto (ITBIS %)">
-                <div className="relative">
-                  <input data-testid="quotation-tax" type="number" min="0" max="100" step="1" value={form.tax_percent} onChange={(e) => setForm({ ...form, tax_percent: e.target.value })} className={inputCls} />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">%</span>
-                </div>
-              </Field>
+            {/* Configuración del Entregable */}
+            <div className="space-y-4 pt-2">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-zinc-800 pb-2">Configuración del Entregable</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Field label="Impuesto (ITBIS %)">
+                  <div className="relative">
+                    <input data-testid="quotation-tax" type="number" min="0" max="100" step="1" value={form.tax_percent} onChange={(e) => setForm({ ...form, tax_percent: e.target.value })} className={inputCls} />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">%</span>
+                  </div>
+                </Field>
 
-              <Field label="Imagen del Hero (URL)">
-                <input data-testid="quotation-hero-image" value={form.hero_image} onChange={(e) => setForm({ ...form, hero_image: e.target.value })} placeholder="https://... o deja vacío para usar la del destino" className={inputCls} />
-              </Field>
+                <Field label="Imagen del Hero (URL)">
+                  <input data-testid="quotation-hero-image" value={form.hero_image} onChange={(e) => setForm({ ...form, hero_image: e.target.value })} placeholder="https://... o deja vacío para usar la del destino" className={inputCls} />
+                </Field>
+              </div>
             </div>
 
             {/* DESGLOSE POR SERVICIO */}
