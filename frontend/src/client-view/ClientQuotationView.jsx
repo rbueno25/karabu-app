@@ -338,7 +338,7 @@ export default function ClientQuotationView() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               <div className="rounded-2xl border-2 border-[#0D9387] bg-white dark:bg-[#0F2A4A] overflow-hidden shadow-xl flex flex-col items-center p-5 text-center">
-                <div className="w-full h-36 rounded-xl bg-[#0F2A4A] flex items-center justify-center p-3 mb-4 shadow-inner"><img src="/karabu-comparador.jpeg" alt="Karabu" className="h-full w-full object-contain rounded-lg" /></div>
+                <div className="w-full h-36 rounded-xl bg-white flex items-center justify-center p-3 mb-4 shadow-inner"><img src="/karabu-comparador.jpeg" alt="Karabu" className="h-full w-full object-contain rounded-lg" /></div>
                 <div className="text-sm font-extrabold text-[#0F2A4A] dark:text-white uppercase tracking-wider mb-1">Karabu Viajes</div>
                 <div className="text-2xl sm:text-3xl font-black text-[#0D9387]">${totalAmount.toLocaleString()} <span className="text-xs font-bold text-slate-500">USD</span></div>
               </div>
