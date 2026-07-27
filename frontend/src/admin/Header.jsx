@@ -4,7 +4,6 @@ import { useAuth } from "./AuthContext";
 import { useTheme } from "./ThemeContext";
 import { useLocation, useNavigate } from "react-router-dom";
 import NotificationDropdown from "./NotificationDropdown";
-import Logo from "../components/Logo";
 
 const CRUMB_MAP = {
   "/": ["Tablero"],
@@ -50,7 +49,6 @@ export default function Header() {
   return (
     <header data-testid="app-header" className="h-16 border-b border-gray-200 dark:border-zinc-800 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md flex items-center justify-between px-6 sm:px-8 sticky top-0 z-30 transition-colors">
       <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-zinc-400">
-        <Logo light={false} showText={false} className="[&_img]:w-[42px] [&_img]:h-[42px]" />
         {crumbs.map((c, i) => (
           <React.Fragment key={i}>
             <span className="text-gray-300 dark:text-zinc-600">/</span>

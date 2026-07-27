@@ -41,7 +41,7 @@ export default function Sidebar() {
       className="fixed inset-y-0 left-0 z-40 w-64 border-r border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 flex flex-col"
     >
       <div className="h-16 flex items-center gap-2 px-4 border-b border-gray-200 dark:border-zinc-800">
-        <Logo light={false} showText={true} className="scale-[0.55] origin-left" />
+        <Logo light={false} showText={true} className="scale-[0.7] origin-left" />
       </div>
 
       <nav className="flex-1 overflow-y-auto p-3 space-y-0.5">

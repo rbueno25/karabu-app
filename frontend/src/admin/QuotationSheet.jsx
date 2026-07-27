@@ -348,11 +348,30 @@ export default function QuotationSheet() {
                 <Field label="Precio en Expedia"><div className="relative"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span><input data-testid="quotation-expedia-price" type="number" step="0.01" min={0} value={form.expedia_price} onChange={(e) => setForm({ ...form, expedia_price: e.target.value })} placeholder="0.00" className={`${inputCls} pl-7`} /></div></Field>
               </div>
               {(form.booking_price || form.expedia_price) && (
-                <div className="mt-3 p-4 rounded-xl bg-gradient-to-r from-brand-turquoise/5 to-brand-orange/5 border border-brand-turquoise/20">
-                  <div className="grid grid-cols-3 gap-4 text-center text-sm">
-                    <div><span className="text-xs text-gray-400 dark:text-gray-400 block mb-1">Karabu</span><span className="font-bold text-brand-turquoise">{formatCurrency(form.amount, form.currency)}</span></div>
-                    <div><span className="text-xs text-gray-400 dark:text-gray-400 block mb-1">Booking</span><span className="font-semibold text-gray-600 dark:text-gray-300">{form.booking_price ? formatCurrency(Number(form.booking_price), form.currency) : '—'}</span></div>
-                    <div><span className="text-xs text-gray-400 dark:text-gray-400 block mb-1">Expedia</span><span className="font-semibold text-gray-600 dark:text-gray-300">{form.expedia_price ? formatCurrency(Number(form.expedia_price), form.currency) : '—'}</span></div>
+                <div className="rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden shadow-sm">
+                  <div className="grid grid-cols-2">
+                    {form.booking_price && Number(form.booking_price) > 0 && (
+                      <div className="flex flex-col items-center p-5 text-center border-r border-slate-200 dark:border-zinc-800">
+                        <div className="w-full h-28 rounded-xl bg-[#003580] flex items-center justify-center p-3 mb-3 shadow-inner">
+                          <img src="/booking-logo.svg" alt="Booking" className="h-full w-full object-contain rounded-lg" />
+                        </div>
+                        <div className="text-xs font-extrabold text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-1">Booking.com</div>
+                        <div className="text-xl font-black text-slate-800 dark:text-slate-200">
+                          {formatCurrency(Number(form.booking_price), form.currency)}
+                        </div>
+                      </div>
+                    )}
+                    {form.expedia_price && Number(form.expedia_price) > 0 && (
+                      <div className="flex flex-col items-center p-5 text-center">
+                        <div className="w-full h-28 rounded-xl bg-[#FFE000] flex items-center justify-center p-3 mb-3 shadow-inner">
+                          <img src="/expedia-logo.svg" alt="Expedia" className="h-full w-full object-contain rounded-lg" />
+                        </div>
+                        <div className="text-xs font-extrabold text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-1">Expedia</div>
+                        <div className="text-xl font-black text-slate-800 dark:text-slate-200">
+                          {formatCurrency(Number(form.expedia_price), form.currency)}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
