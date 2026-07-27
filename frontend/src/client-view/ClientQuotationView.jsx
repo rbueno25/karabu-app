@@ -158,9 +158,9 @@ export default function ClientQuotationView() {
           ? 'bg-white/95 dark:bg-[#0F2A4A]/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shadow-sm'
           : 'bg-transparent'
       }`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 py-4 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 py-2.5 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Logo light={!scrolled} showText={true} className="scale-[0.85] origin-left" />
+            <Logo light={!scrolled || darkMode} showText={true} className="scale-[1.0] origin-left" />
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
@@ -215,7 +215,7 @@ export default function ClientQuotationView() {
         <div className="absolute inset-0 bg-gradient-to-b from-[#0F2A4A]/70 via-black/30 to-black/85 pointer-events-none" />
 
         {/* Spacer para compensar el navbar fixed */}
-        <div className="shrink-0 h-20" />
+                <div className="shrink-0 h-16" />
 
         {/* SALUDO FLOTANTE */}
         <div className="relative z-20 w-full max-w-5xl mx-auto px-4 sm:px-6 my-auto text-center sm:text-left">
@@ -251,24 +251,6 @@ export default function ClientQuotationView() {
                 <div className="text-right border-l border-white/15 pl-3"><span className="text-[10px] text-slate-300 block">por persona</span><span className="text-sm font-bold text-teal-300">${perPersonAmount.toLocaleString()} USD</span></div>
               </div>
             </div>
-
-            {/* Anticipo + Impuesto info */}
-            {(depositPercent > 0 || taxPercent > 0) && (
-              <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {depositPercent > 0 && (
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#FF6B35]/15 border border-[#FF6B35]/30 text-xs text-orange-200">
-                    <span className="text-[10px] uppercase tracking-wider text-orange-300 font-bold">Anticipo {depositPercent}%</span>
-                    <span className="font-bold ml-auto">${depositAmount.toLocaleString()} USD</span>
-                  </div>
-                )}
-                {taxPercent > 0 && (
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/10 border border-white/10 text-xs text-slate-300">
-                    <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold">ITBIS {taxPercent}% incluido</span>
-                    <span className="font-bold ml-auto">${taxAmount.toLocaleString()} USD</span>
-                  </div>
-                )}
-              </div>
-            )}
 
             {inlineFeedback && (
               <div className={`p-3 rounded-xl border mb-3 text-xs font-semibold flex items-center gap-2 animate-in fade-in duration-200 ${

@@ -243,20 +243,8 @@ export default function QuotationSheet() {
               </Field>
             </div>
 
-            {/* Anticipo + Impuesto + Imagen Hero */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-              <Field label="% Anticipo / Seña">
-                <div className="relative">
-                  <input data-testid="quotation-deposit" type="number" min="0" max="100" step="1" value={form.deposit_percent} onChange={(e) => setForm({ ...form, deposit_percent: e.target.value })} className={inputCls} />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">%</span>
-                </div>
-                {form.deposit_percent > 0 && (
-                  <p className="text-xs text-teal-600 dark:text-teal-400 mt-1 font-semibold">
-                    Anticipo: {formatCurrency((Number(form.amount) * Number(form.deposit_percent) / 100), form.currency)}
-                  </p>
-                )}
-              </Field>
-
+            {/* Impuesto + Imagen Hero */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
               <Field label="Impuesto (ITBIS %)">
                 <div className="relative">
                   <input data-testid="quotation-tax" type="number" min="0" max="100" step="1" value={form.tax_percent} onChange={(e) => setForm({ ...form, tax_percent: e.target.value })} className={inputCls} />
