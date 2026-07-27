@@ -140,6 +140,9 @@ class QuotationIn(BaseModel):
     assigned_hotel: Optional[str] = ""
     room_type: Optional[str] = ""
     services: Optional[list] = []
+    deposit_percent: Optional[float] = 0
+    hero_image: Optional[str] = ""
+    tax_percent: Optional[float] = 18
     booking_price: Optional[float] = None
     expedia_price: Optional[float] = None
     status: str = "borrador"
@@ -1515,6 +1518,15 @@ async def startup():
         ))
         await conn.run_sync(lambda sync_conn: sync_conn.execute(
             __import__('sqlalchemy').text("ALTER TABLE quotations ADD COLUMN IF NOT EXISTS services JSONB DEFAULT '[]'")
+        ))
+        await conn.run_sync(lambda sync_conn: sync_conn.execute(
+            __import__('sqlalchemy').text("ALTER TABLE quotations ADD COLUMN IF NOT EXISTS deposit_percent FLOAT DEFAULT 0")
+        ))
+        await conn.run_sync(lambda sync_conn: sync_conn.execute(
+            __import__('sqlalchemy').text("ALTER TABLE quotations ADD COLUMN IF NOT EXISTS hero_image VARCHAR DEFAULT ''")
+        ))
+        await conn.run_sync(lambda sync_conn: sync_conn.execute(
+            __import__('sqlalchemy').text("ALTER TABLE quotations ADD COLUMN IF NOT EXISTS tax_percent FLOAT DEFAULT 18")
         ))
         logger.info("Migration: room_type and services columns ensured")
 

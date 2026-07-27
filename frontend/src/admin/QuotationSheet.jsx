@@ -24,6 +24,7 @@ export default function QuotationSheet() {
     destination: "", travel_date: "", return_date: "", travelers: 1,
     amount: 0, currency: "USD", notes: "", assigned_hotel: "",
     room_type: "", services: [], booking_price: "", expedia_price: "",
+    deposit_percent: 0, hero_image: "", tax_percent: 18,
     status: "borrador", sent_via: "", sent_at: ""
   });
 
@@ -52,6 +53,9 @@ export default function QuotationSheet() {
         assigned_hotel: q.assigned_hotel || q.form_data?.preferredHotel || "",
         room_type: q.room_type || q.form_data?.room_type || q.form_data?.hotelCategory || "",
         services: Array.isArray(q.services) ? q.services : [],
+        deposit_percent: q.deposit_percent ?? 0,
+        hero_image: q.hero_image || "",
+        tax_percent: q.tax_percent ?? 18,
         booking_price: q.booking_price || "", expedia_price: q.expedia_price || "",
         status: q.status || "borrador",
         sent_via: q.sent_via || q.form_data?.preferredContact || "",
@@ -236,6 +240,32 @@ export default function QuotationSheet() {
                     ))}
                   </div>
                 </div>
+              </Field>
+            </div>
+
+            {/* Anticipo + Impuesto + Imagen Hero */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+              <Field label="% Anticipo / Seña">
+                <div className="relative">
+                  <input data-testid="quotation-deposit" type="number" min="0" max="100" step="1" value={form.deposit_percent} onChange={(e) => setForm({ ...form, deposit_percent: e.target.value })} className={inputCls} />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">%</span>
+                </div>
+                {form.deposit_percent > 0 && (
+                  <p className="text-xs text-teal-600 dark:text-teal-400 mt-1 font-semibold">
+                    Anticipo: {formatCurrency((Number(form.amount) * Number(form.deposit_percent) / 100), form.currency)}
+                  </p>
+                )}
+              </Field>
+
+              <Field label="Impuesto (ITBIS %)">
+                <div className="relative">
+                  <input data-testid="quotation-tax" type="number" min="0" max="100" step="1" value={form.tax_percent} onChange={(e) => setForm({ ...form, tax_percent: e.target.value })} className={inputCls} />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">%</span>
+                </div>
+              </Field>
+
+              <Field label="Imagen del Hero (URL)">
+                <input data-testid="quotation-hero-image" value={form.hero_image} onChange={(e) => setForm({ ...form, hero_image: e.target.value })} placeholder="https://... o deja vacío para usar la del destino" className={inputCls} />
               </Field>
             </div>
 

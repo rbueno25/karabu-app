@@ -135,7 +135,11 @@ export default function ClientQuotationView() {
 
   const bookingPrice = q.booking_price || Math.round(totalAmount * 1.15);
   const expediaPrice = q.expedia_price || Math.round(totalAmount * 1.12);
-  const heroBgImage = q.gallery_images?.[0] || `https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&q=80&w=1920`;
+  const heroBgImage = q.hero_image || q.gallery_images?.[0] || `https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&q=80&w=1920`;
+  const depositPercent = q.deposit_percent || 0;
+  const depositAmount = Math.round(totalAmount * depositPercent / 100);
+  const taxPercent = q.tax_percent ?? 18;
+  const taxAmount = Math.round(totalAmount * taxPercent / 100);
 
   return (
     <div className="min-h-screen bg-white dark:bg-[#070F1E] text-slate-900 dark:text-slate-100 transition-colors duration-300 font-sans selection:bg-[#0D9387] selection:text-white">
@@ -216,6 +220,24 @@ export default function ClientQuotationView() {
                 <div className="text-right border-l border-white/15 pl-3"><span className="text-[10px] text-slate-300 block">por persona</span><span className="text-sm font-bold text-teal-300">${perPersonAmount.toLocaleString()} USD</span></div>
               </div>
             </div>
+
+            {/* Anticipo + Impuesto info */}
+            {(depositPercent > 0 || taxPercent > 0) && (
+              <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {depositPercent > 0 && (
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#FF6B35]/15 border border-[#FF6B35]/30 text-xs text-orange-200">
+                    <span className="text-[10px] uppercase tracking-wider text-orange-300 font-bold">Anticipo {depositPercent}%</span>
+                    <span className="font-bold ml-auto">${depositAmount.toLocaleString()} USD</span>
+                  </div>
+                )}
+                {taxPercent > 0 && (
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/10 border border-white/10 text-xs text-slate-300">
+                    <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold">ITBIS {taxPercent}% incluido</span>
+                    <span className="font-bold ml-auto">${taxAmount.toLocaleString()} USD</span>
+                  </div>
+                )}
+              </div>
+            )}
 
             {inlineFeedback && (
               <div className={`p-3 rounded-xl border mb-3 text-xs font-semibold flex items-center gap-2 animate-in fade-in duration-200 ${

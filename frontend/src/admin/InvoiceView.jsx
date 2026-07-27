@@ -55,7 +55,8 @@ export default function InvoiceView() {
             number: `FAC-${String(qData.id).slice(0, 8).toUpperCase()}`,
             currency: qData.currency || "USD",
             issueDate: qData.created_at ? qData.created_at.split("T")[0] : prev.issueDate,
-            notes: qData.notes || prev.notes
+            notes: qData.notes || prev.notes,
+            taxRate: qData.tax_percent ?? 18
           }));
           if (cliData) {
             setClient({
