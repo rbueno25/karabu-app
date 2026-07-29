@@ -805,7 +805,7 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full bg-brand-orange hover:bg-brand-orange/95 text-white font-bold py-4 rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+                      className="w-full bg-[#0D9387] hover:bg-[#0b7d72] text-white font-bold py-4 rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
                     >
                       {isSubmitting ? (
                         <>
