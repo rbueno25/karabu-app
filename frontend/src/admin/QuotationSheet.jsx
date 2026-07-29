@@ -291,6 +291,24 @@ export default function QuotationSheet() {
 
             <hr className="border-gray-100 dark:border-zinc-800" />
 
+            {/* Configuración */}
+            <Section title="Configuración del Entregable" icon={Eye} defaultOpen={false}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <Field label="Comisión extra (%)">
+                  <div className="relative">
+                    <input data-testid="quotation-tax" type="number" min="0" max="100" step="0.5" value={form.tax_percent || ''} onChange={(e) => setForm({ ...form, tax_percent: e.target.value })} className={`${inputCls} w-28`} placeholder="0" />
+                    <span className="absolute right-8 top-1/2 -translate-y-1/2 text-gray-400 text-xs">%</span>
+                  </div>
+                  <p className="text-[11px] text-gray-400 mt-0.5">Margen interno (no visible al cliente)</p>
+                </Field>
+                <Field label="Imagen Hero (URL)">
+                  <input data-testid="quotation-hero-image" value={form.hero_image} onChange={(e) => setForm({ ...form, hero_image: e.target.value })} placeholder="Vacío = imagen del destino" className={inputCls} />
+                </Field>
+              </div>
+            </Section>
+
+            <hr className="border-gray-100 dark:border-zinc-800" />
+
             {/* Desglose por Servicio */}
             <Section title="Desglose por Servicio" icon={Layers}>
               <div className="space-y-3">
@@ -383,24 +401,6 @@ export default function QuotationSheet() {
                     </div>
                   </div>
                 </div>
-              </div>
-            </Section>
-
-            <hr className="border-gray-100 dark:border-zinc-800" />
-
-            {/* Configuración */}
-            <Section title="Configuración del Entregable" icon={Eye} defaultOpen={false}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <Field label="Comisión extra (%)">
-                  <div className="relative">
-                    <input data-testid="quotation-tax" type="number" min="0" max="100" step="0.5" value={form.tax_percent || ''} onChange={(e) => setForm({ ...form, tax_percent: e.target.value })} className={`${inputCls} w-28`} placeholder="0" />
-                    <span className="absolute right-8 top-1/2 -translate-y-1/2 text-gray-400 text-xs">%</span>
-                  </div>
-                  <p className="text-[11px] text-gray-400 mt-0.5">Margen interno (no visible al cliente)</p>
-                </Field>
-                <Field label="Imagen Hero (URL)">
-                  <input data-testid="quotation-hero-image" value={form.hero_image} onChange={(e) => setForm({ ...form, hero_image: e.target.value })} placeholder="Vacío = imagen del destino" className={inputCls} />
-                </Field>
               </div>
             </Section>
 
