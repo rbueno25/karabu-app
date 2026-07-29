@@ -74,20 +74,42 @@ export default function QuotationSheet() {
     const priceToUse = priceOverride !== undefined ? priceOverride : newServicePrice;
     if (!nameToUse.trim()) { toast.error("Ingresa el nombre del servicio"); return; }
     const priceNum = parseFloat(priceToUse) || 0;
+    // Validar que no exista otro servicio con el mismo precio
+    const duplicate = (form.services || []).find(s => Number(s.price) === priceNum);
+    if (duplicate && priceNum > 0) {
+      toast.error(`Ya existe "${duplicate.name}" con el mismo precio (${formatCurrency(priceNum, form.currency)}). Cada servicio debe tener un precio distinto.`);
+      return;
+    }
     const newService = { id: "srv-" + Date.now() + Math.random().toString(36).substring(2, 5), name: nameToUse.trim(), price: priceNum };
-    setForm(prev => ({ ...prev, services: [...(prev.services || []), newService] }));
+    const updatedServices = [...(form.services || []), newService];
+    const newSum = updatedServices.reduce((acc, s) => acc + (Number(s.price) || 0), 0);
+    setForm(prev => ({ ...prev, services: updatedServices, amount: newSum }));
     if (nameOverride === undefined) { setNewServiceName(""); setNewServicePrice(""); }
   };
 
   const handleRemoveService = (index) => {
-    setForm(prev => ({ ...prev, services: prev.services.filter((_, i) => i !== index) }));
+    setForm(prev => {
+      const updated = prev.services.filter((_, i) => i !== index);
+      const newSum = updated.reduce((acc, s) => acc + (Number(s.price) || 0), 0);
+      return { ...prev, services: updated, amount: newSum };
+    });
   };
 
   const handleUpdateService = (index, field, value) => {
     setForm(prev => {
       const updated = [...(prev.services || [])];
-      updated[index] = { ...updated[index], [field]: field === "price" ? (parseFloat(value) || 0) : value };
-      return { ...prev, services: updated };
+      const newPrice = field === "price" ? (parseFloat(value) || 0) : updated[index].price;
+      // Validar precio duplicado
+      if (field === "price" && newPrice > 0) {
+        const duplicate = updated.find((s, i) => i !== index && Number(s.price) === newPrice);
+        if (duplicate) {
+          toast.error(`Ya existe "${duplicate.name}" con el mismo precio. Cada servicio debe tener un precio distinto.`);
+          return prev;
+        }
+      }
+      updated[index] = { ...updated[index], [field]: field === "price" ? newPrice : value };
+      const newSum = updated.reduce((acc, s) => acc + (Number(s.price) || 0), 0);
+      return { ...prev, services: updated, amount: newSum };
     });
   };
 
@@ -231,15 +253,7 @@ export default function QuotationSheet() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Field label="Hotel Asignado"><input data-testid="quotation-assigned-hotel" value={form.assigned_hotel} onChange={(e) => setForm({ ...form, assigned_hotel: e.target.value })} placeholder="Ej: Grand Palladium Costa Mujeres..." className={inputCls} /></Field>
               <Field label="Tipo de Habitación">
-                <div className="space-y-1.5">
-                  <input data-testid="quotation-room-type" value={form.room_type} onChange={(e) => setForm({ ...form, room_type: e.target.value })} placeholder="Ej: Doble Deluxe, Junior Suite..." className={inputCls} />
-                  <div className="flex flex-wrap gap-1 text-[11px]">
-                    <span className="text-gray-400">Atajos:</span>
-                    {["Doble Standard", "Doble Deluxe", "Suite Vista al Mar", "Triple Familiar", "Sencilla"].map((type) => (
-                      <button type="button" key={type} onClick={() => setForm({ ...form, room_type: type })} className="px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition">{type}</button>
-                    ))}
-                  </div>
-                </div>
+                <input data-testid="quotation-room-type" value={form.room_type} onChange={(e) => setForm({ ...form, room_type: e.target.value })} placeholder="Ej: Sencilla, Doble, Triple..." className={inputCls} />
               </Field>
             </div>
 
@@ -262,12 +276,12 @@ export default function QuotationSheet() {
 
             {/* DESGLOSE POR SERVICIO */}
             <div className="space-y-4 pt-2">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-100 dark:border-zinc-800 pb-2">
+              <div className="border-b border-gray-100 dark:border-zinc-800 pb-2">
                 <div>
                   <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2"><Layers className="h-4 w-4 text-[#0D9387]" />Desglose por Servicio</h3>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Agrega servicios individuales con nombre y precio. El total se calcula automáticamente.</p>
                 </div>
-                <div className="flex flex-wrap items-center gap-1.5">
+                <div className="flex flex-wrap items-center gap-1.5 mt-2">
                   <span className="text-[11px] font-medium text-gray-400">Atajos:</span>
                   <button type="button" onClick={() => handleAddService("Vuelos ida y vuelta", 800)} className="px-2.5 py-1 text-xs rounded-lg bg-teal-500/10 text-teal-700 dark:text-teal-300 border border-teal-500/20 hover:bg-teal-500/20 transition font-medium">+ Vuelos</button>
                   <button type="button" onClick={() => handleAddService("Hospedaje", 1200)} className="px-2.5 py-1 text-xs rounded-lg bg-teal-500/10 text-teal-700 dark:text-teal-300 border border-teal-500/20 hover:bg-teal-500/20 transition font-medium">+ Hospedaje</button>
@@ -327,7 +341,7 @@ export default function QuotationSheet() {
               <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-zinc-800 pb-2">Precio de la Propuesta</h3>
               <div className="grid grid-cols-3 gap-4">
                 <div className="col-span-2"><Field label="Monto Cotizado" required><input data-testid="quotation-amount" type="number" step="0.01" min={0} required value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} className={inputCls} /></Field></div>
-                <div><Field label="Moneda" required><select data-testid="quotation-currency" value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })} className={inputCls}><option>USD</option><option>COP</option><option>EUR</option><option>MXN</option></select></Field></div>
+                <div><Field label="Moneda" required><select data-testid="quotation-currency" value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })} className={inputCls}><option>USD</option><option>DOP</option><option>COP</option><option>EUR</option><option>MXN</option></select></Field></div>
               </div>
             </div>
 
@@ -338,48 +352,28 @@ export default function QuotationSheet() {
                 <Field label="Precio en Booking.com"><div className="relative"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span><input data-testid="quotation-booking-price" type="number" step="0.01" min={0} value={form.booking_price} onChange={(e) => setForm({ ...form, booking_price: e.target.value })} placeholder="0.00" className={`${inputCls} pl-7`} /></div></Field>
                 <Field label="Precio en Expedia"><div className="relative"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span><input data-testid="quotation-expedia-price" type="number" step="0.01" min={0} value={form.expedia_price} onChange={(e) => setForm({ ...form, expedia_price: e.target.value })} placeholder="0.00" className={`${inputCls} pl-7`} /></div></Field>
               </div>
-              {(form.booking_price || form.expedia_price) && (
-                <div className="rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden shadow-sm">
+              <div className="rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden shadow-sm">
                   <div className="grid grid-cols-2">
-                    {form.booking_price && Number(form.booking_price) > 0 && (
                       <div className="flex flex-col items-center p-5 text-center border-r border-slate-200 dark:border-zinc-800">
                         <div className="w-full h-28 rounded-xl bg-[#003580] flex items-center justify-center p-3 mb-3 shadow-inner">
                           <img src="/booking-logo.svg" alt="Booking" className="h-full w-full object-contain rounded-lg" />
                         </div>
                         <div className="text-xs font-extrabold text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-1">Booking.com</div>
                         <div className="text-xl font-black text-slate-800 dark:text-slate-200">
-                          {formatCurrency(Number(form.booking_price), form.currency)}
+                          {form.booking_price ? formatCurrency(Number(form.booking_price), form.currency) : '—'}
                         </div>
                       </div>
-                    )}
-                    {form.expedia_price && Number(form.expedia_price) > 0 && (
                       <div className="flex flex-col items-center p-5 text-center">
                         <div className="w-full h-28 rounded-xl bg-[#FFE000] flex items-center justify-center p-3 mb-3 shadow-inner">
                           <img src="/expedia-logo.svg" alt="Expedia" className="h-full w-full object-contain rounded-lg" />
                         </div>
                         <div className="text-xs font-extrabold text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-1">Expedia</div>
                         <div className="text-xl font-black text-slate-800 dark:text-slate-200">
-                          {formatCurrency(Number(form.expedia_price), form.currency)}
+                          {form.expedia_price ? formatCurrency(Number(form.expedia_price), form.currency) : '—'}
                         </div>
                       </div>
-                    )}
                   </div>
                 </div>
-              )}
-            </div>
-
-            {/* Estado */}
-            <div className="space-y-4 pt-2">
-              <Field label="Estado de la Cotización">
-                <select data-testid="quotation-status" value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })} className={inputCls}>
-                  <option value="borrador">Borrador (Edición)</option>
-                  <option value="enviada">Enviada al Cliente</option>
-                  <option value="aceptada">Aceptada por Cliente</option>
-                  <option value="cambios_solicitados">Cambios Solicitados</option>
-                  <option value="rechazada">Rechazada por Cliente</option>
-                  <option value="expirada">Expirada</option>
-                </select>
-              </Field>
             </div>
 
             {/* Notas */}
