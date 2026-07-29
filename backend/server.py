@@ -523,6 +523,28 @@ async def client_update_status(qid: str, body: ClientStatusUpdate, db: AsyncSess
             message=f"Cotización para {q.destination} fue aceptada",
             link=f"/admin/cotizaciones/{q.id}",
         )
+
+        # Auto-convert to reservation (solo si no existe ya una)
+        existing_res = await db.execute(
+            select(Reservation).where(Reservation.quotation_id == q.id)
+        )
+        if not existing_res.scalar_one_or_none():
+            reservation = Reservation(
+                id=new_id(), client_id=q.client_id, quotation_id=q.id,
+                destination=q.destination,
+                departure_date=q.travel_date or now_iso(),
+                return_date=q.return_date or now_iso(),
+                travelers=q.travelers, services="", notes=q.notes or "",
+                total_amount=q.amount, currency=q.currency,
+                status="pendiente", created_by=q.created_by,
+            )
+            db.add(reservation)
+            await create_notification_all(
+                db, "new_reservation",
+                title=f"Nueva reserva: {client_name}",
+                message=f"Reserva automática para {q.destination} por ${q.amount:,.2f}",
+                link=f"/admin/reservas/{reservation.id}",
+            )
     elif body.status == "cambios_solicitados":
         notes_preview = (body.notes or "")[:100]
         await create_notification_all(

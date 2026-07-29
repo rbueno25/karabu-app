@@ -226,15 +226,6 @@ export default function Quotations() {
                     <td className="px-6 py-3"><StatusBadge value={q.status} /></td>
                     <td className="px-6 py-3 text-right">
                       <div className="inline-flex items-center gap-1">
-                        {q.status === "aceptada" && !convertedIds.has(q.id) && (
-                          <button
-                            onClick={() => convert(q)}
-                            data-testid={`quotation-convert-${q.id}`}
-                            className="inline-flex items-center gap-1 h-8 px-2.5 rounded-[8px] bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-100 text-xs font-medium"
-                          >
-                            <ArrowRight className="h-3.5 w-3.5" /> Convertir
-                          </button>
-                        )}
                         <Link
                           to={`/admin/cotizaciones/${q.id}`}
                           data-testid={`quotation-edit-${q.id}`}
