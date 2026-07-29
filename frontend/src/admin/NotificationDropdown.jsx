@@ -39,7 +39,7 @@ export default function NotificationDropdown() {
     try { const { data } = await api.get("/notifications"); setNotifications(data); setUnreadCount(data.filter((n) => !n.read).length); } catch {} finally { setLoading(false); }
   }, []);
 
-  useEffect(() => { fetchUnread(); const interval = setInterval(fetchUnread, 30000); return () => clearInterval(interval); }, [fetchUnread]);
+  useEffect(() => { fetchUnread(); const interval = setInterval(fetchUnread, 10000); return () => clearInterval(interval); }, [fetchUnread]);
 
   useEffect(() => {
     const handleClick = (e) => { if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setOpen(false); };

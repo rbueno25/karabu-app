@@ -375,6 +375,7 @@ export default function QuotationSheet() {
                   <option value="borrador">Borrador (Edición)</option>
                   <option value="enviada">Enviada al Cliente</option>
                   <option value="aceptada">Aceptada por Cliente</option>
+                  <option value="cambios_solicitados">Cambios Solicitados</option>
                   <option value="rechazada">Rechazada por Cliente</option>
                   <option value="expirada">Expirada</option>
                 </select>

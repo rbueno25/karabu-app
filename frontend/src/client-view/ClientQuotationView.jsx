@@ -272,6 +272,16 @@ export default function ClientQuotationView() {
             )}
 
             <div className="flex flex-col sm:flex-row items-center gap-3">
+              {status === 'aceptada' ? (
+                <div className="w-full py-4 px-6 rounded-xl bg-emerald-500/25 border border-emerald-500/40 text-emerald-200 text-center font-bold text-sm flex items-center justify-center gap-2">
+                  <CheckCircle2 className="w-5 h-5" /> PROPUESTA ACEPTADA — Tu asesor te contactará
+                </div>
+              ) : status === 'cambios_solicitados' || status === 'rechazada' ? (
+                <div className="w-full py-4 px-6 rounded-xl bg-[#FF6B35]/25 border border-[#FF6B35]/40 text-orange-200 text-center font-bold text-sm flex items-center justify-center gap-2">
+                  <RotateCcw className="w-5 h-5" /> CAMBIOS SOLICITADOS — Tu asesor ajustará la propuesta
+                </div>
+              ) : (
+                <>
               <button type="button" onClick={handleDirectAccept} disabled={isSubmitting || status === 'aceptada'}
                 className={`w-full sm:w-1/2 font-bold py-3 px-6 rounded-xl shadow-lg transition duration-200 flex items-center justify-center gap-2 text-sm sm:text-base ${
                   status === 'aceptada' ? 'bg-emerald-600 text-white cursor-default opacity-90' : 'bg-[#0D9387] hover:bg-[#0b7d72] active:scale-[0.98] text-white border border-teal-400/30'
@@ -284,6 +294,8 @@ export default function ClientQuotationView() {
                 className="w-full sm:w-1/2 border-2 border-[#FF6B35] text-[#FF6B35] hover:bg-[#FF6B35]/20 active:scale-[0.98] font-bold py-3 px-6 rounded-xl transition duration-200 flex items-center justify-center gap-2 text-sm sm:text-base backdrop-blur-md">
                 <RotateCcw className="w-5 h-5" />SOLICITAR CAMBIOS
               </button>
+                </>
+              )}
             </div>
           </div>
         </div>

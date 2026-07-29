@@ -178,6 +178,23 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
 
       setIsSubmitting(false);
       setIsSuccess(true);
+      // Resetear formulario al estado inicial
+      setFormData({
+        fullName: '', email: '', phone: '',
+        country: '', city: '', preferredHotel: '',
+        departureDate: '', returnDate: '',
+        flexibleDates: 'No',
+        adultsCount: 2, childrenCount: 0, babiesCount: 0,
+        budgetRange: 'US$1,000–2,000',
+        additionalServices: [],
+        preferredContact: 'ambos',
+        travelType: 'Vacaciones',
+        hotelCategory: '4 estrellas',
+        roomType: 'Sencilla',
+        comments: ''
+      });
+      setErrors({});
+      onClearPreselected();
     } catch (err) {
       setIsSubmitting(false);
       alert('Hubo un error al enviar tu cotización. Intenta de nuevo o escríbenos por WhatsApp.');
@@ -831,8 +848,17 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-3xl shadow-2xl p-10 flex flex-col items-center text-center max-w-md mx-4"
+              className="bg-white rounded-3xl shadow-2xl p-10 flex flex-col items-center text-center max-w-md mx-4 relative"
             >
+              {/* X button to close */}
+              <button
+                onClick={() => setIsSuccess(false)}
+                className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
+                aria-label="Cerrar"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+
               <div className="w-16 h-16 rounded-full bg-brand-turquoise/10 text-brand-turquoise flex items-center justify-center mb-6">
                 <CheckCircle2 className="w-12 h-12" />
               </div>
@@ -841,39 +867,9 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
                 ¡Gracias por tu solicitud!
               </h3>
               
-              <p className="text-slate-600 font-sans text-sm leading-relaxed mb-8">
+              <p className="text-slate-600 font-sans text-sm leading-relaxed">
                 Hemos recibido tu información. Un asesor de Karabú Viajes y Visas preparará una cotización personalizada y te contactará por WhatsApp o correo electrónico en menos de 24 horas.
               </p>
-
-              <button
-                onClick={() => {
-                  setIsSuccess(false);
-                  setFormData({
-                    fullName: '',
-                    email: '',
-                    phone: '',
-                    country: '',
-                    city: '',
-                    preferredHotel: '',
-                    departureDate: '',
-                    returnDate: '',
-                    flexibleDates: 'No',
-                    adultsCount: 2,
-                    childrenCount: 0,
-                    babiesCount: 0,
-                    budgetRange: 'US$1,000–2,000',
-                    additionalServices: [],
-                    preferredContact: 'ambos',
-                    travelType: 'Vacaciones',
-                    hotelCategory: '4 estrellas',
-                    roomType: 'Sencilla',
-                    comments: ''
-                    });
-                }}
-                className="bg-brand-navy hover:bg-brand-navy/90 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition-all transform hover:scale-[1.03] active:scale-[0.97]"
-              >
-                Enviar otra cotización
-              </button>
             </motion.div>
           </motion.div>
         )}

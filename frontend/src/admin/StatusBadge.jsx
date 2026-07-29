@@ -7,6 +7,7 @@ const STYLES = {
   enviada: "bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800",
   aceptada: "bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800",
   rechazada: "bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800",
+  cambios_solicitados: "bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800",
   expirada: "bg-yellow-50 dark:bg-yellow-950 text-yellow-700 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800",
   pendiente: "bg-yellow-50 dark:bg-yellow-950 text-yellow-700 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800",
   confirmada: "bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800",
@@ -21,7 +22,7 @@ const STYLES = {
 
 const LABELS = {
   activo: "Activo", inactivo: "Inactivo",
-  borrador: "Borrador", enviada: "Enviada", aceptada: "Aceptada", rechazada: "Rechazada", expirada: "Expirada",
+  borrador: "Borrador", enviada: "Enviada", aceptada: "Aceptada", rechazada: "Rechazada", cambios_solicitados: "Cambios Solicitados", expirada: "Expirada",
   pendiente: "Pendiente", confirmada: "Confirmada", pagada: "Pagada", en_viaje: "En viaje", finalizada: "Finalizada", cancelada: "Cancelada",
   completado: "Completado", fallido: "Fallido", reembolsado: "Reembolsado",
 };
