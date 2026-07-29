@@ -204,10 +204,10 @@ export default function QuotationSheet() {
           <p className="text-xs text-gray-400 dark:text-gray-500 font-mono">#{quotation.id?.slice(0, 8)}</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <a href={clientLink} target="_blank" rel="noopener noreferrer" className="h-9 w-9 inline-flex items-center justify-center border border-[#0D9387]/30 bg-[#0D9387]/10 hover:bg-[#0D9387]/20 text-[#0D9387] rounded-xl transition-all" title="Ver entregable"><Eye className="h-4 w-4" /></a>
-          <a href={`/#/factura/${quotation.id}`} target="_blank" rel="noopener noreferrer" className="h-9 px-3 inline-flex items-center gap-1.5 border border-[#0D9387]/20 bg-[#0D9387]/5 hover:bg-[#0D9387]/10 text-[#0D9387] text-xs font-semibold rounded-xl transition-all" title="Factura"><FileText className="h-4 w-4" />Factura</a>
+          <a href={clientLink} target="_blank" rel="noopener noreferrer" className="h-9 w-9 inline-flex items-center justify-center border border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 text-gray-400 dark:text-gray-500 rounded-xl transition-all" title="Ver entregable"><Eye className="h-4 w-4" /></a>
+          <a href={`/#/factura/${quotation.id}`} target="_blank" rel="noopener noreferrer" className="h-9 w-9 inline-flex items-center justify-center border border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 text-gray-400 dark:text-gray-500 rounded-xl transition-all" title="Factura"><FileText className="h-4 w-4" /></a>
           <button type="button" onClick={() => setDeleteModalOpen(true)} className="h-9 w-9 inline-flex items-center justify-center border border-red-200 dark:border-red-900/30 bg-red-50 dark:bg-red-950/20 hover:bg-red-100 dark:hover:bg-red-900/40 text-red-500 rounded-xl transition-all" title="Eliminar"><Trash2 className="h-4 w-4" /></button>
-          <button onClick={() => setSendModalOpen(true)} className={`${btnBase} bg-[#0D9387] hover:bg-[#0b7d72] text-white`}><Send className="h-4 w-4" />Enviar al Cliente</button>
+          <button onClick={() => setSendModalOpen(true)} className={`${btnBase} bg-blue-600 hover:bg-blue-700 text-white`}><Send className="h-4 w-4" />Enviar al Cliente</button>
         </div>
       </div>
 
