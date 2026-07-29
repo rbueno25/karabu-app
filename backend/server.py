@@ -34,6 +34,49 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("karabu")
 
 
+# -------------------- Rate Limiter --------------------
+from collections import defaultdict
+import time as _time
+
+class RateLimiter:
+    """Simple in-memory IP-based rate limiter."""
+    def __init__(self):
+        self._hits = defaultdict(list)  # ip → [timestamps]
+        self._cleanup_every = 300  # clean old entries every 5 min
+        self._last_cleanup = _time.time()
+
+    def _cleanup(self):
+        now = _time.time()
+        if now - self._last_cleanup < self._cleanup_every:
+            return
+        self._last_cleanup = now
+        cutoff = now - 120  # keep last 2 min of history
+        for ip in list(self._hits.keys()):
+            self._hits[ip] = [t for t in self._hits[ip] if t > cutoff]
+            if not self._hits[ip]:
+                del self._hits[ip]
+
+    def check(self, ip: str, max_requests: int, window_seconds: int) -> bool:
+        """Returns True if under limit, False if rate limited."""
+        self._cleanup()
+        now = _time.time()
+        cutoff = now - window_seconds
+        self._hits[ip] = [t for t in self._hits[ip] if t > cutoff]
+        self._hits[ip].append(now)
+        return len(self._hits[ip]) <= max_requests
+
+rate_limiter = RateLimiter()
+
+
+def rate_limit(requests: int, per_seconds: int):
+    """Dependency: rate-limit by client IP."""
+    async def _check(request: Request):
+        ip = request.client.host if request.client else "127.0.0.1"
+        if not rate_limiter.check(ip, requests, per_seconds):
+            raise HTTPException(status_code=429, detail="Demasiadas solicitudes. Espera un momento.")
+    return _check
+
+
 # -------------------- Auth utils --------------------
 def hash_password(pw: str) -> str:
     return bcrypt.hashpw(pw.encode(), bcrypt.gensalt()).decode()
@@ -283,7 +326,7 @@ class SettingsIn(BaseModel):
 
 # -------------------- Auth Endpoints --------------------
 @api.post("/auth/login")
-async def login(body: LoginIn, response: Response, db: AsyncSession = Depends(get_db)):
+async def login(body: LoginIn, response: Response, db: AsyncSession = Depends(get_db), _rl=Depends(rate_limit(10, 60))):
     email = body.email.lower()
     result = await db.execute(select(User).where(User.email == email))
     user = result.scalar_one_or_none()
@@ -295,7 +338,7 @@ async def login(body: LoginIn, response: Response, db: AsyncSession = Depends(ge
     user.last_login = datetime.now(timezone.utc)
     response.set_cookie(
         key="access_token", value=token, httponly=True,
-        secure=False, samesite="lax", max_age=43200, path="/",
+        secure=True, samesite="strict", max_age=43200, path="/",
     )
     return {
         "user": {"id": user.id, "username": user.username, "email": user.email, "name": user.name, "role": user.role, "phone": user.phone, "avatar_url": user.avatar_url, "department": user.department},
@@ -304,7 +347,7 @@ async def login(body: LoginIn, response: Response, db: AsyncSession = Depends(ge
 
 @api.post("/auth/logout")
 async def logout(response: Response, _user=Depends(get_current_user)):
-    response.delete_cookie("access_token", path="/")
+    response.delete_cookie("access_token", path="/", secure=True, samesite="strict")
     return {"ok": True}
 
 @api.get("/auth/me")
@@ -493,7 +536,7 @@ class ClientStatusUpdate(BaseModel):
 
 
 @api.patch("/quotations/{qid}/status")
-async def client_update_status(qid: str, body: ClientStatusUpdate, db: AsyncSession = Depends(get_db)):
+async def client_update_status(qid: str, body: ClientStatusUpdate, db: AsyncSession = Depends(get_db), _rl=Depends(rate_limit(10, 60))):
     """Public: client accepts or rejects their quotation."""
     if body.status not in ("aceptada", "rechazada", "cambios_solicitados"):
         raise HTTPException(status_code=400, detail="Estado invalido")
@@ -614,7 +657,7 @@ async def delete_quotation(qid: str, db: AsyncSession = Depends(get_db), _u=Depe
 
 # -------------------- Public Leads (no auth) --------------------
 @api.post("/leads")
-async def create_lead(body: LeadIn, db: AsyncSession = Depends(get_db)):
+async def create_lead(body: LeadIn, db: AsyncSession = Depends(get_db), _rl=Depends(rate_limit(5, 60))):
     """Public endpoint: landing page form → creates client + quotation."""
     email = body.email.strip().lower()
 
