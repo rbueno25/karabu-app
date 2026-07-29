@@ -51,7 +51,7 @@ export default function QuotationSheet() {
         amount: q.amount || 0, currency: q.currency || "USD",
         notes: q.notes || (q.form_data?.comments || ""),
         assigned_hotel: q.assigned_hotel || q.form_data?.preferredHotel || "",
-        room_type: q.room_type || q.form_data?.room_type || q.form_data?.hotelCategory || "",
+        room_type: q.room_type || q.form_data?.roomType || "",
         services: Array.isArray(q.services) ? q.services : [],
         deposit_percent: q.deposit_percent ?? 0,
         hero_image: q.hero_image || "",
@@ -398,7 +398,8 @@ export default function QuotationSheet() {
                 {quotation.form_data.fullName && <div className="flex justify-between"><span className="text-gray-400 dark:text-gray-400 font-medium">Nombre:</span><span className="text-gray-900 dark:text-gray-100 font-semibold">{quotation.form_data.fullName}</span></div>}
                 {quotation.form_data.email && <div className="flex justify-between"><span className="text-gray-400 dark:text-gray-400 font-medium">Email:</span><span className="text-gray-700 dark:text-gray-300">{quotation.form_data.email}</span></div>}
                 {quotation.form_data.phone && <div className="flex justify-between"><span className="text-gray-400 dark:text-gray-400 font-medium">Teléfono:</span><span className="text-gray-700 dark:text-gray-300">{quotation.form_data.phone}</span></div>}
-                {quotation.form_data.hotelCategory && <div className="flex justify-between"><span className="text-gray-400 dark:text-gray-400 font-medium">Hotel:</span><span className="text-gray-700 dark:text-gray-300">{quotation.form_data.hotelCategory}</span></div>}
+                {quotation.form_data.hotelCategory && <div className="flex justify-between"><span className="text-gray-400 dark:text-gray-400 font-medium">Categoría hotel:</span><span className="text-gray-700 dark:text-gray-300">{quotation.form_data.hotelCategory}</span></div>}
+                {quotation.form_data.roomType && <div className="flex justify-between"><span className="text-gray-400 dark:text-gray-400 font-medium">Tipo habitación:</span><span className="text-gray-700 dark:text-gray-300">{quotation.form_data.roomType}</span></div>}
                 {quotation.form_data.preferredHotel && <div className="flex justify-between"><span className="text-gray-400 dark:text-gray-400 font-medium">Pref. Hotel:</span><span className="text-gray-700 dark:text-gray-300">{quotation.form_data.preferredHotel}</span></div>}
               </div>
             </div>
