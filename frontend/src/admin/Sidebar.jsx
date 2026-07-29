@@ -57,7 +57,7 @@ export default function Sidebar() {
               [
                 "flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium transition-colors",
                                 isActive
-                                  ? "bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-400"
+                                  ? "bg-[#0D9387]/10 dark:bg-[#0D9387]/20 text-[#0D9387] dark:text-teal-400"
                                   : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#132D52] dark:hover:text-gray-100",
               ].join(" ")
             }

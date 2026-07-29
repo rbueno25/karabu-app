@@ -82,7 +82,7 @@ export default function Payments() {
           <button
             onClick={openCreate}
             data-testid="payments-new-btn"
-            className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] px-4 py-2 text-sm font-medium transition-colors shadow-sm"
+            className="inline-flex items-center gap-2 bg-[#0D9387] hover:bg-[#0b7d72] text-white rounded-[10px] px-4 py-2 text-sm font-medium transition-colors shadow-sm"
           >
             <Plus className="h-4 w-4" /> Registrar pago
           </button>
@@ -189,7 +189,7 @@ export default function Payments() {
               <button type="button" onClick={() => setModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-zinc-800 rounded-[10px] hover:bg-gray-50 dark:hover:bg-gray-800">
                 Cancelar
               </button>
-              <button type="submit" disabled={saving} data-testid="payment-save-btn" className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] px-4 py-2 text-sm font-medium disabled:opacity-60">
+              <button type="submit" disabled={saving} data-testid="payment-save-btn" className="inline-flex items-center gap-2 bg-[#0D9387] hover:bg-[#0b7d72] text-white rounded-[10px] px-4 py-2 text-sm font-medium disabled:opacity-60">
                 {saving && <Loader2 className="h-4 w-4 animate-spin" />} Guardar
               </button>
             </div>
@@ -200,7 +200,7 @@ export default function Payments() {
   );
 }
 
-const inputCls = "w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none";
+const inputCls = "w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-[#0D9387] focus:ring-2 focus:ring-[#0D9387]/20 outline-none";
 
 function Field({ label, required, children }) {
   return (

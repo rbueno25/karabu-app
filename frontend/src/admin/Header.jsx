@@ -70,7 +70,7 @@ export default function Header() {
               <div className="text-sm font-semibold text-gray-900 dark:text-zinc-100">{user?.name || "—"}</div>
               <div className="text-[11px] text-gray-500 dark:text-zinc-400 capitalize">{user?.role === "super_admin" ? "Super Admin" : user?.role === "admin" ? "Administrador" : "Asesor"}</div>
             </div>
-            <div data-testid="header-user-avatar" className="h-9 w-9 rounded-full bg-blue-600 dark:bg-blue-600 text-white flex items-center justify-center text-sm font-bold shadow-sm shrink-0">{initials}</div>
+            <div data-testid="header-user-avatar" className="h-9 w-9 rounded-full bg-[#0D9387] text-white flex items-center justify-center text-sm font-bold shadow-sm shrink-0">{initials}</div>
             <ChevronDown className={`h-4 w-4 text-gray-400 dark:text-zinc-500 transition-transform duration-200 ${userMenuOpen ? "rotate-180" : ""}`} />
           </button>
 

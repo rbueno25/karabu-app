@@ -7,7 +7,7 @@ import { Plus, Search, Loader2, Pencil, Trash2, MapPin, X, ImageIcon } from "luc
 import { toast } from "sonner";
 
 const empty = { name: "", country: "", image_url: "", description: "", status: "activo" };
-const inputCls = "w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none";
+const inputCls = "w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-[#0D9387] focus:ring-2 focus:ring-[#0D9387]/20 outline-none";
 
 export default function Destinations() {
   const [items, setItems] = useState([]);
@@ -77,7 +77,7 @@ export default function Destinations() {
         title="Destinos"
         description="Administra los destinos mostrados en la página principal."
         action={
-          <button onClick={openCreate} data-testid="destinations-new-btn" className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] px-4 py-2 text-sm font-medium transition-colors shadow-sm">
+          <button onClick={openCreate} data-testid="destinations-new-btn" className="inline-flex items-center gap-2 bg-[#0D9387] hover:bg-[#0b7d72] text-white rounded-[10px] px-4 py-2 text-sm font-medium transition-colors shadow-sm">
             <Plus className="h-4 w-4" /> Nuevo destino
           </button>
         }
@@ -86,9 +86,9 @@ export default function Destinations() {
         <div className="px-6 py-4 border-b border-gray-200 dark:border-zinc-800 flex items-center gap-3 flex-wrap">
           <div className="relative flex-1 min-w-[240px]">
             <Search className="h-4 w-4 text-gray-400 dark:text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input data-testid="destinations-search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar por destino o país…" className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100 rounded-[10px] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none" />
+            <input data-testid="destinations-search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar por destino o país…" className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100 rounded-[10px] focus:border-[#0D9387] focus:ring-2 focus:ring-[#0D9387]/20 outline-none" />
           </div>
-          <select data-testid="destinations-status-filter" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="text-sm border border-gray-200 dark:border-zinc-800 rounded-[10px] px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100">
+          <select data-testid="destinations-status-filter" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="text-sm border border-gray-200 dark:border-zinc-800 rounded-[10px] px-3 py-2 focus:border-[#0D9387] focus:ring-2 focus:ring-[#0D9387]/20 outline-none bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100">
             <option value="">Todos los estados</option>
             <option value="activo">Activo</option>
             <option value="inactivo">Inactivo</option>
@@ -204,7 +204,7 @@ function Modal({ onClose, title, onSubmit, saving, children, testId, saveTestId 
         <div className="space-y-4">{children}</div>
         <div className="mt-6 flex items-center justify-end gap-2">
           <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-zinc-800 rounded-[10px] hover:bg-gray-50 dark:hover:bg-gray-800">Cancelar</button>
-          <button type="submit" disabled={saving} data-testid={saveTestId} className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] px-4 py-2 text-sm font-medium disabled:opacity-60">
+          <button type="submit" disabled={saving} data-testid={saveTestId} className="inline-flex items-center gap-2 bg-[#0D9387] hover:bg-[#0b7d72] text-white rounded-[10px] px-4 py-2 text-sm font-medium disabled:opacity-60">
             {saving && <Loader2 className="h-4 w-4 animate-spin" />} Guardar
           </button>
         </div>

@@ -11,7 +11,7 @@ import {
   CalendarCheck, CreditCard, History, Loader2, Save, Trash2 
 } from "lucide-react";
 
-const inputCls = "w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-shadow";
+const inputCls = "w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-[#0D9387] focus:ring-2 focus:ring-[#0D9387]/20 outline-none transition-shadow";
 
 export default function ClientDetail() {
   const { id } = useParams();
@@ -198,7 +198,7 @@ export default function ClientDetail() {
         <aside className="col-span-12 lg:col-span-4 space-y-6">
           <div className="bg-white dark:bg-zinc-900 rounded-[16px] border border-gray-200 dark:border-zinc-800 p-6 shadow-[0_1px_3px_0_rgba(0,0,0,0.05),_0_1px_2px_-1px_rgba(0,0,0,0.05)]">
             <div className="flex flex-col items-center text-center pb-6 border-b border-gray-100 dark:border-zinc-800">
-              <div className="h-16 w-16 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xl font-bold mb-3">
+              <div className="h-16 w-16 rounded-full bg-[#0D9387]/10 text-[#0D9387] flex items-center justify-center text-xl font-bold mb-3">
                 {client.first_name[0]}{client.last_name[0]}
               </div>
               <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">{client.first_name} {client.last_name}</h3>
@@ -210,14 +210,14 @@ export default function ClientDetail() {
                 <Mail className="h-4 w-4 text-gray-400 dark:text-gray-400 mt-0.5" />
                 <div className="flex-1 min-w-0">
                   <span className="text-xs text-gray-400 dark:text-gray-400 block font-medium">Correo Electrónico</span>
-                  <a href={`mailto:${client.email}`} className="text-gray-700 dark:text-gray-300 hover:text-blue-600 break-all font-medium">{client.email}</a>
+                  <a href={`mailto:${client.email}`} className="text-gray-700 dark:text-gray-300 hover:text-[#0D9387] break-all font-medium">{client.email}</a>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <Phone className="h-4 w-4 text-gray-400 dark:text-gray-400 mt-0.5" />
                 <div className="flex-1">
                   <span className="text-xs text-gray-400 dark:text-gray-400 block font-medium">Teléfono</span>
-                  <a href={`tel:${client.phone}`} className="text-gray-700 dark:text-gray-300 hover:text-blue-600 font-medium">{client.phone}</a>
+                  <a href={`tel:${client.phone}`} className="text-gray-700 dark:text-gray-300 hover:text-[#0D9387] font-medium">{client.phone}</a>
                 </div>
               </div>
               <div className="flex items-start gap-3">
@@ -277,7 +277,7 @@ export default function ClientDetail() {
                   className={[
                     "flex items-center gap-2 px-3.5 py-2.5 rounded-[10px] text-xs font-semibold uppercase tracking-wider transition-colors",
                     tab === t.id 
-                      ? "bg-white dark:bg-zinc-900 text-blue-600 shadow-sm border border-gray-200 dark:border-zinc-800" 
+                      ? "bg-white dark:bg-zinc-900 text-[#0D9387] shadow-sm border border-gray-200 dark:border-zinc-800" 
                       : "text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/55"
                   ].join(" ")}
                 >
@@ -376,7 +376,7 @@ export default function ClientDetail() {
                       type="submit"
                       disabled={saving}
                       data-testid="client-save-btn"
-                      className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] px-4 py-2 text-sm font-semibold transition-colors shadow-sm disabled:opacity-60"
+                      className="inline-flex items-center gap-2 bg-[#0D9387] hover:bg-[#0b7d72] text-white rounded-[10px] px-4 py-2 text-sm font-semibold transition-colors shadow-sm disabled:opacity-60"
                     >
                       {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                       Guardar Cambios
@@ -416,7 +416,7 @@ export default function ClientDetail() {
                               <td className="px-4 py-3 text-right">
                                 <Link 
                                   to={`/admin/reservas/${r.id}`}
-                                  className="text-blue-600 hover:text-blue-800 text-xs font-semibold hover:underline"
+                                  className="text-[#0D9387] hover:text-[#0b7d72] text-xs font-semibold hover:underline"
                                 >
                                   Detalle
                                 </Link>
@@ -518,14 +518,14 @@ export default function ClientDetail() {
                     value={notesText}
                     onChange={(e) => setNotesText(e.target.value)}
                     placeholder="Escribe observaciones, preferencias de viaje del cliente, historial de contacto, etc..."
-                    className="w-full rounded-[10px] border border-gray-300 dark:border-gray-600 px-3.5 py-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-shadow"
+                    className="w-full rounded-[10px] border border-gray-300 dark:border-gray-600 px-3.5 py-3 text-sm focus:border-[#0D9387] focus:ring-2 focus:ring-[#0D9387]/20 outline-none transition-shadow"
                   />
                   <div className="flex justify-end">
                     <button
                       onClick={handleSaveNotes}
                       disabled={savingNotes}
                       data-testid="client-notes-save-btn"
-                      className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] px-4 py-2 text-sm font-semibold transition-colors shadow-sm disabled:opacity-60"
+                      className="inline-flex items-center gap-2 bg-[#0D9387] hover:bg-[#0b7d72] text-white rounded-[10px] px-4 py-2 text-sm font-semibold transition-colors shadow-sm disabled:opacity-60"
                     >
                       {savingNotes ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                       Guardar Notas

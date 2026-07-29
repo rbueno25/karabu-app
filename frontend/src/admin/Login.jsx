@@ -27,7 +27,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2 bg-white dark:bg-zinc-900">
-      <div className="hidden lg:flex flex-col justify-between p-12 bg-gradient-to-br from-blue-600 to-blue-700 text-white relative overflow-hidden">
+      <div className="hidden lg:flex flex-col justify-between p-12 bg-gradient-to-br from-[#0F2A4A] to-[#0D9387] text-white relative overflow-hidden">
         <div className="flex items-center gap-2 z-10">
           <div className="h-9 w-9 rounded-[10px] bg-white/15 flex items-center justify-center backdrop-blur">
             <Plane className="h-4 w-4" />
@@ -55,7 +55,7 @@ export default function Login() {
           className="w-full max-w-sm space-y-6"
         >
           <div className="lg:hidden flex items-center gap-2 mb-8">
-            <div className="h-8 w-8 rounded-[10px] bg-blue-600 text-white flex items-center justify-center">
+            <div className="h-8 w-8 rounded-[10px] bg-[#0D9387] text-white flex items-center justify-center">
               <Plane className="h-4 w-4" />
             </div>
             <div className="font-semibold text-gray-900 dark:text-gray-100">Karabu Viajes</div>
@@ -75,7 +75,7 @@ export default function Login() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 autoComplete="email"
-                className="w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 px-3 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-shadow"
+                className="w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 px-3 py-2.5 text-sm focus:border-[#0D9387] focus:ring-2 focus:ring-[#0D9387]/20 outline-none transition-shadow"
               />
             </div>
             <div>
@@ -88,7 +88,7 @@ export default function Login() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   autoComplete="current-password"
-                  className="w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 px-3 py-2.5 pr-10 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-shadow"
+                  className="w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 px-3 py-2.5 pr-10 text-sm focus:border-[#0D9387] focus:ring-2 focus:ring-[#0D9387]/20 outline-none transition-shadow"
                 />
                 <button
                   type="button"
@@ -115,7 +115,7 @@ export default function Login() {
             type="submit"
             disabled={loading}
             data-testid="login-submit-btn"
-            className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white rounded-[10px] px-4 py-2.5 text-sm font-medium transition-colors shadow-sm"
+            className="w-full flex items-center justify-center gap-2 bg-[#0D9387] hover:bg-[#0b7d72] disabled:opacity-60 text-white rounded-[10px] px-4 py-2.5 text-sm font-medium transition-colors shadow-sm"
           >
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
             Ingresar

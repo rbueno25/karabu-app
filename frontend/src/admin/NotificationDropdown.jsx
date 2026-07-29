@@ -11,7 +11,7 @@ const TYPE_ICONS = {
 };
 
 const TYPE_COLORS = {
-  new_lead: "text-blue-500 bg-blue-100 dark:bg-blue-950/60 dark:text-blue-400",
+  new_lead: "text-[#0D9387] bg-[#0D9387]/10 dark:bg-[#0D9387]/20 dark:text-teal-400",
   accepted: "text-emerald-500 bg-emerald-100 dark:bg-emerald-950/60 dark:text-emerald-400",
   rejected: "text-orange-500 bg-orange-100 dark:bg-orange-950/60 dark:text-orange-400",
   regret: "text-red-500 bg-red-100 dark:bg-red-950/60 dark:text-red-400",

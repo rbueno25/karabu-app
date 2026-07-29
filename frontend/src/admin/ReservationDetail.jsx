@@ -12,7 +12,7 @@ import {
   Mail, Phone
 } from "lucide-react";
 
-const inputCls = "w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-shadow";
+const inputCls = "w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-[#0D9387] focus:ring-2 focus:ring-[#0D9387]/20 outline-none transition-shadow";
 
 export default function ReservationDetail() {
   const { id } = useParams();
@@ -282,7 +282,7 @@ export default function ReservationDetail() {
             onClick={openPaymentModal}
             data-testid="payment-add-btn"
             disabled={form.status === "cancelada"}
-            className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] px-4 py-2 text-sm font-semibold transition-colors shadow-sm disabled:opacity-30 disabled:hover:bg-blue-600"
+            className="inline-flex items-center gap-2 bg-[#0D9387] hover:bg-[#0b7d72] text-white rounded-[10px] px-4 py-2 text-sm font-semibold transition-colors shadow-sm disabled:opacity-30 disabled:hover:bg-[#0D9387]"
           >
             <CreditCard className="h-4 w-4" /> Registrar Pago
           </button>
@@ -299,7 +299,7 @@ export default function ReservationDetail() {
               <div className="space-y-2">
                 <Link 
                   to={`/admin/clientes/${client.id}`}
-                  className="text-base font-bold text-blue-600 hover:text-blue-800 hover:underline block"
+                  className="text-base font-bold text-[#0D9387] hover:text-[#0b7d72] hover:underline block"
                 >
                   {client.first_name} {client.last_name}
                 </Link>
@@ -353,7 +353,7 @@ export default function ReservationDetail() {
                   className={[
                     "flex items-center gap-2 px-3.5 py-2.5 rounded-[10px] text-xs font-semibold uppercase tracking-wider transition-colors",
                     tab === t.id 
-                      ? "bg-white dark:bg-zinc-900 text-blue-600 shadow-sm border border-gray-200 dark:border-zinc-800" 
+                      ? "bg-white dark:bg-zinc-900 text-[#0D9387] shadow-sm border border-gray-200 dark:border-zinc-800" 
                       : "text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/55"
                   ].join(" ")}
                 >
@@ -489,7 +489,7 @@ export default function ReservationDetail() {
                       type="submit"
                       disabled={savingDetails}
                       data-testid="reservation-save-btn"
-                      className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] px-4 py-2 text-sm font-semibold transition-colors shadow-sm disabled:opacity-60"
+                      className="inline-flex items-center gap-2 bg-[#0D9387] hover:bg-[#0b7d72] text-white rounded-[10px] px-4 py-2 text-sm font-semibold transition-colors shadow-sm disabled:opacity-60"
                     >
                       {savingDetails ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                       Guardar Cambios
@@ -506,7 +506,7 @@ export default function ReservationDetail() {
                     <button 
                       onClick={() => openPassengerModal()}
                       data-testid="passenger-add-btn"
-                      className="inline-flex items-center gap-1.5 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 text-blue-600 rounded-[8px] px-3 py-1.5 text-xs font-semibold transition-colors"
+                      className="inline-flex items-center gap-1.5 bg-blue-50 dark:bg-blue-900/30 hover:bg-[#0D9387]/10 text-[#0D9387] rounded-[8px] px-3 py-1.5 text-xs font-semibold transition-colors"
                     >
                       <Plus className="h-3.5 w-3.5" /> Agregar Pasajero
                     </button>
@@ -572,7 +572,7 @@ export default function ReservationDetail() {
                     <button 
                       onClick={openDocumentModal}
                       data-testid="document-add-btn"
-                      className="inline-flex items-center gap-1.5 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 text-blue-600 rounded-[8px] px-3 py-1.5 text-xs font-semibold transition-colors"
+                      className="inline-flex items-center gap-1.5 bg-blue-50 dark:bg-blue-900/30 hover:bg-[#0D9387]/10 text-[#0D9387] rounded-[8px] px-3 py-1.5 text-xs font-semibold transition-colors"
                     >
                       <Plus className="h-3.5 w-3.5" /> Agregar Documento
                     </button>
@@ -589,7 +589,7 @@ export default function ReservationDetail() {
                       {form.documents.map((doc, idx) => (
                         <div key={idx} className="flex items-center justify-between p-3 border border-gray-150 rounded-[10px] bg-gray-50 dark:bg-zinc-800/30 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                           <div className="flex items-start gap-3 min-w-0">
-                            <div className="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-[8px] text-blue-600 shrink-0">
+                            <div className="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-[8px] text-[#0D9387] shrink-0">
                               <FileText className="h-4 w-4" />
                             </div>
                             <div className="min-w-0">
@@ -602,7 +602,7 @@ export default function ReservationDetail() {
                               href={doc.url} 
                               target="_blank" 
                               rel="noopener noreferrer"
-                              className="h-7 w-7 rounded-[6px] hover:bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600"
+                              className="h-7 w-7 rounded-[6px] hover:bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-[#0D9387]"
                               aria-label="Abrir documento"
                             >
                               <ExternalLink className="h-3.5 w-3.5" />
@@ -631,7 +631,7 @@ export default function ReservationDetail() {
                     <button 
                       onClick={openPaymentModal}
                       disabled={form.status === "cancelada"}
-                      className="inline-flex items-center gap-1.5 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 text-blue-600 rounded-[8px] px-3 py-1.5 text-xs font-semibold transition-colors disabled:opacity-30 disabled:hover:bg-blue-50 dark:bg-blue-900/30"
+                      className="inline-flex items-center gap-1.5 bg-blue-50 dark:bg-blue-900/30 hover:bg-[#0D9387]/10 text-[#0D9387] rounded-[8px] px-3 py-1.5 text-xs font-semibold transition-colors disabled:opacity-30 disabled:hover:bg-[#0D9387]/10 dark:bg-[#0D9387]/10"
                     >
                       <Plus className="h-3.5 w-3.5" /> Registrar Pago
                     </button>
@@ -720,7 +720,7 @@ export default function ReservationDetail() {
 
             <div className="mt-6 flex items-center justify-end gap-2">
               <button type="button" onClick={() => setPassengerModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-zinc-800 rounded-[10px] hover:bg-gray-50 dark:hover:bg-gray-800">Cancelar</button>
-              <button type="submit" disabled={savingPassenger} data-testid="passenger-save-btn" className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] px-4 py-2 text-sm font-semibold disabled:opacity-60">
+              <button type="submit" disabled={savingPassenger} data-testid="passenger-save-btn" className="inline-flex items-center gap-2 bg-[#0D9387] hover:bg-[#0b7d72] text-white rounded-[10px] px-4 py-2 text-sm font-semibold disabled:opacity-60">
                 {savingPassenger ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Guardar
               </button>
             </div>
@@ -765,7 +765,7 @@ export default function ReservationDetail() {
 
             <div className="mt-6 flex items-center justify-end gap-2">
               <button type="button" onClick={() => setDocumentModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-zinc-800 rounded-[10px] hover:bg-gray-50 dark:hover:bg-gray-800">Cancelar</button>
-              <button type="submit" disabled={savingDocument} data-testid="document-save-btn" className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] px-4 py-2 text-sm font-semibold disabled:opacity-60">
+              <button type="submit" disabled={savingDocument} data-testid="document-save-btn" className="inline-flex items-center gap-2 bg-[#0D9387] hover:bg-[#0b7d72] text-white rounded-[10px] px-4 py-2 text-sm font-semibold disabled:opacity-60">
                 {savingDocument ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Guardar
               </button>
             </div>
@@ -832,7 +832,7 @@ export default function ReservationDetail() {
 
             <div className="mt-6 flex items-center justify-end gap-2">
               <button type="button" onClick={() => setPaymentModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-zinc-800 rounded-[10px] hover:bg-gray-50 dark:hover:bg-gray-800">Cancelar</button>
-              <button type="submit" disabled={savingPayment} data-testid="payment-save-btn" className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] px-4 py-2 text-sm font-semibold disabled:opacity-60">
+              <button type="submit" disabled={savingPayment} data-testid="payment-save-btn" className="inline-flex items-center gap-2 bg-[#0D9387] hover:bg-[#0b7d72] text-white rounded-[10px] px-4 py-2 text-sm font-semibold disabled:opacity-60">
                 {savingPayment ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Registrar
               </button>
             </div>

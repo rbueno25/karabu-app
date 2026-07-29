@@ -20,8 +20,8 @@ const emptyQuote = {
   status: "borrador",
 };
 
-const inputCls = "w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none";
-const selectCls = "text-sm border border-gray-200 dark:border-zinc-800 rounded-[10px] px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100";
+const inputCls = "w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-[#0D9387] focus:ring-2 focus:ring-[#0D9387]/20 outline-none";
+const selectCls = "text-sm border border-gray-200 dark:border-zinc-700 rounded-xl px-3 py-2 focus:border-[#0D9387] focus:ring-2 focus:ring-[#0D9387]/20 outline-none bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100";
 
 export default function Quotations() {
   const [searchParams] = useSearchParams();
@@ -153,7 +153,7 @@ export default function Quotations() {
           <button
             onClick={openCreate}
             data-testid="quotations-new-btn"
-            className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] px-4 py-2 text-sm font-medium transition-colors shadow-sm"
+            className="inline-flex items-center gap-2 bg-[#0D9387] hover:bg-[#0b7d72] text-white rounded-[10px] px-4 py-2 text-sm font-medium transition-colors shadow-sm"
           >
             <Plus className="h-4 w-4" /> Nueva cotización
           </button>
@@ -168,7 +168,7 @@ export default function Quotations() {
               value={q}
               onChange={(e) => { setQ(e.target.value); setPage(1); }}
               placeholder="Buscar por cliente o destino…"
-              className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100 rounded-[10px] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none"
+              className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100 rounded-[10px] focus:border-[#0D9387] focus:ring-2 focus:ring-[#0D9387]/20 outline-none"
             />
           </div>
           <select
@@ -216,7 +216,7 @@ export default function Quotations() {
                       <Link
                         to={`/admin/cotizaciones/${q.id}`}
                         data-testid={`quotation-link-${q.id}`}
-                        className="text-blue-600 hover:text-blue-800 font-medium hover:underline transition-colors"
+                        className="text-[#0D9387] hover:text-[#0b7d72] font-medium hover:underline transition-colors"
                       >
                         {q.destination}
                       </Link>
@@ -331,7 +331,7 @@ export default function Quotations() {
               <button type="button" onClick={() => setModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-zinc-800 rounded-[10px] hover:bg-gray-50 dark:hover:bg-gray-800">
                 Cancelar
               </button>
-              <button type="submit" disabled={saving} data-testid="quotation-save-btn" className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] px-4 py-2 text-sm font-medium disabled:opacity-60">
+              <button type="submit" disabled={saving} data-testid="quotation-save-btn" className="inline-flex items-center gap-2 bg-[#0D9387] hover:bg-[#0b7d72] text-white rounded-[10px] px-4 py-2 text-sm font-medium disabled:opacity-60">
                 {saving && <Loader2 className="h-4 w-4 animate-spin" />} Guardar
               </button>
             </div>

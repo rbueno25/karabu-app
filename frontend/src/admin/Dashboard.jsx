@@ -64,9 +64,9 @@ export default function Dashboard() {
 
       {/* ── Cotizaciones: Enviadas + Aceptadas + Ventas ── */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <Link to="/admin/cotizaciones?status=enviada" className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 p-5 shadow-sm hover:border-blue-300 hover:shadow-md transition-all cursor-pointer">
+        <Link to="/admin/cotizaciones?status=enviada" className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 p-5 shadow-sm hover:border-[#0D9387]/30 hover:shadow-md transition-all cursor-pointer">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-600 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 text-[#0D9387] flex items-center justify-center">
               <Send className="w-5 h-5" />
             </div>
             <div>

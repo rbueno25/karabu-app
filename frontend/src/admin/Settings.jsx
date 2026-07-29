@@ -16,7 +16,7 @@ const SECTIONS = [
   { id: "seguridad", label: "Seguridad", icon: Lock },
 ];
 
-const inputCls = "w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none";
+const inputCls = "w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-[#0D9387] focus:ring-2 focus:ring-[#0D9387]/20 outline-none";
 
 export default function Settings() {
   const { user } = useAuth();
@@ -76,7 +76,7 @@ export default function Settings() {
                 data-testid={`settings-tab-${id}`}
                 className={[
                   "w-full flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium transition-colors text-left",
-                  section === id ? "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300" : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800",
+                  section === id ? "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-teal-300" : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800",
                 ].join(" ")}
               >
                 <Icon className="h-4 w-4" /> {label}
@@ -188,7 +188,7 @@ export default function Settings() {
                 <input type="number" min={1} max={168} value={form.session_hours} onChange={(e) => setForm({ ...form, session_hours: e.target.value })} className={inputCls} disabled={!canEdit} />
               </Field>
               <label className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
-                <input type="checkbox" checked={!!form.require_2fa} onChange={(e) => setForm({ ...form, require_2fa: e.target.checked })} disabled={!canEdit} className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500" />
+                <input type="checkbox" checked={!!form.require_2fa} onChange={(e) => setForm({ ...form, require_2fa: e.target.checked })} disabled={!canEdit} className="rounded border-gray-300 dark:border-gray-600 text-[#0D9387] focus:ring-[#0D9387]" />
                 Requerir autenticación en dos pasos (2FA) — próximamente
               </label>
             </div>
@@ -196,7 +196,7 @@ export default function Settings() {
 
           {canEdit && (
             <div className="flex items-center justify-end pt-4 border-t border-gray-100 dark:border-zinc-800">
-              <button type="submit" disabled={saving} data-testid="settings-save-btn" className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] px-4 py-2 text-sm font-medium disabled:opacity-60">
+              <button type="submit" disabled={saving} data-testid="settings-save-btn" className="inline-flex items-center gap-2 bg-[#0D9387] hover:bg-[#0b7d72] text-white rounded-[10px] px-4 py-2 text-sm font-medium disabled:opacity-60">
                 {saving && <Loader2 className="h-4 w-4 animate-spin" />} Guardar cambios
               </button>
             </div>

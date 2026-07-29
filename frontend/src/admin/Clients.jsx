@@ -127,7 +127,7 @@ export default function Clients() {
           <button
             onClick={openCreate}
             data-testid="clients-new-btn"
-            className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] px-4 py-2 text-sm font-medium transition-colors shadow-sm"
+            className="inline-flex items-center gap-2 bg-[#0D9387] hover:bg-[#0b7d72] text-white rounded-[10px] px-4 py-2 text-sm font-medium transition-colors shadow-sm"
           >
             <Plus className="h-4 w-4" /> Nuevo cliente
           </button>
@@ -143,14 +143,14 @@ export default function Clients() {
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Buscar por nombre, correo o teléfono…"
-              className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100 rounded-[10px] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none"
+              className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100 rounded-[10px] focus:border-[#0D9387] focus:ring-2 focus:ring-[#0D9387]/20 outline-none"
             />
           </div>
           <select
             data-testid="clients-status-filter"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="text-sm border border-gray-200 dark:border-zinc-800 rounded-[10px] px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100"
+            className="text-sm border border-gray-200 dark:border-zinc-800 rounded-[10px] px-3 py-2 focus:border-[#0D9387] focus:ring-2 focus:ring-[#0D9387]/20 outline-none bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100"
           >
             <option value="">Todos los estados</option>
             <option value="activo">Activo</option>
@@ -170,7 +170,7 @@ export default function Clients() {
             action={
               <button
                 onClick={openCreate}
-                className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] px-4 py-2 text-sm font-medium"
+                className="inline-flex items-center gap-2 bg-[#0D9387] hover:bg-[#0b7d72] text-white rounded-[10px] px-4 py-2 text-sm font-medium"
               >
                 <Plus className="h-4 w-4" /> Nuevo cliente
               </button>
@@ -196,7 +196,7 @@ export default function Clients() {
                       <Link
                         to={`/admin/clientes/${c.id}`}
                         data-testid={`client-link-${c.id}`}
-                        className="text-blue-600 hover:text-blue-800 font-medium hover:underline transition-colors"
+                        className="text-[#0D9387] hover:text-[#0b7d72] font-medium hover:underline transition-colors"
                       >
                         {c.first_name} {c.last_name}
                       </Link>
@@ -309,7 +309,7 @@ export default function Clients() {
                 type="submit"
                 disabled={saving}
                 data-testid="client-save-btn"
-                className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] px-4 py-2 text-sm font-medium disabled:opacity-60"
+                className="inline-flex items-center gap-2 bg-[#0D9387] hover:bg-[#0b7d72] text-white rounded-[10px] px-4 py-2 text-sm font-medium disabled:opacity-60"
               >
                 {saving && <Loader2 className="h-4 w-4 animate-spin" />} Guardar
               </button>
@@ -322,7 +322,7 @@ export default function Clients() {
 }
 
 const inputCls =
-  "w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-shadow";
+  "w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-[#0D9387] focus:ring-2 focus:ring-[#0D9387]/20 outline-none transition-shadow";
 
 function Field({ label, required, children }) {
   return (

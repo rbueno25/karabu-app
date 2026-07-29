@@ -12,7 +12,7 @@ const STYLES = {
   pendiente: "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800/50",
   confirmada: "bg-[#0D9387]/10 dark:bg-[#0D9387]/20 text-[#0D9387] dark:text-teal-400 border-[#0D9387]/20 dark:border-[#0D9387]/30",
   pagada: "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/50",
-  en_viaje: "bg-[#0F2A4A]/10 dark:bg-[#0F2A4A]/30 text-[#0F2A4A] dark:text-blue-300 border-[#0F2A4A]/20 dark:border-[#0F2A4A]/30",
+  en_viaje: "bg-[#0F2A4A]/10 dark:bg-[#0F2A4A]/30 text-[#0F2A4A] dark:text-teal-300 border-[#0F2A4A]/20 dark:border-[#0F2A4A]/30",
   finalizada: "bg-gray-100 dark:bg-zinc-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-zinc-700",
   cancelada: "bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800/50",
   completado: "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/50",
