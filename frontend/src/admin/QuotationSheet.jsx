@@ -194,7 +194,7 @@ export default function QuotationSheet() {
       </div>
 
       {/* Banner de cambios solicitados por el cliente */}
-      {(form.status === 'cambios_solicitados' || form.status === 'rechazada') && form.client_notes && (
+      {(form.status === 'cambios_solicitados' || form.status === 'rechazada') && (
         <div className="rounded-xl border-2 border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/50 p-5 flex gap-4 items-start shadow-[0_0_20px_rgba(251,191,36,0.15)]">
           <div className="flex-shrink-0 mt-0.5">
             <AlertTriangle className="h-6 w-6 text-amber-600 dark:text-amber-400" />
@@ -203,9 +203,11 @@ export default function QuotationSheet() {
             <h3 className="text-sm font-bold text-amber-800 dark:text-amber-300 mb-1">
               {form.status === 'cambios_solicitados' ? '🔄 El cliente solicita cambios' : '❌ El cliente rechazó la propuesta'}
             </h3>
-            <p className="text-sm text-amber-900 dark:text-amber-200 leading-relaxed whitespace-pre-wrap">
-              {form.client_notes}
-            </p>
+            {(form.client_notes || form.notes) && (
+              <p className="text-sm text-amber-900 dark:text-amber-200 leading-relaxed whitespace-pre-wrap">
+                {form.client_notes || form.notes}
+              </p>
+            )}
           </div>
         </div>
       )}
