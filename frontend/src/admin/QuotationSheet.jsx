@@ -1,17 +1,33 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import api, { formatApiError } from "../lib/api";
-import PageHeader from "./PageHeader";
 import StatusBadge from "./StatusBadge";
 import { formatDate, formatCurrency } from "../lib/format";
 import { toast } from "sonner";
 import { 
   ArrowLeft, FileText, User, Mail, Phone, Calendar, 
   MapPin, DollarSign, Send, Save, Loader2, X, Clipboard, ExternalLink,
-  Plus, Trash2, AlertTriangle, CheckCircle, Sparkles, Layers, Eye
+  Plus, Trash2, AlertTriangle, CheckCircle, Sparkles, Layers, Eye,
+  ChevronDown, ChevronRight
 } from "lucide-react";
 
-const inputCls = "w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-shadow";
+const inputCls = "w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 px-3 py-2.5 text-sm focus:border-[#0D9387] focus:ring-2 focus:ring-[#0D9387]/20 outline-none transition-all placeholder:text-gray-400";
+
+function Section({ title, icon: Icon, children, defaultOpen = true }) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div className="space-y-3">
+      <button type="button" onClick={() => setOpen(!open)} className="w-full flex items-center gap-2 group">
+        <div className="flex items-center gap-2 flex-1">
+          {Icon && <Icon className="h-4 w-4 text-[#0D9387]" />}
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200">{title}</h3>
+        </div>
+        {open ? <ChevronDown className="h-4 w-4 text-gray-400 group-hover:text-[#0D9387] transition-colors" /> : <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-[#0D9387] transition-colors" />}
+      </button>
+      {open && <div className="pl-0">{children}</div>}
+    </div>
+  );
+}
 
 export default function QuotationSheet() {
   const { id } = useParams();
@@ -75,7 +91,6 @@ export default function QuotationSheet() {
     const priceToUse = priceOverride !== undefined ? priceOverride : newServicePrice;
     if (!nameToUse.trim()) { toast.error("Ingresa el nombre del servicio"); return; }
     const priceNum = parseFloat(priceToUse) || 0;
-    // Validar que no exista otro servicio con el mismo precio
     const duplicate = (form.services || []).find(s => Number(s.price) === priceNum);
     if (duplicate && priceNum > 0) {
       toast.error(`Ya existe "${duplicate.name}" con el mismo precio (${formatCurrency(priceNum, form.currency)}). Cada servicio debe tener un precio distinto.`);
@@ -100,7 +115,6 @@ export default function QuotationSheet() {
     setForm(prev => {
       const updated = [...(prev.services || [])];
       const newPrice = field === "price" ? (parseFloat(value) || 0) : updated[index].price;
-      // Validar precio duplicado
       if (field === "price" && newPrice > 0) {
         const duplicate = updated.find((s, i) => i !== index && Number(s.price) === newPrice);
         if (duplicate) {
@@ -173,264 +187,261 @@ export default function QuotationSheet() {
   const whatsappMsg = `Hola ${client.first_name}, aquí tienes tu propuesta de viaje personalizada para ${form.destination}. Puedes ver todos los detalles y aceptarla aquí: ${clientLink}`;
   const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(whatsappMsg)}`;
 
+  const btnBase = "inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-semibold transition-all shadow-sm";
+
   return (
     <div data-testid="quotation-sheet-page" className="space-y-6 relative">
       <div className="fixed inset-0 -z-10 pointer-events-none">
         <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-brand-turquoise/5 dark:bg-brand-turquoise/8 rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-brand-navy/3 dark:bg-brand-navy/6 rounded-full blur-3xl" />
       </div>
+
+      {/* Header */}
       <div className="flex items-center gap-3">
-        <Link to="/admin/cotizaciones" className="h-9 w-9 border border-gray-200 dark:border-zinc-800 rounded-[10px] bg-white dark:bg-zinc-900 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors" data-testid="quotation-back-btn"><ArrowLeft className="h-4 w-4" /></Link>
+        <Link to="/admin/cotizaciones" className="h-9 w-9 border border-gray-200 dark:border-zinc-700 rounded-xl bg-white dark:bg-zinc-900 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors" data-testid="quotation-back-btn"><ArrowLeft className="h-4 w-4" /></Link>
         <div className="flex-1">
-          <div className="flex items-center gap-2.5"><h1 className="text-2xl font-semibold tracking-tight text-gray-900 dark:text-gray-100">Cotización</h1><StatusBadge value={form.status} /></div>
-          <p className="text-xs text-gray-500 dark:text-gray-300">ID Cotización: {quotation.id}</p>
+          <div className="flex items-center gap-2.5"><h1 className="text-xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Cotización</h1><StatusBadge value={form.status} /></div>
+          <p className="text-xs text-gray-400 dark:text-gray-500 font-mono">#{quotation.id?.slice(0, 8)}</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <a href={clientLink} target="_blank" rel="noopener noreferrer" data-testid="quotation-view-deliverable-btn" className="h-9 w-9 inline-flex items-center justify-center border border-[#0D9387]/30 bg-[#0D9387]/10 hover:bg-[#0D9387]/25 text-[#0D9387] dark:text-teal-300 rounded-[10px] transition-all shadow-sm" title="Ver entregable del cliente"><Eye className="h-4.5 w-4.5" /></a>
-          <a href={`/#/factura/${quotation.id}`} target="_blank" rel="noopener noreferrer" data-testid="quotation-view-invoice-btn" className="h-9 px-3 inline-flex items-center gap-1.5 border border-blue-200 dark:border-blue-900/40 bg-blue-50 dark:bg-blue-950/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300 text-xs font-bold rounded-[10px] transition-all shadow-sm" title="Ver / Generar Factura"><FileText className="h-4 w-4" /><span>Factura</span></a>
-          <button type="button" onClick={() => setDeleteModalOpen(true)} data-testid="quotation-delete-btn" className="h-9 w-9 inline-flex items-center justify-center border border-red-200 dark:border-red-900/40 bg-red-50 dark:bg-red-950/30 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 rounded-[10px] transition-all shadow-sm" title="Eliminar cotización"><Trash2 className="h-4.5 w-4.5" /></button>
-          <button onClick={() => setSendModalOpen(true)} data-testid="quotation-send-btn" className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] px-3.5 py-2 text-sm font-semibold transition-colors shadow-sm"><Send className="h-4 w-4" /><span>Enviar al Cliente</span></button>
+          <a href={clientLink} target="_blank" rel="noopener noreferrer" className="h-9 w-9 inline-flex items-center justify-center border border-[#0D9387]/30 bg-[#0D9387]/10 hover:bg-[#0D9387]/20 text-[#0D9387] rounded-xl transition-all" title="Ver entregable"><Eye className="h-4 w-4" /></a>
+          <a href={`/#/factura/${quotation.id}`} target="_blank" rel="noopener noreferrer" className="h-9 px-3 inline-flex items-center gap-1.5 border border-[#0D9387]/20 bg-[#0D9387]/5 hover:bg-[#0D9387]/10 text-[#0D9387] text-xs font-semibold rounded-xl transition-all" title="Factura"><FileText className="h-4 w-4" />Factura</a>
+          <button type="button" onClick={() => setDeleteModalOpen(true)} className="h-9 w-9 inline-flex items-center justify-center border border-red-200 dark:border-red-900/30 bg-red-50 dark:bg-red-950/20 hover:bg-red-100 dark:hover:bg-red-900/40 text-red-500 rounded-xl transition-all" title="Eliminar"><Trash2 className="h-4 w-4" /></button>
+          <button onClick={() => setSendModalOpen(true)} className={`${btnBase} bg-[#0D9387] hover:bg-[#0b7d72] text-white`}><Send className="h-4 w-4" />Enviar al Cliente</button>
         </div>
       </div>
 
-      {/* Banner de cambios solicitados por el cliente */}
+      {/* Banner de cambios */}
       {(form.status === 'cambios_solicitados' || form.status === 'rechazada') && (
-        <div className="rounded-xl border-2 border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/50 p-5 flex gap-4 items-start shadow-[0_0_20px_rgba(251,191,36,0.15)]">
-          <div className="flex-shrink-0 mt-0.5">
-            <AlertTriangle className="h-6 w-6 text-amber-600 dark:text-amber-400" />
-          </div>
+        <div className="rounded-2xl border-2 border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/40 p-5 flex gap-4 items-start shadow-[0_0_20px_rgba(251,191,36,0.15)]">
+          <AlertTriangle className="h-6 w-6 text-amber-500 shrink-0 mt-0.5" />
           <div className="flex-1 min-w-0">
             <h3 className="text-sm font-bold text-amber-800 dark:text-amber-300 mb-1">
               {form.status === 'cambios_solicitados' ? '🔄 El cliente solicita cambios' : '❌ El cliente rechazó la propuesta'}
             </h3>
             {(form.client_notes || form.notes) && (
-              <p className="text-sm text-amber-900 dark:text-amber-200 leading-relaxed whitespace-pre-wrap">
-                {form.client_notes || form.notes}
-              </p>
+              <p className="text-sm text-amber-900 dark:text-amber-200 leading-relaxed whitespace-pre-wrap">{form.client_notes || form.notes}</p>
             )}
           </div>
         </div>
       )}
 
       <div className="grid grid-cols-12 gap-6">
-        <form onSubmit={handleSave} className="col-span-12 lg:col-span-8 bg-white dark:bg-zinc-900 rounded-[20px] shadow-[0_4px_24px_rgba(15,42,74,0.06),0_1px_4px_rgba(0,168,150,0.04)] border border-brand-turquoise/10 overflow-hidden relative">
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-navy via-brand-turquoise to-brand-orange" />
-          <div className="p-8 border-b border-brand-turquoise/10 dark:border-brand-turquoise/20 bg-gradient-to-br from-brand-navy/3 via-white to-brand-turquoise/5 dark:from-brand-navy/15 dark:via-brand-navy/10 dark:to-brand-turquoise/10 flex justify-between items-start flex-wrap gap-4">
+        {/* Formulario principal */}
+        <form onSubmit={handleSave} className="col-span-12 lg:col-span-8 bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-gray-200 dark:border-zinc-800 overflow-hidden">
+          {/* Header del form */}
+          <div className="p-6 border-b border-gray-100 dark:border-zinc-800 flex justify-between items-start flex-wrap gap-4 bg-gradient-to-r from-[#0F2A4A]/5 to-[#0D9387]/5 dark:from-[#0F2A4A]/20 dark:to-[#0D9387]/10">
             <div>
-              <div className="text-xl font-bold text-brand-navy dark:text-gray-100 flex items-center gap-2"><FileText className="h-5 w-5 text-brand-turquoise" /><span>KARABU VIAJES & VISAS</span></div>
-              <p className="text-xs text-gray-500 dark:text-gray-300 mt-1">Propuesta y Presupuesto de Servicios Turísticos</p>
+              <div className="text-lg font-bold text-[#0F2A4A] dark:text-gray-100 flex items-center gap-2">
+                <FileText className="h-5 w-5 text-[#0D9387]" /> KARABU VIAJES
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Propuesta de Servicios Turísticos</p>
             </div>
-            <div className="text-right text-xs text-gray-500 dark:text-gray-300">
-              <p className="font-semibold text-gray-800 dark:text-gray-200">Fecha de Creación:</p>
-              <p>{formatDate(quotation.created_at)}</p>
-              {quotation.sent_at && <div className="mt-1"><p className="font-semibold text-gray-800 dark:text-gray-200">Fecha de Envío:</p><p>{formatDate(quotation.sent_at)} ({quotation.sent_via})</p></div>}
+            <div className="text-right text-xs text-gray-500 dark:text-gray-400">
+              <p className="font-semibold text-gray-700 dark:text-gray-300">Creada: {formatDate(quotation.created_at)}</p>
+              {quotation.sent_at && <p className="mt-0.5">Enviada: {formatDate(quotation.sent_at)} ({quotation.sent_via})</p>}
             </div>
           </div>
 
-          <div className="p-8 space-y-6">
-            {/* Client and Broker Cards */}
+          <div className="p-6 space-y-5">
+            {/* Cards Cliente + Broker */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-4 rounded-2xl bg-slate-50/80 dark:bg-zinc-900/90 border border-slate-200/80 dark:border-zinc-800 shadow-sm relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-24 h-24 bg-teal-500/5 rounded-bl-full pointer-events-none" />
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-[#0D9387] bg-[#0D9387]/10 dark:bg-teal-500/20 dark:text-teal-300 mb-3"><User className="w-3 h-3" /> Información del Cliente</span>
-                <div className="flex items-start gap-3.5">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0D9387] to-teal-700 text-white font-bold flex items-center justify-center text-sm shadow-md shrink-0">{(client.first_name?.[0] || 'C') + (client.last_name?.[0] || '')}</div>
-                  <div className="space-y-1.5 min-w-0 flex-1">
-                    <h4 className="font-bold text-base text-gray-900 dark:text-zinc-100 truncate">{client.first_name} {client.last_name}</h4>
-                    <div className="flex flex-col gap-1 text-xs text-gray-600 dark:text-zinc-400 font-medium">
-                      <a href={`mailto:${client.email}`} className="flex items-center gap-2 hover:text-[#0D9387] dark:hover:text-teal-300 transition-colors truncate"><Mail className="h-3.5 w-3.5 text-[#0D9387] shrink-0" /><span className="truncate">{client.email || 'Sin correo registrado'}</span></a>
-                      {client.phone && <a href={`tel:${client.phone}`} className="flex items-center gap-2 hover:text-[#0D9387] dark:hover:text-teal-300 transition-colors"><Phone className="h-3.5 w-3.5 text-[#0D9387] shrink-0" /><span>{client.phone}</span></a>}
+              <div className="p-4 rounded-2xl bg-gray-50 dark:bg-zinc-800/50 border border-gray-100 dark:border-zinc-800">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider text-[#0D9387] bg-[#0D9387]/10 mb-3"><User className="w-3 h-3" /> Cliente</span>
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#0D9387] text-white font-bold flex items-center justify-center text-sm shrink-0">{(client.first_name?.[0] || 'C') + (client.last_name?.[0] || '')}</div>
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <h4 className="font-bold text-sm text-gray-900 dark:text-gray-100 truncate">{client.first_name} {client.last_name}</h4>
+                    <a href={`mailto:${client.email}`} className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-[#0D9387] transition-colors truncate"><Mail className="h-3 w-3 shrink-0" />{client.email || 'Sin correo'}</a>
+                    {client.phone && <a href={`tel:${client.phone}`} className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-[#0D9387] transition-colors"><Phone className="h-3 w-3 shrink-0" />{client.phone}</a>}
+                  </div>
+                </div>
+              </div>
+              <div className="p-4 rounded-2xl bg-gray-50 dark:bg-zinc-800/50 border border-gray-100 dark:border-zinc-800">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider text-[#0F2A4A] bg-[#0F2A4A]/10 dark:text-blue-300 dark:bg-blue-950/50 mb-3"><User className="w-3 h-3" /> Asesor</span>
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#0F2A4A] text-white font-bold flex items-center justify-center text-sm shrink-0">{broker.name ? broker.name.split(' ').map(n=>n[0]).join('').slice(0,2) : 'K'}</div>
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <h4 className="font-bold text-sm text-gray-900 dark:text-gray-100 truncate">{broker.name || 'Asesor Karabu'}</h4>
+                    <a href={`mailto:${broker.email}`} className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-[#0D9387] transition-colors truncate"><Mail className="h-3 w-3 shrink-0" />{broker.email || 'asesor@karabu.com'}</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <hr className="border-gray-100 dark:border-zinc-800" />
+
+            {/* Destino y Fechas */}
+            <Section title="Destino y Fechas" icon={MapPin}>
+              <div className="space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <Field label="Destino del Viaje" required><input data-testid="quotation-destination" required value={form.destination} onChange={(e) => setForm({ ...form, destination: e.target.value })} className={inputCls} /></Field>
+                  <Field label="Viajeros" required><input data-testid="quotation-travelers" type="number" min={1} required value={form.travelers} onChange={(e) => setForm({ ...form, travelers: e.target.value })} className={inputCls} /></Field>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <Field label="Fecha de Salida"><input data-testid="quotation-travel-date" type="date" value={form.travel_date} onChange={(e) => setForm({ ...form, travel_date: e.target.value })} className={inputCls} /></Field>
+                  <Field label="Fecha de Regreso"><input data-testid="quotation-return-date" type="date" value={form.return_date} onChange={(e) => setForm({ ...form, return_date: e.target.value })} className={inputCls} /></Field>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <Field label="Hotel Asignado"><input data-testid="quotation-assigned-hotel" value={form.assigned_hotel} onChange={(e) => setForm({ ...form, assigned_hotel: e.target.value })} placeholder="Ej: Grand Palladium..." className={inputCls} /></Field>
+                  <Field label="Tipo de Habitación"><input data-testid="quotation-room-type" value={form.room_type} onChange={(e) => setForm({ ...form, room_type: e.target.value })} placeholder="Sencilla, Doble, Triple..." className={inputCls} /></Field>
+                </div>
+              </div>
+            </Section>
+
+            <hr className="border-gray-100 dark:border-zinc-800" />
+
+            {/* Desglose por Servicio */}
+            <Section title="Desglose por Servicio" icon={Layers}>
+              <div className="space-y-3">
+                <p className="text-xs text-gray-400">Agrega servicios con nombre y precio. El total se calcula automáticamente.</p>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="text-[11px] text-gray-400 font-medium">Atajos:</span>
+                  {[
+                    ["Vuelos ida y vuelta", 800],
+                    ["Hospedaje", 1200],
+                    ["Traslados aeropuerto - hotel", 150],
+                    ["Seguro de viaje médico", 100]
+                  ].map(([name, price]) => (
+                    <button key={name} type="button" onClick={() => handleAddService(name, price)} className="px-2.5 py-1 text-xs rounded-lg bg-[#0D9387]/10 text-[#0D9387] border border-[#0D9387]/20 hover:bg-[#0D9387]/20 transition font-medium">{name.split(' ')[0]}</button>
+                  ))}
+                </div>
+
+                <div className="p-3 bg-gray-50 dark:bg-zinc-800/50 rounded-xl border border-gray-100 dark:border-zinc-800">
+                  <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 items-end">
+                    <div className="sm:col-span-6"><label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Servicio</label><input data-testid="service-name-input" value={newServiceName} onChange={(e) => setNewServiceName(e.target.value)} placeholder="Vuelos, Hospedaje..." className={inputCls} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddService(); } }} /></div>
+                    <div className="sm:col-span-4"><label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Precio</label><div className="relative"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">$</span><input data-testid="service-price-input" type="number" step="0.01" min="0" value={newServicePrice} onChange={(e) => setNewServicePrice(e.target.value)} placeholder="0.00" className={`${inputCls} pl-6`} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddService(); } }} /></div></div>
+                    <div className="sm:col-span-2"><button type="button" onClick={() => handleAddService()} className="w-full h-[42px] bg-[#0D9387] hover:bg-[#0b7d72] text-white font-semibold text-xs rounded-xl flex items-center justify-center gap-1 transition"><Plus className="h-4 w-4" />Agregar</button></div>
+                  </div>
+                </div>
+
+                {form.services && form.services.length > 0 ? (
+                  <div className="space-y-2">
+                    {form.services.map((srv, index) => (
+                      <div key={srv.id || index} className="flex items-center gap-2 p-3 rounded-xl bg-gray-50 dark:bg-zinc-800/50 border border-gray-100 dark:border-zinc-800">
+                        <div className="flex-1"><input value={srv.name} onChange={(e) => handleUpdateService(index, "name", e.target.value)} className="w-full bg-transparent font-medium text-sm text-gray-900 dark:text-gray-100 border-b border-transparent hover:border-gray-300 focus:border-[#0D9387] outline-none px-1 py-0.5" /></div>
+                        <div className="relative w-28"><span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs">$</span><input type="number" step="0.01" min="0" value={srv.price} onChange={(e) => handleUpdateService(index, "price", e.target.value)} className="w-full pl-5 pr-2 py-1 text-right font-bold text-sm bg-white dark:bg-zinc-900 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 outline-none focus:border-[#0D9387]" /></div>
+                        <span className="text-xs text-gray-400 font-medium">{form.currency}</span>
+                        <button type="button" onClick={() => handleRemoveService(index)} className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition"><Trash2 className="h-4 w-4" /></button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-4 text-center border border-dashed border-gray-200 dark:border-gray-700 rounded-xl text-xs text-gray-400">Sin servicios. Usa el formulario o los atajos.</div>
+                )}
+
+                {/* Resumen */}
+                <div className="p-4 rounded-xl bg-gradient-to-r from-gray-50 to-[#0D9387]/5 dark:from-zinc-800/50 dark:to-zinc-800/30 border border-gray-100 dark:border-zinc-800 space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-sm">
+                    <div className="flex items-center gap-2"><span className="font-semibold text-gray-600 dark:text-gray-400">Suma servicios:</span><span className="font-bold text-gray-900 dark:text-white">{formatCurrency(sumServices, form.currency)}</span></div>
+                    <div className="flex items-center gap-2"><span className="font-semibold text-gray-600 dark:text-gray-400">Monto total:</span><span className="font-bold text-[#0D9387] text-lg">{formatCurrency(totalAmount, form.currency)}</span></div>
+                  </div>
+                  {isOverBudget ? (
+                    <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/50 text-red-600 dark:text-red-400 text-xs font-semibold flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <span className="flex items-center gap-1.5"><AlertTriangle className="h-4 w-4 shrink-0" />Servicios ({formatCurrency(sumServices, form.currency)}) exceden el total ({formatCurrency(totalAmount, form.currency)})</span>
+                      <button type="button" onClick={handleSyncTotalWithServices} className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold text-xs shrink-0 transition">Ajustar a {formatCurrency(sumServices, form.currency)}</button>
+                    </div>
+                  ) : diffManagement > 0 && form.services?.length > 0 ? (
+                    <div className="p-2.5 rounded-xl bg-[#0D9387]/10 border border-[#0D9387]/20 text-[#0D9387] text-xs font-semibold flex items-center gap-2"><Sparkles className="h-4 w-4" />Gastos de gestión: {formatCurrency(diffManagement, form.currency)}</div>
+                  ) : form.services?.length > 0 && sumServices === totalAmount ? (
+                    <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-400 text-xs font-semibold flex items-center gap-2"><CheckCircle className="h-4 w-4" />Servicios y total coinciden</div>
+                  ) : null}
+                </div>
+              </div>
+            </Section>
+
+            <hr className="border-gray-100 dark:border-zinc-800" />
+
+            {/* Precio */}
+            <Section title="Precio de la Propuesta" icon={DollarSign}>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="col-span-2"><Field label="Monto Cotizado" required><input data-testid="quotation-amount" type="number" step="0.01" min={0} required value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} className={inputCls} /></Field></div>
+                <div><Field label="Moneda" required><select data-testid="quotation-currency" value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })} className={inputCls}><option>USD</option><option>DOP</option><option>COP</option><option>EUR</option><option>MXN</option></select></Field></div>
+              </div>
+            </Section>
+
+            <hr className="border-gray-100 dark:border-zinc-800" />
+
+            {/* Comparativa */}
+            <Section title="Comparativa de Precios" icon={Sparkles} defaultOpen={!!form.booking_price || !!form.expedia_price}>
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <Field label="Booking.com"><div className="relative"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span><input data-testid="quotation-booking-price" type="number" step="0.01" value={form.booking_price} onChange={(e) => setForm({ ...form, booking_price: e.target.value })} placeholder="0.00" className={`${inputCls} pl-7`} /></div></Field>
+                  <Field label="Expedia"><div className="relative"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span><input data-testid="quotation-expedia-price" type="number" step="0.01" value={form.expedia_price} onChange={(e) => setForm({ ...form, expedia_price: e.target.value })} placeholder="0.00" className={`${inputCls} pl-7`} /></div></Field>
+                </div>
+                <div className="rounded-2xl border border-gray-100 dark:border-zinc-800 overflow-hidden">
+                  <div className="grid grid-cols-2 divide-x divide-gray-100 dark:divide-zinc-800">
+                    <div className="flex flex-col items-center p-4 bg-[#003580]/5">
+                      <img src="/booking-logo.svg" alt="Booking" className="h-20 object-contain mb-2" />
+                      <span className="text-xs font-bold text-gray-500 uppercase mb-1">Booking.com</span>
+                      <span className="text-lg font-black text-gray-900 dark:text-white">{form.booking_price ? formatCurrency(Number(form.booking_price), form.currency) : '—'}</span>
+                    </div>
+                    <div className="flex flex-col items-center p-4 bg-[#FFE000]/5">
+                      <img src="/expedia-logo.svg" alt="Expedia" className="h-20 object-contain mb-2" />
+                      <span className="text-xs font-bold text-gray-500 uppercase mb-1">Expedia</span>
+                      <span className="text-lg font-black text-gray-900 dark:text-white">{form.expedia_price ? formatCurrency(Number(form.expedia_price), form.currency) : '—'}</span>
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="p-4 rounded-2xl bg-slate-50/80 dark:bg-zinc-900/90 border border-slate-200/80 dark:border-zinc-800 shadow-sm relative overflow-hidden">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-blue-600 bg-blue-50 dark:bg-blue-950/60 dark:text-blue-300 mb-3"><User className="w-3 h-3" /> Asesor Asignado (Broker)</span>
-                <div className="flex items-start gap-3.5">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-bold flex items-center justify-center text-sm shadow-md shrink-0">{broker.name ? broker.name.split(' ').map(n=>n[0]).join('').slice(0,2) : 'A'}</div>
-                  <div className="space-y-1.5 min-w-0 flex-1">
-                    <h4 className="font-bold text-base text-gray-900 dark:text-zinc-100 truncate">{broker.name || 'Asesor Karabu'}</h4>
-                    <a href={`mailto:${broker.email}`} className="flex items-center gap-2 text-xs text-gray-600 dark:text-zinc-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors truncate"><Mail className="h-3.5 w-3.5 text-blue-600 shrink-0" /><span className="truncate">{broker.email || 'asesor@karabu.com'}</span></a>
-                  </div>
-                </div>
-              </div>
-            </div>
+            </Section>
 
-            {/* Destino y Fechas */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-zinc-800 pb-2">Destino y Fechas</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Field label="Destino del Viaje" required><input data-testid="quotation-destination" required value={form.destination} onChange={(e) => setForm({ ...form, destination: e.target.value })} className={inputCls} /></Field>
-                <Field label="Cantidad de Viajeros" required><input data-testid="quotation-travelers" type="number" min={1} required value={form.travelers} onChange={(e) => setForm({ ...form, travelers: e.target.value })} className={inputCls} /></Field>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Field label="Fecha de Salida"><input data-testid="quotation-travel-date" type="date" value={form.travel_date} onChange={(e) => setForm({ ...form, travel_date: e.target.value })} className={inputCls} /></Field>
-                <Field label="Fecha de Regreso"><input data-testid="quotation-return-date" type="date" value={form.return_date} onChange={(e) => setForm({ ...form, return_date: e.target.value })} className={inputCls} /></Field>
-              </div>
-            </div>
+            <hr className="border-gray-100 dark:border-zinc-800" />
 
-            {/* Hotel + Tipo Habitación */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Field label="Hotel Asignado"><input data-testid="quotation-assigned-hotel" value={form.assigned_hotel} onChange={(e) => setForm({ ...form, assigned_hotel: e.target.value })} placeholder="Ej: Grand Palladium Costa Mujeres..." className={inputCls} /></Field>
-              <Field label="Tipo de Habitación">
-                <input data-testid="quotation-room-type" value={form.room_type} onChange={(e) => setForm({ ...form, room_type: e.target.value })} placeholder="Ej: Sencilla, Doble, Triple..." className={inputCls} />
-              </Field>
-            </div>
-
-            {/* Configuración del Entregable */}
-            <div className="space-y-4 pt-2">
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-zinc-800 pb-2">Configuración del Entregable</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Configuración */}
+            <Section title="Configuración del Entregable" icon={Eye} defaultOpen={false}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <Field label="Comisión extra (%)">
                   <div className="relative">
                     <input data-testid="quotation-tax" type="number" min="0" max="100" step="0.5" value={form.tax_percent || ''} onChange={(e) => setForm({ ...form, tax_percent: e.target.value })} className={`${inputCls} w-28`} placeholder="0" />
                     <span className="absolute right-8 top-1/2 -translate-y-1/2 text-gray-400 text-xs">%</span>
                   </div>
-                  <p className="text-[11px] text-gray-400 mt-0.5">Margen adicional sobre el total (solo interno)</p>
+                  <p className="text-[11px] text-gray-400 mt-0.5">Margen interno (no visible al cliente)</p>
                 </Field>
-
-                <Field label="Imagen del Hero (URL)">
-                  <input data-testid="quotation-hero-image" value={form.hero_image} onChange={(e) => setForm({ ...form, hero_image: e.target.value })} placeholder="https://... o deja vacío para usar la del destino" className={inputCls} />
+                <Field label="Imagen Hero (URL)">
+                  <input data-testid="quotation-hero-image" value={form.hero_image} onChange={(e) => setForm({ ...form, hero_image: e.target.value })} placeholder="Vacío = imagen del destino" className={inputCls} />
                 </Field>
               </div>
-            </div>
+            </Section>
 
-            {/* DESGLOSE POR SERVICIO */}
-            <div className="space-y-4 pt-2">
-              <div className="border-b border-gray-100 dark:border-zinc-800 pb-2">
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2"><Layers className="h-4 w-4 text-[#0D9387]" />Desglose por Servicio</h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Agrega servicios individuales con nombre y precio. El total se calcula automáticamente.</p>
-                </div>
-                <div className="flex flex-wrap items-center gap-1.5 mt-2">
-                  <span className="text-[11px] font-medium text-gray-400">Atajos:</span>
-                  <button type="button" onClick={() => handleAddService("Vuelos ida y vuelta", 800)} className="px-2.5 py-1 text-xs rounded-lg bg-teal-500/10 text-teal-700 dark:text-teal-300 border border-teal-500/20 hover:bg-teal-500/20 transition font-medium">+ Vuelos</button>
-                  <button type="button" onClick={() => handleAddService("Hospedaje", 1200)} className="px-2.5 py-1 text-xs rounded-lg bg-teal-500/10 text-teal-700 dark:text-teal-300 border border-teal-500/20 hover:bg-teal-500/20 transition font-medium">+ Hospedaje</button>
-                  <button type="button" onClick={() => handleAddService("Traslados aeropuerto - hotel", 150)} className="px-2.5 py-1 text-xs rounded-lg bg-teal-500/10 text-teal-700 dark:text-teal-300 border border-teal-500/20 hover:bg-teal-500/20 transition font-medium">+ Traslados</button>
-                  <button type="button" onClick={() => handleAddService("Seguro de viaje médico", 100)} className="px-2.5 py-1 text-xs rounded-lg bg-teal-500/10 text-teal-700 dark:text-teal-300 border border-teal-500/20 hover:bg-teal-500/20 transition font-medium">+ Seguro</button>
-                </div>
-              </div>
-
-              <div className="p-3.5 bg-gray-50 dark:bg-zinc-800/50 rounded-[12px] border border-gray-200 dark:border-gray-700 space-y-3">
-                <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
-                  <div className="sm:col-span-7"><label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">Nombre del Servicio</label><input data-testid="service-name-input" value={newServiceName} onChange={(e) => setNewServiceName(e.target.value)} placeholder="Ej: Vuelos ida y vuelta, Hospedaje..." className={inputCls} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddService(); } }} /></div>
-                  <div className="sm:col-span-3"><label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">Precio Individual ($)</label><div className="relative"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">$</span><input data-testid="service-price-input" type="number" step="0.01" min="0" value={newServicePrice} onChange={(e) => setNewServicePrice(e.target.value)} placeholder="0.00" className={`${inputCls} pl-6`} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddService(); } }} /></div></div>
-                  <div className="sm:col-span-2"><button type="button" onClick={() => handleAddService()} data-testid="add-service-btn" className="w-full h-[38px] bg-[#0D9387] hover:bg-[#0b7d72] text-white font-semibold text-xs rounded-[10px] flex items-center justify-center gap-1.5 transition shadow-sm"><Plus className="h-4 w-4" /> Agregar</button></div>
-                </div>
-              </div>
-
-              {form.services && form.services.length > 0 ? (
-                <div className="space-y-2 border border-gray-200 dark:border-gray-700/80 rounded-[12px] p-3 bg-white dark:bg-zinc-900">
-                  {form.services.map((srv, index) => (
-                    <div key={srv.id || index} className="flex flex-col sm:flex-row sm:items-center gap-2 p-2.5 rounded-lg bg-gray-50 dark:bg-zinc-800 border border-gray-150 dark:border-gray-700/50">
-                      <div className="flex-1"><input value={srv.name} onChange={(e) => handleUpdateService(index, "name", e.target.value)} className="w-full bg-transparent font-medium text-sm text-gray-900 dark:text-gray-100 border-b border-transparent hover:border-gray-300 focus:border-blue-500 outline-none px-1 py-0.5" /></div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <div className="relative w-32"><span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs">$</span><input type="number" step="0.01" min="0" value={srv.price} onChange={(e) => handleUpdateService(index, "price", e.target.value)} className="w-full pl-6 pr-2 py-1 text-right font-bold text-sm bg-white dark:bg-zinc-900 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:text-gray-100 outline-none focus:border-blue-500" /></div>
-                        <span className="text-xs text-gray-400 font-semibold">{form.currency}</span>
-                        <button type="button" onClick={() => handleRemoveService(index)} title="Eliminar servicio" className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition"><Trash2 className="h-4 w-4" /></button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="p-4 text-center border border-dashed border-gray-200 dark:border-gray-700 rounded-[12px] text-xs text-gray-400">Aún no has agregado desgloses de servicios. Usa el formulario de arriba o los atajos rápidos.</div>
-              )}
-
-              {/* Resumen de cálculo */}
-              <div className="p-4 rounded-[14px] bg-gradient-to-r from-gray-50 to-teal-50/30 dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 space-y-3">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-sm">
-                  <div className="flex items-center gap-2"><span className="font-semibold text-gray-700 dark:text-gray-300">Suma de Servicios:</span><span className="font-bold text-gray-900 dark:text-white text-base">{formatCurrency(sumServices, form.currency)}</span></div>
-                  <div className="flex items-center gap-2"><span className="font-semibold text-gray-700 dark:text-gray-300">Monto General:</span><span className="font-bold text-[#0D9387] text-base">{formatCurrency(totalAmount, form.currency)}</span></div>
-                </div>
-                {isOverBudget ? (
-                  <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-xs font-semibold flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <div className="flex items-center gap-2"><AlertTriangle className="h-4 w-4 shrink-0 text-red-500" /><span><strong>¡Atención!</strong> La suma de los servicios ({formatCurrency(sumServices, form.currency)}) excede el monto total ({formatCurrency(totalAmount, form.currency)}).</span></div>
-                    <button type="button" onClick={handleSyncTotalWithServices} className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold text-xs shrink-0 transition shadow-sm">Ajustar Monto Total a {formatCurrency(sumServices, form.currency)}</button>
-                  </div>
-                ) : diffManagement > 0 && form.services && form.services.length > 0 ? (
-                  <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300 text-xs font-semibold flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2"><Sparkles className="h-4 w-4 shrink-0 text-emerald-500" /><span><strong>Gastos de gestión:</strong> {formatCurrency(diffManagement, form.currency)} (Diferencia calculada entre el monto general y la suma de servicios)</span></div>
-                  </div>
-                ) : form.services && form.services.length > 0 && sumServices === totalAmount ? (
-                  <div className="p-2.5 rounded-xl bg-teal-500/10 border border-teal-500/30 text-teal-700 dark:text-teal-300 text-xs font-semibold flex items-center gap-2"><CheckCircle className="h-4 w-4 text-teal-500" /><span>La suma de los servicios coincide exactamente con el monto general.</span></div>
-                ) : null}
-              </div>
-            </div>
-
-            {/* Precio de la Propuesta */}
-            <div className="space-y-4 pt-2">
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-zinc-800 pb-2">Precio de la Propuesta</h3>
-              <div className="grid grid-cols-3 gap-4">
-                <div className="col-span-2"><Field label="Monto Cotizado" required><input data-testid="quotation-amount" type="number" step="0.01" min={0} required value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} className={inputCls} /></Field></div>
-                <div><Field label="Moneda" required><select data-testid="quotation-currency" value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })} className={inputCls}><option>USD</option><option>DOP</option><option>COP</option><option>EUR</option><option>MXN</option></select></Field></div>
-              </div>
-            </div>
-
-            {/* Comparativa de Precios */}
-            <div className="space-y-4 pt-2">
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-zinc-800 pb-2">Comparativa de Precios</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <Field label="Precio en Booking.com"><div className="relative"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span><input data-testid="quotation-booking-price" type="number" step="0.01" min={0} value={form.booking_price} onChange={(e) => setForm({ ...form, booking_price: e.target.value })} placeholder="0.00" className={`${inputCls} pl-7`} /></div></Field>
-                <Field label="Precio en Expedia"><div className="relative"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span><input data-testid="quotation-expedia-price" type="number" step="0.01" min={0} value={form.expedia_price} onChange={(e) => setForm({ ...form, expedia_price: e.target.value })} placeholder="0.00" className={`${inputCls} pl-7`} /></div></Field>
-              </div>
-              <div className="rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden shadow-sm">
-                  <div className="grid grid-cols-2">
-                      <div className="flex flex-col items-center p-5 text-center border-r border-slate-200 dark:border-zinc-800">
-                        <div className="w-full h-28 rounded-xl bg-[#003580] flex items-center justify-center p-3 mb-3 shadow-inner">
-                          <img src="/booking-logo.svg" alt="Booking" className="h-full w-full object-contain rounded-lg" />
-                        </div>
-                        <div className="text-xs font-extrabold text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-1">Booking.com</div>
-                        <div className="text-xl font-black text-slate-800 dark:text-slate-200">
-                          {form.booking_price ? formatCurrency(Number(form.booking_price), form.currency) : '—'}
-                        </div>
-                      </div>
-                      <div className="flex flex-col items-center p-5 text-center">
-                        <div className="w-full h-28 rounded-xl bg-[#FFE000] flex items-center justify-center p-3 mb-3 shadow-inner">
-                          <img src="/expedia-logo.svg" alt="Expedia" className="h-full w-full object-contain rounded-lg" />
-                        </div>
-                        <div className="text-xs font-extrabold text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-1">Expedia</div>
-                        <div className="text-xl font-black text-slate-800 dark:text-slate-200">
-                          {form.expedia_price ? formatCurrency(Number(form.expedia_price), form.currency) : '—'}
-                        </div>
-                      </div>
-                  </div>
-                </div>
-            </div>
+            <hr className="border-gray-100 dark:border-zinc-800" />
 
             {/* Notas */}
-            <div className="space-y-4 pt-2">
-              <Field label="Especificaciones / Notas de Itinerario">
-                <textarea data-testid="quotation-notes" rows={6} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder="Detalla qué incluye la cotización: Hoteles propuestos, categoría de habitación, vuelos, traslados, etc..." className={inputCls} />
-              </Field>
-            </div>
+            <Section title="Especificaciones / Notas" icon={FileText} defaultOpen={!!form.notes}>
+              <textarea data-testid="quotation-notes" rows={4} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder="Detalles del itinerario, hoteles, vuelos, traslados..." className={inputCls} />
+            </Section>
           </div>
 
-          <div className="p-6 border-t border-brand-turquoise/10 dark:border-brand-turquoise/20 bg-gradient-to-r from-brand-navy/[0.02] to-brand-turquoise/[0.03] dark:from-brand-navy/15 dark:to-brand-turquoise/10 flex items-center justify-end gap-2">
-            <button type="submit" disabled={saving} data-testid="quotation-save-btn" className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] px-5 py-2 text-sm font-semibold transition-colors shadow-sm disabled:opacity-60">{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}Guardar Hoja de Cotización</button>
+          {/* Footer */}
+          <div className="px-6 py-4 border-t border-gray-100 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-800/30 flex items-center justify-end">
+            <button type="submit" disabled={saving} className={`${btnBase} bg-[#0D9387] hover:bg-[#0b7d72] text-white disabled:opacity-50`}>
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+              Guardar Cotización
+            </button>
           </div>
         </form>
 
         {/* Sidebar */}
-        <div className="col-span-12 lg:col-span-4 space-y-6">
+        <div className="col-span-12 lg:col-span-4 space-y-4">
           {quotation.form_data && Object.keys(quotation.form_data).length > 0 && (
-            <div className="bg-white dark:bg-zinc-900 rounded-[16px] border border-green-200 dark:border-green-800 p-6 shadow-[0_1px_3px_0_rgba(0,0,0,0.05)]">
-              <h3 className="text-sm font-semibold text-green-700 dark:text-green-400 border-b border-green-100 dark:border-green-800 pb-3 mb-4 flex items-center gap-2"><User className="h-4 w-4" /> Datos del Formulario Web</h3>
-              <div className="space-y-3 text-sm">
-                {quotation.form_data.fullName && <div className="flex justify-between"><span className="text-gray-400 dark:text-gray-400 font-medium">Nombre:</span><span className="text-gray-900 dark:text-gray-100 font-semibold">{quotation.form_data.fullName}</span></div>}
-                {quotation.form_data.email && <div className="flex justify-between"><span className="text-gray-400 dark:text-gray-400 font-medium">Email:</span><span className="text-gray-700 dark:text-gray-300">{quotation.form_data.email}</span></div>}
-                {quotation.form_data.phone && <div className="flex justify-between"><span className="text-gray-400 dark:text-gray-400 font-medium">Teléfono:</span><span className="text-gray-700 dark:text-gray-300">{quotation.form_data.phone}</span></div>}
-                {quotation.form_data.hotelCategory && <div className="flex justify-between"><span className="text-gray-400 dark:text-gray-400 font-medium">Categoría hotel:</span><span className="text-gray-700 dark:text-gray-300">{quotation.form_data.hotelCategory}</span></div>}
-                {quotation.form_data.roomType && <div className="flex justify-between"><span className="text-gray-400 dark:text-gray-400 font-medium">Tipo habitación:</span><span className="text-gray-700 dark:text-gray-300">{quotation.form_data.roomType}</span></div>}
-                {quotation.form_data.preferredHotel && <div className="flex justify-between"><span className="text-gray-400 dark:text-gray-400 font-medium">Pref. Hotel:</span><span className="text-gray-700 dark:text-gray-300">{quotation.form_data.preferredHotel}</span></div>}
+            <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 p-5">
+              <h3 className="text-sm font-semibold text-[#0D9387] border-b border-gray-100 dark:border-zinc-800 pb-3 mb-3 flex items-center gap-2"><User className="h-4 w-4" />Datos del Formulario Web</h3>
+              <div className="space-y-2 text-sm">
+                {quotation.form_data.fullName && <Row label="Nombre" value={quotation.form_data.fullName} bold />}
+                {quotation.form_data.email && <Row label="Email" value={quotation.form_data.email} />}
+                {quotation.form_data.phone && <Row label="Teléfono" value={quotation.form_data.phone} />}
+                {quotation.form_data.hotelCategory && <Row label="Categoría hotel" value={quotation.form_data.hotelCategory} />}
+                {quotation.form_data.roomType && <Row label="Tipo habitación" value={quotation.form_data.roomType} />}
+                {quotation.form_data.preferredHotel && <Row label="Hotel preferido" value={quotation.form_data.preferredHotel} />}
               </div>
             </div>
           )}
 
-          <div className="bg-white dark:bg-zinc-900 rounded-[20px] shadow-[0_2px_12px_rgba(15,42,74,0.04)] border border-brand-turquoise/8 p-6">
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-zinc-800 pb-3 mb-4">Información del Sistema</h3>
-            <div className="space-y-3.5 text-sm">
-              <div className="flex justify-between"><span className="text-gray-400 dark:text-gray-400 font-medium">Estado actual:</span><StatusBadge value={quotation.status} /></div>
-              <div className="flex justify-between"><span className="text-gray-400 dark:text-gray-400 font-medium">Última actualización:</span><span className="text-gray-700 dark:text-gray-300 font-medium">{formatDate(quotation.updated_at)}</span></div>
+          <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 p-5">
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 border-b border-gray-100 dark:border-zinc-800 pb-3 mb-3">Información</h3>
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between"><span className="text-gray-400">Estado</span><StatusBadge value={quotation.status} /></div>
+              <div className="flex justify-between"><span className="text-gray-400">Actualizado</span><span className="text-gray-700 dark:text-gray-300 font-medium">{formatDate(quotation.updated_at)}</span></div>
               {quotation.client_notes && (
                 <div className="pt-3 border-t border-amber-200 dark:border-amber-800">
                   <span className="text-amber-600 dark:text-amber-400 font-medium text-xs uppercase tracking-wider block mb-1">Mensaje del cliente</span>
@@ -442,48 +453,50 @@ export default function QuotationSheet() {
         </div>
       </div>
 
-      {/* Send Modal */}
+      {/* Modales (sin cambios visuales mayores) */}
       {sendModalOpen && (
-        <div data-testid="send-modal" className="fixed inset-0 z-50 flex items-start justify-center bg-gray-900/50 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="mt-16 bg-white dark:bg-zinc-900 rounded-[16px] shadow-xl border border-gray-200 dark:border-zinc-800 w-full max-w-sm p-6">
-            <div className="flex items-center justify-between mb-5"><h3 className="text-base font-bold text-gray-900 dark:text-gray-100">Enviar Cotización</h3><button type="button" onClick={() => setSendModalOpen(false)} className="h-8 w-8 rounded-[8px] hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center"><X className="h-4 w-4 text-gray-500 dark:text-gray-300" /></button></div>
-            <p className="text-sm text-gray-500 dark:text-gray-300 mb-5">Elige el canal por el cual deseas enviarle la propuesta interactiva al cliente.</p>
+        <div data-testid="send-modal" className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="mt-16 bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-gray-200 dark:border-zinc-800 w-full max-w-sm p-6">
+            <div className="flex items-center justify-between mb-5"><h3 className="text-base font-bold text-gray-900 dark:text-gray-100">Enviar Cotización</h3><button type="button" onClick={() => setSendModalOpen(false)} className="h-8 w-8 rounded-xl hover:bg-gray-100 dark:hover:bg-zinc-800 flex items-center justify-center"><X className="h-4 w-4" /></button></div>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-5">Elige el canal para enviar la propuesta al cliente.</p>
             <div className="space-y-3">
-              <button onClick={() => handleSend("whatsapp")} data-testid="send-via-whatsapp" className="w-full inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white rounded-[10px] py-2.5 text-sm font-semibold transition-colors"><Send className="h-4 w-4" /> Enviar por WhatsApp</button>
-              <button onClick={() => handleSend("email")} data-testid="send-via-email" className="w-full inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] py-2.5 text-sm font-semibold transition-colors"><Mail className="h-4 w-4" /> Enviar por Correo</button>
+              <button onClick={() => handleSend("whatsapp")} className="w-full inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white rounded-xl py-2.5 text-sm font-semibold transition"><Send className="h-4 w-4" />Enviar por WhatsApp</button>
+              <button onClick={() => handleSend("email")} className="w-full inline-flex items-center justify-center gap-2 bg-[#0D9387] hover:bg-[#0b7d72] text-white rounded-xl py-2.5 text-sm font-semibold transition"><Mail className="h-4 w-4" />Enviar por Correo</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Success Modal */}
       {successModalOpen && (
-        <div data-testid="success-modal" className="fixed inset-0 z-50 flex items-start justify-center bg-gray-900/50 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="mt-16 bg-white dark:bg-zinc-900 rounded-[16px] shadow-xl border border-gray-200 dark:border-zinc-800 w-full max-w-md p-6 space-y-4">
-            <div className="flex items-center justify-between mb-2"><h3 className="text-base font-bold text-gray-900 dark:text-gray-100">Propuesta Generada Correctamente</h3><button type="button" onClick={() => setSuccessModalOpen(false)} className="h-8 w-8 rounded-[8px] hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center"><X className="h-4 w-4 text-gray-500 dark:text-gray-300" /></button></div>
-            <p className="text-sm text-gray-600 dark:text-gray-300">La cotización ha sido guardada con el estado <strong>"Enviada"</strong>. Ya se puede compartir el enlace con el cliente.</p>
-            <div className="space-y-2"><span className="text-xs font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wider block">Enlace Público de la Propuesta</span>
-              <div className="flex items-center gap-1.5"><input readOnly value={clientLink} className="flex-1 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-800 rounded-[8px] px-3 py-2 text-xs text-gray-600 dark:text-gray-300 font-mono focus:outline-none" /><button onClick={copyClientLink} className="h-9 w-9 bg-gray-100 dark:bg-zinc-800 hover:bg-gray-250 rounded-[8px] flex items-center justify-center text-gray-600 dark:text-gray-300 shrink-0 transition-colors"><Clipboard className="h-4 w-4" /></button></div>
+        <div data-testid="success-modal" className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="mt-16 bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-gray-200 dark:border-zinc-800 w-full max-w-md p-6 space-y-4">
+            <div className="flex items-center justify-between"><h3 className="text-base font-bold text-gray-900 dark:text-gray-100">Propuesta Generada</h3><button type="button" onClick={() => setSuccessModalOpen(false)} className="h-8 w-8 rounded-xl hover:bg-gray-100 dark:hover:bg-zinc-800 flex items-center justify-center"><X className="h-4 w-4" /></button></div>
+            <p className="text-sm text-gray-600 dark:text-gray-300">Cotización marcada como <strong>Enviada</strong>. Comparte el enlace con el cliente.</p>
+            <div className="space-y-2">
+              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block">Enlace público</span>
+              <div className="flex items-center gap-1.5">
+                <input readOnly value={clientLink} className="flex-1 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl px-3 py-2 text-xs text-gray-600 dark:text-gray-300 font-mono outline-none" />
+                <button onClick={copyClientLink} className="h-9 w-9 bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-xl flex items-center justify-center text-gray-600 dark:text-gray-300 shrink-0 transition"><Clipboard className="h-4 w-4" /></button>
+              </div>
             </div>
             {sendingPlatform === "whatsapp" ? (
-              <div className="pt-2"><a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="w-full inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white rounded-[10px] py-2.5 text-sm font-semibold transition-colors"><ExternalLink className="h-4 w-4" /> Abrir WhatsApp Web</a></div>
+              <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="w-full inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white rounded-xl py-2.5 text-sm font-semibold transition"><ExternalLink className="h-4 w-4" />Abrir WhatsApp Web</a>
             ) : (
-              <div className="pt-2 bg-gray-50 dark:bg-zinc-800 p-4 rounded-[10px] border"><span className="text-xs font-bold text-gray-600 dark:text-gray-300 block mb-1">Correo Preparado</span><p className="text-xs text-gray-500 dark:text-gray-300">Puedes copiar el enlace y redactar el correo a <strong>{client.email}</strong>.</p></div>
+              <div className="bg-gray-50 dark:bg-zinc-800 p-4 rounded-xl border border-gray-100 dark:border-zinc-700"><p className="text-xs text-gray-500">Copia el enlace y envíalo a <strong>{client.email}</strong>.</p></div>
             )}
-            <div className="flex justify-end pt-2"><button type="button" onClick={() => setSuccessModalOpen(false)} className="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-zinc-800 rounded-[10px] hover:bg-gray-50 dark:hover:bg-gray-800">Cerrar</button></div>
+            <div className="flex justify-end pt-2"><button type="button" onClick={() => setSuccessModalOpen(false)} className="px-4 py-2 text-sm font-semibold text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-zinc-700 rounded-xl hover:bg-gray-50 dark:hover:bg-zinc-800">Cerrar</button></div>
           </div>
         </div>
       )}
 
-      {/* Delete Modal */}
       {deleteModalOpen && (
-        <div data-testid="delete-confirm-modal" className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm p-4">
-          <div className="bg-white dark:bg-zinc-900 rounded-[16px] shadow-2xl border border-gray-200 dark:border-zinc-800 w-full max-w-md p-6 space-y-4">
-            <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3"><div className="flex items-center gap-2 text-red-600 dark:text-red-400 font-bold text-lg"><AlertTriangle className="h-5 w-5" /><span>Eliminar Cotización</span></div><button type="button" onClick={() => setDeleteModalOpen(false)} className="h-8 w-8 rounded-[8px] hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center"><X className="h-4 w-4 text-gray-500 dark:text-gray-300" /></button></div>
-            <p className="text-sm text-gray-700 dark:text-gray-300">¿Estás seguro de que deseas eliminar esta cotización? Esta acción es irreversible.</p>
+        <div data-testid="delete-confirm-modal" className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+          <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-gray-200 dark:border-zinc-800 w-full max-w-md p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-gray-100 dark:border-zinc-800 pb-3"><div className="flex items-center gap-2 text-red-500 font-bold text-lg"><AlertTriangle className="h-5 w-5" />Eliminar Cotización</div><button type="button" onClick={() => setDeleteModalOpen(false)} className="h-8 w-8 rounded-xl hover:bg-gray-100 dark:hover:bg-zinc-800 flex items-center justify-center"><X className="h-4 w-4" /></button></div>
+            <p className="text-sm text-gray-700 dark:text-gray-300">¿Eliminar esta cotización? Es irreversible.</p>
             <div className="flex items-center justify-end gap-3 pt-2">
-              <button type="button" onClick={() => setDeleteModalOpen(false)} disabled={deleting} className="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-zinc-800 rounded-[10px] hover:bg-gray-50 dark:hover:bg-gray-800">Cancelar</button>
-              <button type="button" onClick={handleDeleteQuotation} disabled={deleting} data-testid="confirm-delete-btn" className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white rounded-[10px] px-4 py-2 text-sm font-semibold transition-colors shadow-sm disabled:opacity-50">{deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}Sí, eliminar</button>
+              <button type="button" onClick={() => setDeleteModalOpen(false)} disabled={deleting} className="px-4 py-2 text-sm font-semibold text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-zinc-700 rounded-xl hover:bg-gray-50 dark:hover:bg-zinc-800">Cancelar</button>
+              <button type="button" onClick={handleDeleteQuotation} disabled={deleting} className="inline-flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white rounded-xl px-4 py-2 text-sm font-semibold transition disabled:opacity-50">{deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}Eliminar</button>
             </div>
           </div>
         </div>
@@ -495,8 +508,17 @@ export default function QuotationSheet() {
 function Field({ label, required, children }) {
   return (
     <div>
-      <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300 mb-1.5">{label} {required && <span className="text-red-500">*</span>}</label>
+      <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">{label}{required && <span className="text-red-400 ml-0.5">*</span>}</label>
       {children}
+    </div>
+  );
+}
+
+function Row({ label, value, bold }) {
+  return (
+    <div className="flex justify-between gap-3">
+      <span className="text-gray-400 shrink-0">{label}:</span>
+      <span className={`text-right ${bold ? 'text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-600 dark:text-gray-400'}`}>{value}</span>
     </div>
   );
 }
