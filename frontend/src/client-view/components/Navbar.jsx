@@ -44,7 +44,7 @@ export function Navbar({ id, status, darkMode, onToggleDarkMode }) {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 w-full backdrop-blur-md bg-black/25 border-b border-white/10 transition-colors">
+    <header className="fixed top-0 left-0 right-0 z-50 w-full bg-[#0F2A4A] shadow-lg border-b border-[#0D9387]/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         
         {/* Brand — usa el mismo Logo de la página principal */}
