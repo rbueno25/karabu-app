@@ -506,8 +506,9 @@ async def client_update_status(qid: str, body: ClientStatusUpdate, db: AsyncSess
     is_regret = old_status == "aceptada" and body.status == "rechazada"
 
     q.status = body.status
-    if body.notes is not None:
-        q.notes = (q.notes or "") + "\n" + body.notes
+    # Save client notes in dedicated field, not mixed with admin notes
+    if body.notes is not None and body.notes.strip():
+        q.client_notes = body.notes.strip()
 
     # Get client name for notification
     client_r = await db.execute(select(Client).where(Client.id == q.client_id))
@@ -1595,6 +1596,9 @@ async def startup():
         ))
         await conn.run_sync(lambda sync_conn: sync_conn.execute(
             __import__('sqlalchemy').text("ALTER TABLE quotations ADD COLUMN IF NOT EXISTS tax_percent FLOAT DEFAULT 18")
+        ))
+        await conn.run_sync(lambda sync_conn: sync_conn.execute(
+            __import__('sqlalchemy').text("ALTER TABLE quotations ADD COLUMN IF NOT EXISTS client_notes TEXT DEFAULT ''")
         ))
         logger.info("Migration: room_type and services columns ensured")
 

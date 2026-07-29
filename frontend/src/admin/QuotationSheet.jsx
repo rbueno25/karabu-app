@@ -22,7 +22,7 @@ export default function QuotationSheet() {
 
   const [form, setForm] = useState({
     destination: "", travel_date: "", return_date: "", travelers: 1,
-    amount: 0, currency: "USD", notes: "", assigned_hotel: "",
+    amount: 0, currency: "USD", notes: "", client_notes: "", assigned_hotel: "",
     room_type: "", services: [], booking_price: "", expedia_price: "",
     deposit_percent: 0, hero_image: "", tax_percent: 18,
     status: "borrador", sent_via: "", sent_at: ""
@@ -50,6 +50,7 @@ export default function QuotationSheet() {
         travelers: q.travelers || (q.form_data?.adultsCount || 0) + (q.form_data?.childrenCount || 0) + (q.form_data?.babiesCount || 0) || 1,
         amount: q.amount || 0, currency: q.currency || "USD",
         notes: q.notes || (q.form_data?.comments || ""),
+        client_notes: q.client_notes || "",
         assigned_hotel: q.assigned_hotel || q.form_data?.preferredHotel || "",
         room_type: q.room_type || q.form_data?.roomType || "",
         services: Array.isArray(q.services) ? q.services : [],
@@ -191,6 +192,23 @@ export default function QuotationSheet() {
           <button onClick={() => setSendModalOpen(true)} data-testid="quotation-send-btn" className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] px-3.5 py-2 text-sm font-semibold transition-colors shadow-sm"><Send className="h-4 w-4" /><span>Enviar al Cliente</span></button>
         </div>
       </div>
+
+      {/* Banner de cambios solicitados por el cliente */}
+      {(form.status === 'cambios_solicitados' || form.status === 'rechazada') && form.client_notes && (
+        <div className="rounded-xl border-2 border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/50 p-5 flex gap-4 items-start shadow-[0_0_20px_rgba(251,191,36,0.15)]">
+          <div className="flex-shrink-0 mt-0.5">
+            <AlertTriangle className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="text-sm font-bold text-amber-800 dark:text-amber-300 mb-1">
+              {form.status === 'cambios_solicitados' ? '🔄 El cliente solicita cambios' : '❌ El cliente rechazó la propuesta'}
+            </h3>
+            <p className="text-sm text-amber-900 dark:text-amber-200 leading-relaxed whitespace-pre-wrap">
+              {form.client_notes}
+            </p>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-12 gap-6">
         <form onSubmit={handleSave} className="col-span-12 lg:col-span-8 bg-white dark:bg-zinc-900 rounded-[20px] shadow-[0_4px_24px_rgba(15,42,74,0.06),0_1px_4px_rgba(0,168,150,0.04)] border border-brand-turquoise/10 overflow-hidden relative">
@@ -410,6 +428,12 @@ export default function QuotationSheet() {
             <div className="space-y-3.5 text-sm">
               <div className="flex justify-between"><span className="text-gray-400 dark:text-gray-400 font-medium">Estado actual:</span><StatusBadge value={quotation.status} /></div>
               <div className="flex justify-between"><span className="text-gray-400 dark:text-gray-400 font-medium">Última actualización:</span><span className="text-gray-700 dark:text-gray-300 font-medium">{formatDate(quotation.updated_at)}</span></div>
+              {quotation.client_notes && (
+                <div className="pt-3 border-t border-amber-200 dark:border-amber-800">
+                  <span className="text-amber-600 dark:text-amber-400 font-medium text-xs uppercase tracking-wider block mb-1">Mensaje del cliente</span>
+                  <p className="text-amber-900 dark:text-amber-200 text-sm whitespace-pre-wrap leading-relaxed">{quotation.client_notes}</p>
+                </div>
+              )}
             </div>
           </div>
         </div>

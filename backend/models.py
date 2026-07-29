@@ -100,6 +100,7 @@ class Quotation(Base):
     amount = Column(Float, default=0)
     currency = Column(String, default="USD")
     notes = Column(Text, default="")
+    client_notes = Column(Text, default="")  # mensajes del cliente: cambios solicitados, rechazo, etc.
     assigned_hotel = Column(String, default="")  # hotel assigned by advisor if client didn't specify
     room_type = Column(String, default="")  # tipo de habitación (ej: Doble Deluxe, Suite)
     services = Column(JSON, default=list)  # desglose por servicio [{name, price}, ...]
@@ -123,7 +124,9 @@ class Quotation(Base):
             "id": self.id, "client_id": self.client_id, "destination": self.destination,
             "travel_date": self.travel_date, "return_date": self.return_date,
             "travelers": self.travelers, "amount": self.amount, "currency": self.currency,
-            "notes": self.notes, "status": self.status,
+            "notes": self.notes,
+            "client_notes": self.client_notes or "",
+            "status": self.status,
             "assigned_hotel": self.assigned_hotel,
             "room_type": self.room_type,
             "services": self.services or [],
