@@ -167,6 +167,7 @@ class LeadIn(BaseModel):
     additionalServices: list = []
     travelType: str = ""
     hotelCategory: str = ""
+    roomType: str = ""
     preferredContact: str = "ambos"
     comments: str = ""
 
@@ -580,6 +581,7 @@ async def create_lead(body: LeadIn, db: AsyncSession = Depends(get_db)):
         "additionalServices": body.additionalServices,
         "travelType": body.travelType,
         "hotelCategory": body.hotelCategory,
+        "roomType": body.roomType,
         "preferredContact": body.preferredContact,
         "comments": body.comments,
     }
