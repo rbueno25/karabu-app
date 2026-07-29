@@ -30,6 +30,8 @@ export default function Quotations() {
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
   const [statusFilter, setStatusFilter] = useState(searchParams.get("status") || "");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -65,15 +67,24 @@ export default function Quotations() {
     // eslint-disable-next-line
   }, [statusFilter]);
 
-  // Client-side search + pagination
+  // Client-side search + pagination + date filter
   const filtered = useMemo(() => {
-    if (!q) return items;
-    const lower = q.toLowerCase();
-    return items.filter((it) =>
-      (it.client_name || "").toLowerCase().includes(lower) ||
-      (it.destination || "").toLowerCase().includes(lower)
-    );
-  }, [items, q]);
+    let result = items;
+    if (q) {
+      const lower = q.toLowerCase();
+      result = result.filter((it) =>
+        (it.client_name || "").toLowerCase().includes(lower) ||
+        (it.destination || "").toLowerCase().includes(lower)
+      );
+    }
+    if (dateFrom) {
+      result = result.filter((it) => (it.travel_date || "").slice(0, 10) >= dateFrom);
+    }
+    if (dateTo) {
+      result = result.filter((it) => (it.travel_date || "").slice(0, 10) <= dateTo);
+    }
+    return result;
+  }, [items, q, dateFrom, dateTo]);
 
   const paginated = useMemo(() => filtered.slice((page - 1) * perPage, page * perPage), [filtered, page]);
   const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
@@ -171,6 +182,20 @@ export default function Quotations() {
               className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100 rounded-[10px] focus:border-[#0D9387] focus:ring-2 focus:ring-[#0D9387]/20 outline-none"
             />
           </div>
+          <input
+            type="date"
+            value={dateFrom}
+            onChange={(e) => { setDateFrom(e.target.value); setPage(1); }}
+            className={selectCls}
+            title="Fecha desde"
+          />
+          <input
+            type="date"
+            value={dateTo}
+            onChange={(e) => { setDateTo(e.target.value); setPage(1); }}
+            className={selectCls}
+            title="Fecha hasta"
+          />
           <select
             value={statusFilter}
             onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}

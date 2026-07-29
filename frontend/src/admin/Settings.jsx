@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import api, { formatApiError } from "../lib/api";
 import PageHeader from "./PageHeader";
-import { Loader2, Building2, ImageIcon, Share2, DollarSign, Percent, Mail, FileText, Lock } from "lucide-react";
+import { Loader2, Building2, ImageIcon, Share2, DollarSign, Percent, Mail, FileText, Lock, User, Key } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "./AuthContext";
 
@@ -14,6 +14,7 @@ const SECTIONS = [
   { id: "correo", label: "Correo", icon: Mail },
   { id: "plantillas", label: "Plantillas", icon: FileText },
   { id: "seguridad", label: "Seguridad", icon: Lock },
+  { id: "perfil", label: "Mi Perfil", icon: User },
 ];
 
 const inputCls = "w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-[#0D9387] focus:ring-2 focus:ring-[#0D9387]/20 outline-none";
@@ -26,6 +27,34 @@ export default function Settings() {
   const [form, setForm] = useState(null);
 
   const canEdit = user && (user.role === "super_admin" || user.role === "admin");
+
+  // Profile state
+  const [profileForm, setProfileForm] = useState({
+    name: user?.name || "",
+    phone: user?.phone || "",
+    current_password: "",
+    new_password: "",
+  });
+  const [savingProfile, setSavingProfile] = useState(false);
+
+  const handleProfileSave = async (e) => {
+    e.preventDefault();
+    setSavingProfile(true);
+    try {
+      const body = { name: profileForm.name, phone: profileForm.phone };
+      if (profileForm.new_password) {
+        body.current_password = profileForm.current_password;
+        body.new_password = profileForm.new_password;
+      }
+      await api.put("/profile", body);
+      toast.success("Perfil actualizado");
+      setProfileForm(p => ({ ...p, current_password: "", new_password: "" }));
+    } catch (e) {
+      toast.error(formatApiError(e.response?.data?.detail) || "Error al actualizar perfil");
+    } finally {
+      setSavingProfile(false);
+    }
+  };
 
   useEffect(() => {
     (async () => {
@@ -192,6 +221,37 @@ export default function Settings() {
                 Requerir autenticación en dos pasos (2FA) — próximamente
               </label>
             </div>
+          )}
+
+          {section === "perfil" && (
+            <form onSubmit={handleProfileSave} className="space-y-4">
+              <SectionTitle>Mi Perfil</SectionTitle>
+              <Field label="Nombre completo">
+                <input value={profileForm.name} onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })} className={inputCls} />
+              </Field>
+              <Field label="Teléfono / WhatsApp">
+                <input value={profileForm.phone} onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })} className={inputCls} />
+              </Field>
+              <Field label="Email">
+                <input value={user?.email || ""} disabled className={`${inputCls} opacity-60`} />
+                <p className="text-xs text-gray-400 mt-1">El email no se puede cambiar. Contacta al administrador.</p>
+              </Field>
+
+              <hr className="border-gray-100 dark:border-zinc-800" />
+              <SectionTitle className="text-sm">Cambiar contraseña</SectionTitle>
+              <Field label="Contraseña actual">
+                <input type="password" value={profileForm.current_password} onChange={(e) => setProfileForm({ ...profileForm, current_password: e.target.value })} className={inputCls} placeholder="••••••••" />
+              </Field>
+              <Field label="Nueva contraseña">
+                <input type="password" value={profileForm.new_password} onChange={(e) => setProfileForm({ ...profileForm, new_password: e.target.value })} className={inputCls} placeholder="Mínimo 6 caracteres" />
+              </Field>
+
+              <div className="flex items-center justify-end pt-4 border-t border-gray-100 dark:border-zinc-800">
+                <button type="submit" disabled={savingProfile} className="inline-flex items-center gap-2 bg-[#0D9387] hover:bg-[#0b7d72] text-white rounded-[10px] px-4 py-2 text-sm font-medium disabled:opacity-60">
+                  {savingProfile && <Loader2 className="h-4 w-4 animate-spin" />} Actualizar perfil
+                </button>
+              </div>
+            </form>
           )}
 
           {canEdit && (

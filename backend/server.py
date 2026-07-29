@@ -366,6 +366,38 @@ async def logout(response: Response, _user=Depends(get_current_user)):
     response.delete_cookie("access_token", path="/", secure=True, samesite="strict")
     return {"ok": True}
 
+
+class ProfileUpdate(BaseModel):
+    name: Optional[str] = None
+    phone: Optional[str] = None
+    avatar_url: Optional[str] = None
+    current_password: Optional[str] = None
+    new_password: Optional[str] = None
+
+
+@api.put("/profile")
+async def update_profile(body: ProfileUpdate, db: AsyncSession = Depends(get_db), u=Depends(get_current_user)):
+    result = await db.execute(select(User).where(User.id == u["id"]))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+    if body.new_password:
+        if not body.current_password or not verify_password(body.current_password, user.password_hash):
+            raise HTTPException(status_code=400, detail="Contraseña actual incorrecta")
+        user.password_hash = hash_password(body.new_password)
+
+    if body.name is not None:
+        user.name = sanitize_html(body.name)
+    if body.phone is not None:
+        user.phone = body.phone
+    if body.avatar_url is not None:
+        user.avatar_url = body.avatar_url
+
+    await db.flush()
+    return user.to_dict()
+
+
 @api.get("/auth/me")
 async def me(user=Depends(get_optional_user)):
     if user is None:
