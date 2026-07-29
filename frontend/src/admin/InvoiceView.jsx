@@ -30,7 +30,7 @@ export default function InvoiceView() {
     number: "FAC-2026-0042", ncf: "B0100002481",
     issueDate: new Date().toISOString().split("T")[0],
     dueDate: new Date(Date.now() + 15 * 86400000).toISOString().split("T")[0],
-    status: "pendiente", currency: "USD", taxRate: 18, includeTax: true,
+    status: "pendiente", currency: "USD", taxRate: 0, includeTax: false,
     notes: "Factura correspondiente a reserva de paquete turístico con Karabu Viajes."
   });
 
@@ -56,7 +56,7 @@ export default function InvoiceView() {
             currency: qData.currency || "USD",
             issueDate: qData.created_at ? qData.created_at.split("T")[0] : prev.issueDate,
             notes: qData.notes || prev.notes,
-            taxRate: qData.tax_percent ?? 18
+            taxRate: 0
           }));
           if (cliData) {
             setClient({
@@ -90,8 +90,6 @@ export default function InvoiceView() {
   }, [id]);
 
   const rawSubtotal = items.reduce((acc, item) => acc + (Number(item.quantity) * Number(item.unitPrice)), 0);
-  const taxAmount = invoice.includeTax ? Math.round(rawSubtotal * (invoice.taxRate / 100) * 100) / 100 : 0;
-  const grandTotal = rawSubtotal + taxAmount;
 
   const handleItemChange = (index, field, val) => {
     const updated = [...items];
@@ -199,10 +197,9 @@ export default function InvoiceView() {
             </div>
             <div className="space-y-2.5 p-4 rounded-2xl bg-slate-50 dark:bg-zinc-800/60 border border-slate-200/80 dark:border-zinc-700/80 text-xs">
               <div className="flex items-center justify-between py-1 border-b border-slate-200 dark:border-zinc-700"><span className="font-medium text-slate-600 dark:text-zinc-400">Subtotal</span><span className="font-bold text-slate-800 dark:text-zinc-200 font-mono text-sm">{formatCurrency(rawSubtotal, invoice.currency)}</span></div>
-              <div className="flex items-center justify-between py-1 border-b border-slate-200 dark:border-zinc-700"><span className="font-medium text-slate-600 dark:text-zinc-400">ITBIS ({invoice.taxRate}%)</span><span className="font-bold text-slate-800 dark:text-zinc-200 font-mono text-sm">{formatCurrency(taxAmount, invoice.currency)}</span></div>
               <div className="flex items-center justify-between pt-2 pb-1 bg-gradient-to-r from-[#0F2A4A] to-[#0D9387] text-white p-3 rounded-xl shadow-md">
                 <div><span className="text-xs font-bold uppercase tracking-wider block">Monto Total</span></div>
-                <span className="text-xl font-black font-mono tracking-tight">{formatCurrency(grandTotal, invoice.currency)}</span>
+                <span className="text-xl font-black font-mono tracking-tight">{formatCurrency(rawSubtotal, invoice.currency)}</span>
               </div>
             </div>
           </div>
