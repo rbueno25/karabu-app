@@ -20,6 +20,22 @@ from sqlalchemy.orm import selectinload
 
 from database import Base, engine, get_db, init_db, AsyncSessionLocal
 from models import User, Client, Quotation, Reservation, Payment, Destination, Package, Setting, Pais, Ciudad, Lugar, Notification
+import re
+
+# -------------------- Sanitizer --------------------
+_HTML_TAG = re.compile(r"<[^>]*>", re.IGNORECASE)
+_SCRIPT_TAG = re.compile(r"<\s*script[^>]*>.*?<\s*/\s*script[^>]*>", re.IGNORECASE | re.DOTALL)
+_IFRAME_TAG = re.compile(r"<\s*iframe[^>]*>.*?<\s*/\s*iframe[^>]*>", re.IGNORECASE | re.DOTALL)
+_STYLE_TAG = re.compile(r"<\s*style[^>]*>.*?<\s*/\s*style[^>]*>", re.IGNORECASE | re.DOTALL)
+
+def sanitize_html(text: str) -> str:
+    """Strip HTML tags and dangerous elements from text to prevent XSS."""
+    if not text or not isinstance(text, str):
+        return text or ""
+    text = _SCRIPT_TAG.sub("", text)
+    text = _IFRAME_TAG.sub("", text)
+    text = _STYLE_TAG.sub("", text)
+    return _HTML_TAG.sub("", text).strip()
 
 # -------------------- Setup --------------------
 app = FastAPI(title="Karabu Viajes API")
@@ -490,6 +506,12 @@ async def get_quotation(qid: str, db: AsyncSession = Depends(get_db)):
 
 @api.post("/quotations")
 async def create_quotation(body: QuotationIn, db: AsyncSession = Depends(get_db), u=Depends(get_current_user)):
+    # Sanitize text inputs
+    body.notes = sanitize_html(body.notes or "")
+    body.destination = sanitize_html(body.destination)
+    body.assigned_hotel = sanitize_html(body.assigned_hotel or "")
+    body.room_type = sanitize_html(body.room_type or "")
+
     # Auto-populate hero_image from destination if empty
     hero = body.hero_image or ""
     if not hero:
@@ -522,6 +544,8 @@ async def update_quotation(qid: str, body: QuotationIn, db: AsyncSession = Depen
     if not q:
         raise HTTPException(status_code=404, detail="Cotización no encontrada")
     for k, v in body.model_dump().items():
+        if isinstance(v, str):
+            v = sanitize_html(v)
         setattr(q, k, v)
     # Auto-populate hero_image from destination if still empty after update
     if not q.hero_image:
@@ -549,9 +573,9 @@ async def client_update_status(qid: str, body: ClientStatusUpdate, db: AsyncSess
     is_regret = old_status == "aceptada" and body.status == "rechazada"
 
     q.status = body.status
-    # Save client notes in dedicated field, not mixed with admin notes
+    # Save client notes in dedicated field, sanitized
     if body.notes is not None and body.notes.strip():
-        q.client_notes = body.notes.strip()
+        q.client_notes = sanitize_html(body.notes.strip())
 
     # Get client name for notification
     client_r = await db.execute(select(Client).where(Client.id == q.client_id))
@@ -659,6 +683,15 @@ async def delete_quotation(qid: str, db: AsyncSession = Depends(get_db), _u=Depe
 @api.post("/leads")
 async def create_lead(body: LeadIn, db: AsyncSession = Depends(get_db), _rl=Depends(rate_limit(5, 60))):
     """Public endpoint: landing page form → creates client + quotation."""
+    # Sanitize all text inputs
+    body.fullName = sanitize_html(body.fullName)
+    body.comments = sanitize_html(body.comments)
+    body.preferredHotel = sanitize_html(body.preferredHotel)
+    body.country = sanitize_html(body.country)
+    body.city = sanitize_html(body.city)
+    body.hotelCategory = sanitize_html(body.hotelCategory)
+    body.roomType = sanitize_html(body.roomType)
+
     email = body.email.strip().lower()
 
     # Find or create client
@@ -1696,6 +1729,30 @@ async def shutdown():
 
 
 app.include_router(api)
+
+# -------------------- Security Headers Middleware --------------------
+from starlette.middleware.base import BaseHTTPMiddleware
+
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'self'; "
+            "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://*.render.com; "
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+            "font-src 'self' https://fonts.gstatic.com; "
+            "img-src 'self' data: https:; "
+            "connect-src 'self' https://*.render.com https://*.onrender.com; "
+            "frame-ancestors 'none'"
+        )
+        return response
+
+app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
