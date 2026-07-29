@@ -106,7 +106,7 @@ class Quotation(Base):
     services = Column(JSON, default=list)  # desglose por servicio [{name, price}, ...]
     deposit_percent = Column(Float, default=0)  # % de anticipo/seña a pagar
     hero_image = Column(String, default="")  # imagen personalizada del hero
-    tax_percent = Column(Float, default=18)  # ITBIS u otro impuesto aplicable
+    tax_percent = Column(Float, default=0)  # comisión extra sobre el total (solo interno)
     booking_price = Column(Float, nullable=True)  # comparison: Booking.com price
     expedia_price = Column(Float, nullable=True)  # comparison: Expedia price
     form_data = Column(JSON, default=dict)  # raw form submission data for public leads

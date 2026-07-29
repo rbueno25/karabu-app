@@ -146,7 +146,7 @@ export default function ClientQuotationView() {
   const heroBgImage = q.hero_image || q.gallery_images?.[0] || `https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&q=80&w=1920`;
   const depositPercent = q.deposit_percent || 0;
   const depositAmount = Math.round(totalAmount * depositPercent / 100);
-  const taxPercent = q.tax_percent ?? 18;
+  const taxPercent = q.tax_percent ?? 0;
   const taxAmount = Math.round(totalAmount * taxPercent / 100);
 
   return (

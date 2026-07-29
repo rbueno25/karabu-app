@@ -24,7 +24,7 @@ export default function QuotationSheet() {
     destination: "", travel_date: "", return_date: "", travelers: 1,
     amount: 0, currency: "USD", notes: "", client_notes: "", assigned_hotel: "",
     room_type: "", services: [], booking_price: "", expedia_price: "",
-    deposit_percent: 0, hero_image: "", tax_percent: 18,
+    deposit_percent: 0, hero_image: "", tax_percent: 0,
     status: "borrador", sent_via: "", sent_at: ""
   });
 
@@ -56,7 +56,7 @@ export default function QuotationSheet() {
         services: Array.isArray(q.services) ? q.services : [],
         deposit_percent: q.deposit_percent ?? 0,
         hero_image: q.hero_image || "",
-        tax_percent: q.tax_percent ?? 18,
+        tax_percent: q.tax_percent ?? 0,
         booking_price: q.booking_price || "", expedia_price: q.expedia_price || "",
         status: q.status || "borrador",
         sent_via: q.sent_via || q.form_data?.preferredContact || "",
@@ -281,11 +281,12 @@ export default function QuotationSheet() {
             <div className="space-y-4 pt-2">
               <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-zinc-800 pb-2">Configuración del Entregable</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Field label="Impuesto (ITBIS %)">
+                <Field label="Comisión extra (%)">
                   <div className="relative">
-                    <input data-testid="quotation-tax" type="number" min="0" max="100" step="1" value={form.tax_percent} onChange={(e) => setForm({ ...form, tax_percent: e.target.value })} className={inputCls} />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">%</span>
+                    <input data-testid="quotation-tax" type="number" min="0" max="100" step="0.5" value={form.tax_percent || ''} onChange={(e) => setForm({ ...form, tax_percent: e.target.value })} className={`${inputCls} w-28`} placeholder="0" />
+                    <span className="absolute right-8 top-1/2 -translate-y-1/2 text-gray-400 text-xs">%</span>
                   </div>
+                  <p className="text-[11px] text-gray-400 mt-0.5">Margen adicional sobre el total (solo interno)</p>
                 </Field>
 
                 <Field label="Imagen del Hero (URL)">

@@ -168,7 +168,7 @@ class QuotationIn(BaseModel):
     services: Optional[list] = []
     deposit_percent: Optional[float] = 0
     hero_image: Optional[str] = ""
-    tax_percent: Optional[float] = 18
+    tax_percent: Optional[float] = 0
     booking_price: Optional[float] = None
     expedia_price: Optional[float] = None
     status: str = "borrador"
@@ -464,7 +464,7 @@ async def create_quotation(body: QuotationIn, db: AsyncSession = Depends(get_db)
         services=body.services or [],
         deposit_percent=body.deposit_percent or 0,
         hero_image=hero,
-        tax_percent=body.tax_percent if body.tax_percent is not None else 18,
+        tax_percent=body.tax_percent if body.tax_percent is not None else 0,
         booking_price=body.booking_price,
         expedia_price=body.expedia_price,
     )
