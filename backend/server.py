@@ -108,6 +108,32 @@ async def create_notification_all(db: AsyncSession, type_: str, title: str, mess
     for u in users:
         await create_notification(db, u.id, type_, title, message, link)
 
+async def get_destination_image(db: AsyncSession, destination_name: str) -> str:
+    """Look up hero image from destinations table matching destination name."""
+    if not destination_name:
+        return ""
+    # Try exact match on name
+    result = await db.execute(
+        select(Destination).where(Destination.name.ilike(destination_name), Destination.status == "activo")
+    )
+    d = result.scalar_one_or_none()
+    if d and d.image_url:
+        return d.image_url
+    # Try partial match (destination name contains query or vice versa)
+    result = await db.execute(
+        select(Destination).where(
+            or_(
+                Destination.name.ilike(f"%{destination_name}%"),
+                Destination.country.ilike(f"%{destination_name}%"),
+            ),
+            Destination.status == "activo",
+        )
+    )
+    d = result.scalar_one_or_none()
+    if d and d.image_url:
+        return d.image_url
+    return ""
+
 def require_admin(user: dict):
     if user.get("role") not in ("super_admin", "admin"):
         raise HTTPException(status_code=403, detail="No tienes permiso")
@@ -421,6 +447,11 @@ async def get_quotation(qid: str, db: AsyncSession = Depends(get_db)):
 
 @api.post("/quotations")
 async def create_quotation(body: QuotationIn, db: AsyncSession = Depends(get_db), u=Depends(get_current_user)):
+    # Auto-populate hero_image from destination if empty
+    hero = body.hero_image or ""
+    if not hero:
+        hero = await get_destination_image(db, body.destination)
+
     q = Quotation(
         id=new_id(), client_id=body.client_id, destination=body.destination,
         travel_date=body.travel_date or "", return_date=body.return_date or "",
@@ -428,6 +459,14 @@ async def create_quotation(body: QuotationIn, db: AsyncSession = Depends(get_db)
         notes=body.notes or "", status=body.status,
         sent_via=body.sent_via or "", sent_at=body.sent_at or "",
         created_by=u["id"],
+        assigned_hotel=body.assigned_hotel or "",
+        room_type=body.room_type or "",
+        services=body.services or [],
+        deposit_percent=body.deposit_percent or 0,
+        hero_image=hero,
+        tax_percent=body.tax_percent if body.tax_percent is not None else 18,
+        booking_price=body.booking_price,
+        expedia_price=body.expedia_price,
     )
     db.add(q)
     await db.flush()
@@ -441,6 +480,9 @@ async def update_quotation(qid: str, body: QuotationIn, db: AsyncSession = Depen
         raise HTTPException(status_code=404, detail="Cotización no encontrada")
     for k, v in body.model_dump().items():
         setattr(q, k, v)
+    # Auto-populate hero_image from destination if still empty after update
+    if not q.hero_image:
+        q.hero_image = await get_destination_image(db, q.destination)
     return q.to_dict()
 
 
@@ -472,30 +514,37 @@ async def client_update_status(qid: str, body: ClientStatusUpdate, db: AsyncSess
     client = client_r.scalar_one_or_none()
     client_name = f"{client.first_name} {client.last_name}" if client else "Cliente"
 
-    # Notify the advisor who created the quotation
-    if q.created_by:
-        if body.status == "aceptada":
-            await create_notification(
-                db, q.created_by, "accepted",
-                title=f"{client_name} aceptó la propuesta",
-                message=f"Cotización para {q.destination} fue aceptada",
-                link=f"/admin/cotizaciones/{q.id}",
-            )
-        elif is_regret:
-            await create_notification(
-                db, q.created_by, "regret",
-                title=f"{client_name} cambió de opinión",
-                message=f"Había aceptado {q.destination} y ahora solicita cambios",
-                link=f"/admin/cotizaciones/{q.id}",
-            )
-        elif body.status == "rechazada":
-            notes_preview = (body.notes or "")[:100]
-            await create_notification(
-                db, q.created_by, "rejected",
-                title=f"{client_name} solicita cambios",
-                message=f"Rechazó {q.destination}" + (f": {notes_preview}" if notes_preview else ""),
-                link=f"/admin/cotizaciones/{q.id}",
-            )
+    # Notify ALL active users (admins + advisors) about client actions
+    if body.status == "aceptada":
+        await create_notification_all(
+            db, "accepted",
+            title=f"{client_name} aceptó la propuesta",
+            message=f"Cotización para {q.destination} fue aceptada",
+            link=f"/admin/cotizaciones/{q.id}",
+        )
+    elif body.status == "cambios_solicitados":
+        notes_preview = (body.notes or "")[:100]
+        await create_notification_all(
+            db, "changes_requested",
+            title=f"{client_name} solicita cambios",
+            message=f"Cotización para {q.destination}" + (f": {notes_preview}" if notes_preview else ""),
+            link=f"/admin/cotizaciones/{q.id}",
+        )
+    elif is_regret:
+        await create_notification_all(
+            db, "regret",
+            title=f"{client_name} cambió de opinión",
+            message=f"Había aceptado {q.destination} y ahora solicita cambios",
+            link=f"/admin/cotizaciones/{q.id}",
+        )
+    elif body.status == "rechazada":
+        notes_preview = (body.notes or "")[:100]
+        await create_notification_all(
+            db, "rejected",
+            title=f"{client_name} rechazó la propuesta",
+            message=f"Rechazó {q.destination}" + (f": {notes_preview}" if notes_preview else ""),
+            link=f"/admin/cotizaciones/{q.id}",
+        )
 
     return q.to_dict()
 
@@ -587,11 +636,15 @@ async def create_lead(body: LeadIn, db: AsyncSession = Depends(get_db)):
     }
 
     total_travelers = body.adultsCount + body.childrenCount + body.babiesCount
+    destination_str = f"{body.country}{', ' + body.city if body.city else ''}"
+
+    # Try to find hero image from destinations table
+    hero_image = await get_destination_image(db, destination_str)
 
     q = Quotation(
         id=new_id(),
         client_id=client.id,
-        destination=f"{body.country}{', ' + body.city if body.city else ''}",
+        destination=destination_str,
         travel_date=body.departureDate,
         return_date=body.returnDate,
         travelers=total_travelers,
@@ -599,6 +652,8 @@ async def create_lead(body: LeadIn, db: AsyncSession = Depends(get_db)):
         currency="USD",
         notes=body.comments or "",
         form_data=form_data,
+        room_type=body.roomType,
+        hero_image=hero_image,
         status="borrador",
         sent_via=body.preferredContact,
         sent_at=now_iso(),
@@ -806,6 +861,17 @@ async def create_payment(body: PaymentIn, db: AsyncSession = Depends(get_db), u=
         total_paid = pay_r.scalar() or 0
         if total_paid >= res.total_amount and res.status in ("pendiente", "confirmada"):
             res.status = "pagada"
+
+    # Notify ALL active users about payment
+    client_r = await db.execute(select(Client).where(Client.id == res.client_id))
+    client = client_r.scalar_one_or_none()
+    client_name = f"{client.first_name} {client.last_name}" if client else "Cliente"
+    await create_notification_all(
+        db, "payment",
+        title=f"Pago recibido: {client_name}",
+        message=f"${body.amount:,.2f} {body.method} — {res.destination}",
+        link=f"/admin/reservas/{body.reservation_id}",
+    )
 
     return p.to_dict()
 
