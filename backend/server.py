@@ -1159,6 +1159,36 @@ async def get_dashboard(db: AsyncSession = Depends(get_db), _u=Depends(get_curre
     # Conversion rate
     conv_rate = round((accepted / total_quotations * 100) if total_quotations > 0 else 0, 1)
 
+    # Monthly series: cotizaciones por mes (últimos 6 meses) para el gráfico
+    monthly_series = []
+    for i in range(5, -1, -1):
+        bucket_start = now.replace(day=1) - timedelta(days=30 * i)
+        bucket_start = bucket_start.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        if i == 0:
+            bucket_end = now
+        else:
+            bucket_end = (bucket_start.replace(day=28) + timedelta(days=4)).replace(day=1)
+        label = bucket_start.strftime("%b")
+
+        total_r = await db.execute(
+            select(func.count(Quotation.id)).where(
+                Quotation.created_at >= bucket_start,
+                Quotation.created_at < bucket_end
+            )
+        )
+        accepted_r = await db.execute(
+            select(func.count(Quotation.id)).where(
+                Quotation.created_at >= bucket_start,
+                Quotation.created_at < bucket_end,
+                Quotation.status == "aceptada"
+            )
+        )
+        monthly_series.append({
+            "month": label,
+            "total": total_r.scalar() or 0,
+            "accepted": accepted_r.scalar() or 0,
+        })
+
     # Recent activity: last 5 notifications
     n_result = await db.execute(
         select(Notification).order_by(Notification.created_at.desc()).limit(5)
@@ -1177,6 +1207,7 @@ async def get_dashboard(db: AsyncSession = Depends(get_db), _u=Depends(get_curre
         "total_clients": total_clients,
         "new_leads": new_leads,
         "conversion_rate": conv_rate,
+        "monthly_series": monthly_series,
         "recent_activity": recent,
     }
 

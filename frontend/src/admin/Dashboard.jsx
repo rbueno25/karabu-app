@@ -6,6 +6,7 @@ import StatCard from "./StatCard";
 import StatusBadge from "./StatusBadge";
 import { Users, CalendarCheck, FileText, DollarSign, Loader2, Send, CheckCircle2, TrendingUp, Clock, Target } from "lucide-react";
 import { formatCurrency, formatDate } from "../lib/format";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
 export default function Dashboard() {
   const [data, setData] = useState(null);
@@ -83,6 +84,28 @@ export default function Dashboard() {
             </div>
           </div>
         </Link>
+      </div>
+
+      {/* Monthly chart */}
+      <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 shadow-sm p-6 mb-6">
+        <div className="flex items-center gap-2 mb-4">
+          <TrendingUp className="h-5 w-5 text-[#0D9387]" />
+          <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">Cotizaciones por mes</h3>
+        </div>
+        <ResponsiveContainer width="100%" height={280}>
+          <BarChart data={data.monthly_series} barGap={4}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+            <XAxis dataKey="month" tick={{ fontSize: 13, fill: "#6b7280" }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fontSize: 12, fill: "#9ca3af" }} axisLine={false} tickLine={false} allowDecimals={false} />
+            <Tooltip
+              contentStyle={{ borderRadius: 12, border: "1px solid #e5e7eb", boxShadow: "0 4px 12px rgba(0,0,0,0.08)" }}
+              labelStyle={{ fontWeight: 600, color: "#111827" }}
+            />
+            <Legend wrapperStyle={{ paddingTop: 12 }} />
+            <Bar dataKey="total" name="Total" fill="#0D9387" radius={[6, 6, 0, 0]} />
+            <Bar dataKey="accepted" name="Aceptadas" fill="#10b981" radius={[6, 6, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
       </div>
 
       {/* Recent activity */}
