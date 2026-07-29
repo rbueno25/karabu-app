@@ -120,7 +120,7 @@ export default function ClientQuotationView() {
   const travelDate = q.travel_date || '—';
   const returnDate = q.return_date || '—';
   const hotelName = q.assigned_hotel || 'Hotel por confirmar';
-  const rawRoomType = q.room_type || q.form_data?.room_type || q.form_data?.hotelCategory || '';
+  const rawRoomType = q.room_type || q.form_data?.roomType || '';
   const roomType = rawRoomType ? `Habitación ${rawRoomType}` : '';
   const travelers = q.travelers || 1;
   const adults = q.form_data?.adultsCount ?? travelers;
@@ -190,14 +190,6 @@ export default function ClientQuotationView() {
               {copiedLink ? <Check className={`w-4 h-4 ${scrolled ? 'text-emerald-600' : 'text-emerald-300'}`} /> : <Share2 className={`w-4 h-4 ${scrolled ? 'text-slate-500' : 'text-teal-200'}`} />}
               <span className="hidden md:inline">{copiedLink ? 'Copiado' : 'Compartir'}</span>
             </button>
-            <a href={`/#/factura/${currentId}`} className={`p-2.5 rounded-xl transition-all duration-300 shadow-md flex items-center gap-1.5 text-xs font-bold ${
-              scrolled
-                ? 'bg-[#0D9387]/10 hover:bg-[#0D9387]/20 text-[#0D9387] border border-[#0D9387]/30'
-                : 'bg-[#0D9387]/30 hover:bg-[#0D9387]/50 backdrop-blur-md border border-[#0D9387]/50 text-white'
-            }`} title="Ver Factura">
-              <CreditCard className={`w-4 h-4 ${scrolled ? 'text-[#0D9387]' : 'text-teal-200'}`} />
-              <span className="hidden sm:inline">Factura</span>
-            </a>
             <button onClick={() => setDarkMode(!darkMode)} className={`p-2.5 rounded-xl transition-all duration-300 shadow-md ${
               scrolled
                 ? 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'

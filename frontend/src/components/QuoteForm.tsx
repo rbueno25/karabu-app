@@ -658,7 +658,7 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
                       {/* Alojamiento preferido */}
                       <div className="flex flex-col gap-1.5">
                         <label htmlFor="hotelCategory" className="font-display font-bold text-[11px] text-slate-500 uppercase tracking-wide">
-                          Alojamiento preferido (Hotel)
+                          Categoría del hotel
                         </label>
                         <div className="relative">
                           <select
