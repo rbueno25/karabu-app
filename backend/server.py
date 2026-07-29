@@ -1069,6 +1069,86 @@ async def delete_package(pid: str, db: AsyncSession = Depends(get_db), _u=Depend
     return {"ok": True}
 
 
+# -------------------- Dashboard --------------------
+@api.get("/dashboard")
+async def get_dashboard(db: AsyncSession = Depends(get_db), _u=Depends(get_current_user)):
+    """Real-time metrics for the admin dashboard."""
+    now = datetime.now(timezone.utc)
+    month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+
+    # Total quotations this month
+    q_total = await db.execute(
+        select(func.count(Quotation.id)).where(Quotation.created_at >= month_start)
+    )
+    total_quotations = q_total.scalar() or 0
+
+    # Pending (borrador + enviada)
+    q_pending = await db.execute(
+        select(func.count(Quotation.id)).where(
+            Quotation.created_at >= month_start,
+            Quotation.status.in_(["borrador", "enviada"])
+        )
+    )
+    pending = q_pending.scalar() or 0
+
+    # Accepted
+    q_accepted = await db.execute(
+        select(func.count(Quotation.id)).where(
+            Quotation.created_at >= month_start,
+            Quotation.status == "aceptada"
+        )
+    )
+    accepted = q_accepted.scalar() or 0
+
+    # Revenue: sum of accepted quotations amount
+    q_revenue = await db.execute(
+        select(func.coalesce(func.sum(Quotation.amount), 0)).where(
+            Quotation.status == "aceptada"
+        )
+    )
+    revenue = float(q_revenue.scalar() or 0)
+
+    # Total clients
+    c_total = await db.execute(
+        select(func.count(Client.id)).where(Client.deleted_at.is_(None))
+    )
+    total_clients = c_total.scalar() or 0
+
+    # New leads today (created_by is None = from landing)
+    q_leads = await db.execute(
+        select(func.count(Quotation.id)).where(
+            Quotation.created_at >= today_start,
+            Quotation.created_by.is_(None)
+        )
+    )
+    new_leads = q_leads.scalar() or 0
+
+    # Conversion rate
+    conv_rate = round((accepted / total_quotations * 100) if total_quotations > 0 else 0, 1)
+
+    # Recent activity: last 5 notifications
+    n_result = await db.execute(
+        select(Notification).order_by(Notification.created_at.desc()).limit(5)
+    )
+    recent = [
+        {"type": n.type, "title": n.title, "message": n.message,
+         "link": n.link, "created_at": n.created_at.isoformat() if n.created_at else None}
+        for n in n_result.scalars().all()
+    ]
+
+    return {
+        "total_quotations": total_quotations,
+        "pending": pending,
+        "accepted": accepted,
+        "revenue": revenue,
+        "total_clients": total_clients,
+        "new_leads": new_leads,
+        "conversion_rate": conv_rate,
+        "recent_activity": recent,
+    }
+
+
 # -------------------- Users --------------------
 @api.get("/users")
 async def list_users(
