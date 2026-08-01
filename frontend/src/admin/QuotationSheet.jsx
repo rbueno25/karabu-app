@@ -158,6 +158,11 @@ export default function QuotationSheet() {
       const updatedForm = { ...form, travelers: Number(form.travelers), amount: Number(form.amount), booking_price: form.booking_price ? Number(form.booking_price) : null, expedia_price: form.expedia_price ? Number(form.expedia_price) : null, status: "enviada", sent_via: platform, sent_at: isoNow };
       await api.put(`/quotations/${id}`, updatedForm);
       toast.success(`Cotización marcada como enviada vía ${platform}`);
+      // Copy WhatsApp message to clipboard
+      if (platform === "whatsapp") {
+        await navigator.clipboard.writeText(whatsappMsg);
+        toast.success("Mensaje copiado. Pégalo en WhatsApp.");
+      }
       setSendModalOpen(false); setSuccessModalOpen(true);
       loadQuotation();
     } catch (e) {
