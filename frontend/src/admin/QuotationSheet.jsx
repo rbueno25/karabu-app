@@ -485,7 +485,19 @@ export default function QuotationSheet() {
               </div>
             </div>
             {sendingPlatform === "whatsapp" ? (
-              <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="w-full inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white rounded-xl py-2.5 text-sm font-semibold transition"><ExternalLink className="h-4 w-4" />Abrir WhatsApp Web</a>
+              <>
+                <div className="space-y-2">
+                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block">Mensaje para WhatsApp</span>
+                  <div className="relative">
+                    <textarea readOnly rows={3} value={whatsappMsg} className="w-full bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl px-3 py-2 text-xs text-gray-600 dark:text-gray-300 font-sans outline-none resize-none" />
+                    <button
+                      onClick={() => { navigator.clipboard.writeText(whatsappMsg); toast.success("Mensaje copiado"); }}
+                      className="absolute top-2 right-2 h-8 px-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1 transition"
+                    ><Clipboard className="h-3.5 w-3.5" />Copiar</button>
+                  </div>
+                </div>
+                <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="w-full inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white rounded-xl py-2.5 text-sm font-semibold transition"><ExternalLink className="h-4 w-4" />Abrir WhatsApp Web</a>
+              </>
             ) : (
               <div className="bg-gray-50 dark:bg-zinc-800 p-4 rounded-xl border border-gray-100 dark:border-zinc-700"><p className="text-xs text-gray-500">Copia el enlace y envíalo a <strong>{client.email}</strong>.</p></div>
             )}
