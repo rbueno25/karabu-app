@@ -23,7 +23,7 @@ engine = create_async_engine(
     echo=False,
     pool_size=10,
     max_overflow=5,
-    connect_args={"ssl": _ssl_mode} if _ssl_mode else {},
+    connect_args={"ssl": _ssl_mode} if _ssl_mode else {"ssl": False},
 )
 AsyncSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
