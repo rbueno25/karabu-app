@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api, { formatApiError } from "../lib/api";
 import { ArrowLeft, Loader2, Eye, EyeOff, UserPlus } from "lucide-react";
+import ImageUpload from "./ImageUpload";
 import { toast } from "sonner";
 import { useAuth } from "./AuthContext";
 
@@ -160,13 +161,12 @@ export default function UserCreate() {
               <p className="text-[11px] text-gray-400 mt-1">Este número aparecerá en el entregable para que el cliente pueda contactarte.</p>
             </Field>
 
-            <Field label="URL de foto de perfil">
-              <input
-                data-testid="user-avatar"
+            <Field label="Foto de perfil">
+              <ImageUpload
                 value={form.avatar_url}
-                onChange={(e) => setForm({ ...form, avatar_url: e.target.value })}
-                placeholder="https://..."
-                className={inputCls}
+                onChange={(url) => setForm({ ...form, avatar_url: url })}
+                label="Cargar imagen"
+                previewSize="md"
               />
               <p className="text-[11px] text-gray-400 mt-1">Si no agregas una, se mostrarán tus iniciales como avatar.</p>
             </Field>

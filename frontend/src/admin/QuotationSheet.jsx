@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import api, { formatApiError } from "../lib/api";
 import StatusBadge from "./StatusBadge";
+import ImageUpload from "./ImageUpload";
 import { formatDate, formatCurrency } from "../lib/format";
 import { toast } from "sonner";
 import { 
@@ -306,8 +307,14 @@ export default function QuotationSheet() {
                   </div>
                   <p className="text-[11px] text-gray-400 mt-0.5">Margen interno (no visible al cliente)</p>
                 </Field>
-                <Field label="Imagen Hero (URL)">
-                  <input data-testid="quotation-hero-image" value={form.hero_image} onChange={(e) => setForm({ ...form, hero_image: e.target.value })} placeholder="Vacío = imagen del destino" className={inputCls} />
+                <Field label="Imagen Hero">
+                  <ImageUpload
+                    value={form.hero_image}
+                    onChange={(url) => setForm({ ...form, hero_image: url })}
+                    label="Cargar imagen del destino"
+                    previewSize="sm"
+                  />
+                  <p className="text-[11px] text-gray-400 mt-1">Vacío = se usará una imagen del destino automáticamente</p>
                 </Field>
               </div>
             </Section>

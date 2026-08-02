@@ -1887,7 +1887,43 @@ async def shutdown():
     await engine.dispose()
 
 
+# -------------------- File Upload --------------------
+import shutil
+from fastapi import UploadFile, File as FileParam
+
+UPLOADS_DIR = ROOT_DIR / "uploads"
+UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
+
+ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg", ".bmp"}
+MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10 MB
+
+@api.post("/upload")
+async def upload_file(file: UploadFile = FileParam(...), u=Depends(get_current_user)):
+    """Upload an image file. Returns the public URL."""
+    ext = Path(file.filename or "image.png").suffix.lower()
+    if ext not in ALLOWED_EXTENSIONS:
+        raise HTTPException(status_code=400, detail=f"Formato no permitido. Usa: {', '.join(ALLOWED_EXTENSIONS)}")
+    
+    # Read and validate size
+    contents = await file.read()
+    if len(contents) > MAX_UPLOAD_SIZE:
+        raise HTTPException(status_code=400, detail="La imagen no debe superar 10 MB")
+    
+    # Save with unique name
+    safe_name = f"{new_id()}{ext}"
+    dest_path = UPLOADS_DIR / safe_name
+    with open(dest_path, "wb") as f:
+        f.write(contents)
+    
+    url = f"/uploads/{safe_name}"
+    logger.info(f"Uploaded: {url} by user {u['email']}")
+    return {"url": url, "filename": safe_name}
+
 app.include_router(api)
+
+# Mount uploads for static serving
+from fastapi.staticfiles import StaticFiles
+app.mount("/uploads", StaticFiles(directory=str(UPLOADS_DIR)), name="uploads")
 
 # -------------------- Security Headers Middleware --------------------
 from starlette.middleware.base import BaseHTTPMiddleware

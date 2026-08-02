@@ -5,6 +5,7 @@ import PageHeader from "./PageHeader";
 import StatusBadge from "./StatusBadge";
 import EmptyState from "./EmptyState";
 import { Plus, Search, Loader2, Pencil, Trash2, UserCog, X, ShieldCheck, Eye, EyeOff } from "lucide-react";
+import ImageUpload from "./ImageUpload";
 import { toast } from "sonner";
 import { formatDate } from "../lib/format";
 import { useAuth } from "./AuthContext";
@@ -252,6 +253,14 @@ export default function Users() {
               <div className="border-b border-gray-100 dark:border-zinc-800 pb-3 mb-1 pt-2">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-400">Información Complementaria (Opcional)</span>
               </div>
+              <Field label="Foto de perfil">
+                <ImageUpload
+                  value={form.avatar_url}
+                  onChange={(url) => setForm({ ...form, avatar_url: url })}
+                  label="Cargar imagen"
+                  previewSize="sm"
+                />
+              </Field>
               <Field label="Teléfono / WhatsApp">
                 <input data-testid="user-phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="+57 300 123 4567" className={inputCls} />
               </Field>
