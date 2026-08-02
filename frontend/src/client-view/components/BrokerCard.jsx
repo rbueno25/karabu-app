@@ -11,13 +11,19 @@ export function BrokerCard({ broker, quotationId }) {
       <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-[#0F2A4A] via-[#00A896] to-[#FF6B35]" />
       <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
         <div className="relative shrink-0">
-          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border-2 border-[#00A896] shadow-md shadow-[#00A896]/15">
-            <img
-              src={broker.avatar_url || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80'}
-              alt={broker.name}
-              className="w-full h-full object-cover"
-            />
-          </div>
+          {broker.avatar_url ? (
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border-2 border-[#00A896] shadow-md shadow-[#00A896]/15">
+              <img
+                src={broker.avatar_url}
+                alt={broker.name}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          ) : (
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-br from-[#0D9387] to-[#0F2A4A] text-white flex items-center justify-center text-2xl sm:text-3xl font-bold border-2 border-[#00A896] shadow-md shadow-[#00A896]/15">
+              {broker.name ? broker.name.split(" ").map(n => n[0]).slice(0, 2).join("").toUpperCase() : "KA"}
+            </div>
+          )}
           <div className="absolute -bottom-1 -right-1 p-1.5 rounded-full bg-emerald-500 text-white shadow-sm" title="Asesor verificado">
             <ShieldCheck className="w-4 h-4" />
           </div>

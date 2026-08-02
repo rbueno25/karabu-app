@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import api, { formatApiError } from "../lib/api";
 import PageHeader from "./PageHeader";
 import StatusBadge from "./StatusBadge";
@@ -14,6 +15,7 @@ const ROLE_LABELS = { super_admin: "Super Administrador", admin: "Administrador"
 
 export default function Users() {
   const { user: current } = useAuth();
+  const nav = useNavigate();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
@@ -52,7 +54,7 @@ export default function Users() {
   const paginated = useMemo(() => items.slice((page - 1) * perPage, page * perPage), [items, page]);
   const totalPages = Math.max(1, Math.ceil(items.length / perPage));
 
-  const openCreate = () => { setEditingId(null); setForm(empty); setShowPassword(false); setModalOpen(true); };
+  const openCreate = () => { nav("/admin/usuarios/nuevo"); };
   const openEdit = (u) => {
     setEditingId(u.id);
     setForm({
