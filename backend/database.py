@@ -15,13 +15,15 @@ if "sslmode" in DATABASE_URL:
     DATABASE_URL = DATABASE_URL.split("?")[0].split("&sslmode")[0]
 
 # Create engine with connection retry on startup
-# asyncpg requires ssl='require' in connect_args for Render PostgreSQL
+# SSL: disable for local Docker/Coolify, enable for external hosts (Render)
+_db_host = DATABASE_URL.split("@")[-1].split("/")[0].split(":")[0] if "@" in DATABASE_URL else ""
+_ssl_mode = "require" if any(x in _db_host for x in [".render.com", "dpg-", ".rds.amazonaws.com"]) else False
 engine = create_async_engine(
     DATABASE_URL,
     echo=False,
     pool_size=10,
     max_overflow=5,
-    connect_args={"ssl": "require"},
+    connect_args={"ssl": _ssl_mode} if _ssl_mode else {},
 )
 AsyncSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
