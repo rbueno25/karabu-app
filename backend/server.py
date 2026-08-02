@@ -531,8 +531,14 @@ async def get_quotation(qid: str, db: AsyncSession = Depends(get_db)):
         "quotation": doc,
         "client": client.to_dict() if client else None,
         "broker": {
+            **(broker.to_dict() if broker else {}),
             "name": broker.name if broker else "Asesor Karabu",
             "email": broker.email if broker else "",
+            "phone": broker.phone if broker else "",
+            "avatar_url": broker.avatar_url if broker else "",
+            "role": broker.role if broker else "advisor",
+            "department": broker.department if broker else "",
+            "agency_name": "Karabu Viajes",
         }
     }
 
@@ -1238,6 +1244,11 @@ async def create_user(body: UserIn, db: AsyncSession = Depends(get_db), u=Depend
     require_admin(u)
     if not body.password:
         raise HTTPException(status_code=400, detail="La contraseña es requerida")
+    # Enforce single super_admin
+    if body.role == "super_admin":
+        existing_sa = await db.execute(select(User).where(User.role == "super_admin"))
+        if existing_sa.scalar_one_or_none():
+            raise HTTPException(status_code=400, detail="Solo puede existir un Super Administrador. Usa 'admin' como rol.")
     existing = await db.execute(select(User).where(User.email == body.email.lower()))
     if existing.scalar_one_or_none():
         raise HTTPException(status_code=400, detail="Ya existe un usuario con ese correo")
@@ -1262,6 +1273,11 @@ async def update_user(uid: str, body: UserIn, db: AsyncSession = Depends(get_db)
     require_admin(u)
     if uid == u["id"] and body.status == "inactivo":
         raise HTTPException(status_code=400, detail="No puedes desactivar tu propio usuario")
+    # Enforce single super_admin on role change
+    if body.role == "super_admin":
+        existing_sa = await db.execute(select(User).where(User.role == "super_admin", User.id != uid))
+        if existing_sa.scalar_one_or_none():
+            raise HTTPException(status_code=400, detail="Solo puede existir un Super Administrador. Usa 'admin' como rol.")
     result = await db.execute(select(User).where(User.id == uid))
     user = result.scalar_one_or_none()
     if not user:

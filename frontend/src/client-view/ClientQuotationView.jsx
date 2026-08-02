@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Logo from '../components/Logo';
 import { getQuotation, updateQuotationStatus } from './api-adapter';
+import { BrokerCard } from './components/BrokerCard';
 import {
   Compass, Loader2, AlertCircle, RefreshCw, ShieldCheck,
   CheckCircle2, Calendar, Building2, Bed, Users, CreditCard,
@@ -279,6 +280,11 @@ export default function ClientQuotationView() {
             <ArrowDown className="w-3.5 h-3.5 animate-bounce text-[#0D9387]" />
           </button>
         </div>
+      </section>
+
+      {/* ═══════════════ BROKER CARD — TU ASESOR ═══════════════ */}
+      <section className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 relative z-20">
+        {data?.broker && <BrokerCard broker={data.broker} quotationId={currentId} />}
       </section>
 
       {/* ═══════════════ SECTION 2 — DESGLOSE ═══════════════ */}
