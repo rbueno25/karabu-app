@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { MapPin } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface DestinationsProps {
   onSelectDestination: (destinationName: string) => void;
@@ -82,12 +83,12 @@ export default function Destinations({ onSelectDestination }: DestinationsProps)
             </svg>
           </div>
 
-          <button
-            onClick={() => onSelectDestination('Todos')}
+          <Link
+            to="/destinos"
             className="self-start sm:self-center border border-slate-300 hover:border-brand-turquoise text-slate-600 hover:text-brand-turquoise font-bold px-6 py-2.5 rounded-full text-xs sm:text-sm transition-all duration-300 shadow-sm hover:shadow active:scale-[0.98]"
           >
             Ver todos los destinos
-          </button>
+          </Link>
         </div>
 
         {/* Bento Grid Layout */}
@@ -126,9 +127,12 @@ export default function Destinations({ onSelectDestination }: DestinationsProps)
 
               {/* Action row */}
               <div className="flex items-center justify-between mt-2">
-                <span className="bg-white hover:bg-slate-50 text-brand-navy font-extrabold text-xs sm:text-sm px-6 py-3 rounded-full shadow-md transition-colors">
+                <Link
+                  to="/destinos"
+                  className="bg-white hover:bg-slate-50 text-brand-navy font-extrabold text-xs sm:text-sm px-6 py-3 rounded-full shadow-md transition-colors inline-block"
+                >
                   Ver destinos
-                </span>
+                </Link>
                 
                 <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white border border-white/25">
                   <MapPin className="w-5 h-5" />

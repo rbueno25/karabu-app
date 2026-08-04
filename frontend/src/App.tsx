@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect, lazy, Suspense } from 'react';
-import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate, useSearchParams } from 'react-router-dom';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import Stats from './components/Stats';
@@ -18,6 +18,7 @@ import CTA from './components/CTA';
 import Footer from './components/Footer';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import TermsConditions from './components/TermsConditions';
+import DestinationBrowser from './components/DestinationBrowser';
 import LegalConsentModal from './components/LegalConsentModal';
 
 // Admin — .jsx files, allowJs is enabled
@@ -57,6 +58,7 @@ function AdminLoader() {
 function LandingPage() {
   const [activeSection, setActiveSection] = useState('inicio');
   const [preselectedDestination, setPreselectedDestination] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const handleNavigate = (sectionId: string) => {
     const target = document.getElementById(sectionId);
@@ -70,6 +72,18 @@ function LandingPage() {
     setPreselectedDestination(destName);
     handleNavigate('cotizacion');
   };
+
+  // Read ?dest= param from navigation and auto-scroll to quote form
+  useEffect(() => {
+    const dest = searchParams.get('dest');
+    if (dest) {
+      setPreselectedDestination(dest);
+      // Clean URL after reading
+      setSearchParams({}, { replace: true });
+      // Delay scroll to let DOM render
+      setTimeout(() => handleNavigate('cotizacion'), 300);
+    }
+  }, []);
 
   useEffect(() => {
     const sections = ['inicio', 'destinos', 'servicios', 'por-que-elegirnos', 'cotizacion', 'contacto'];
@@ -121,6 +135,7 @@ export default function App() {
           <Route path="/login" element={<LoginRoute />} />
           <Route path="/privacidad" element={<PrivacyPolicy />} />
           <Route path="/terminos" element={<TermsConditions />} />
+          <Route path="/destinos" element={<DestinationBrowser />} />
           <Route
             path="/admin"
             element={
