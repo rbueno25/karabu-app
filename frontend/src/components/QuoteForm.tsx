@@ -60,6 +60,22 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
+  const [allDestinations, setAllDestinations] = useState<{name:string; country:string}[]>([]);
+
+  const API_BASE = import.meta.env.VITE_API_URL || 'https://karabu-srv.onrender.com';
+
+  // Fetch destinations for autocomplete
+  useEffect(() => {
+    fetch(API_BASE + '/api/destinations')
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data)) setAllDestinations(data);
+      })
+      .catch(() => {});
+  }, []);
+
+  // Unique countries for country datalist
+  const uniqueCountries = [...new Set(allDestinations.map(d => d.country))].sort();
 
   // Map destination names to country + city for auto-fill
   const destinationMap: Record<string, { country: string; city: string }> = {
@@ -101,6 +117,19 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name as keyof ContactFormInput]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }));
+    }
+  };
+
+  // Auto-fill country when city matches a destination
+  const handleCityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const city = e.target.value;
+    setFormData((prev) => ({ ...prev, city }));
+    // Find matching destination and auto-fill country
+    const match = allDestinations.find(
+      d => d.name.toLowerCase() === city.toLowerCase().trim()
+    );
+    if (match) {
+      setFormData((prev) => ({ ...prev, country: match.country }));
     }
   };
 
@@ -176,7 +205,6 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
         comments: formData.comments,
       };
 
-      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
       const res = await fetch(`${API_BASE}/api/leads`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -385,11 +413,15 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
                           name="country"
                           value={formData.country}
                           onChange={handleInputChange}
-                          placeholder="Ej: República Dominicana, España, etc."
+                          placeholder="Ej: República Dominicana, España..."
+                          list="countries-list"
                           className={`font-sans text-sm px-3.5 py-2.5 rounded-lg border bg-slate-50 focus:bg-white focus:outline-none transition-colors ${
                             errors.country ? 'border-red-500 ring-1 ring-red-200' : 'border-slate-200 focus:border-brand-turquoise'
                           }`}
                         />
+                        <datalist id="countries-list">
+                          {uniqueCountries.map(c => <option key={c} value={c} />)}
+                        </datalist>
                         {errors.country && <span className="text-[10px] text-red-500 font-sans">{errors.country}</span>}
                       </div>
 
@@ -403,10 +435,14 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
                           id="city"
                           name="city"
                           value={formData.city}
-                          onChange={handleInputChange}
-                          placeholder="Ej: Punta Cana, Madrid, etc."
+                          onChange={handleCityChange}
+                          placeholder="Ej: Punta Cana, Madrid, Miami..."
+                          list="cities-list"
                           className="font-sans text-sm px-3.5 py-2.5 rounded-lg border bg-slate-50 border-slate-200 focus:border-brand-turquoise focus:bg-white focus:outline-none transition-colors"
                         />
+                        <datalist id="cities-list">
+                          {allDestinations.map(d => <option key={d.name} value={d.name} />)}
+                        </datalist>
                       </div>
                     </div>
 
