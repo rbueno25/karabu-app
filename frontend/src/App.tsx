@@ -73,12 +73,17 @@ function LandingPage() {
     handleNavigate('cotizacion');
   };
 
-  // Read ?dest= param from navigation and auto-scroll to quote form
+  // Read ?dest= and ?destCountry= params from navigation
   useEffect(() => {
     const dest = searchParams.get('dest');
     if (dest) {
+      const destCountry = searchParams.get('destCountry') || '';
+      // Store country for QuoteForm
+      if (destCountry) {
+        sessionStorage.setItem('karabu_preselected_country', destCountry);
+      }
       setPreselectedDestination(dest);
-      // Clean URL after reading
+      // Clean URL
       setSearchParams({}, { replace: true });
       // Delay scroll to let DOM render
       setTimeout(() => handleNavigate('cotizacion'), 300);

@@ -77,7 +77,16 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
   useEffect(() => {
     if (preselectedDestination && preselectedDestination !== 'Todos' && preselectedDestination !== 'Todas') {
       const mapped = destinationMap[preselectedDestination];
-      if (mapped) {
+      // Check for country override from DestinationBrowser (stored in sessionStorage)
+      const overrideCountry = sessionStorage.getItem('karabu_preselected_country');
+      if (overrideCountry) {
+        sessionStorage.removeItem('karabu_preselected_country');
+        setFormData((prev) => ({
+          ...prev,
+          country: overrideCountry,
+          city: mapped ? mapped.city : preselectedDestination,
+        }));
+      } else if (mapped) {
         setFormData((prev) => ({ ...prev, country: mapped.country, city: mapped.city }));
       } else {
         // Unknown destination — fill as country
