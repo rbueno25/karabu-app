@@ -190,10 +190,10 @@ export default function Footer({ onNavigate, onSelectDestination }: FooterProps)
           </span>
           
           <div className="flex items-center gap-6">
-            <a href="#privacy" className="hover:text-slate-400 transition-colors">
+            <a href="/#/privacidad" className="hover:text-slate-400 transition-colors">
               Política de Privacidad
             </a>
-            <a href="#terms" className="hover:text-slate-400 transition-colors">
+            <a href="/#/terminos" className="hover:text-slate-400 transition-colors">
               Términos y Condiciones
             </a>
           </div>

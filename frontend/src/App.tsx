@@ -16,6 +16,8 @@ import QuoteForm from './components/QuoteForm';
 import Testimonials from './components/Testimonials';
 import CTA from './components/CTA';
 import Footer from './components/Footer';
+import PrivacyPolicy from './components/PrivacyPolicy';
+import TermsConditions from './components/TermsConditions';
 
 // Admin — .jsx files, allowJs is enabled
 import { AuthProvider } from './admin/AuthContext';
@@ -115,6 +117,8 @@ export default function App() {
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginRoute />} />
+          <Route path="/privacidad" element={<PrivacyPolicy />} />
+          <Route path="/terminos" element={<TermsConditions />} />
           <Route
             path="/admin"
             element={
