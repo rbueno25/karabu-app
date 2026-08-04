@@ -30,7 +30,7 @@ export default function Logo({ light = false, className = '', showText = true }:
           <div className={`flex items-center gap-1 mt-0.5 ${subtitleColor}`}>
             <div className="h-[1px] w-1.5 bg-current opacity-70"></div>
             <span className="font-sans text-[9px] font-bold tracking-[0.15em] uppercase whitespace-nowrap leading-none">
-              Visas y Viajes
+              Viajes y Visas
             </span>
             <div className="h-[1px] w-1.5 bg-current opacity-70"></div>
           </div>

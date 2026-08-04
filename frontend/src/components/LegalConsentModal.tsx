@@ -50,7 +50,7 @@ export default function LegalConsentModal() {
         {/* Body */}
         <div className="px-6 py-5 space-y-5 text-sm text-slate-600 leading-relaxed">
           <p>
-            Bienvenido a <strong className="text-brand-navy">Karabu Visas y Viajes</strong>. 
+            Bienvenido a <strong className="text-brand-navy">Karabu Viajes y Visas</strong>. 
             Antes de continuar, lee nuestros términos legales. Al hacer clic en 
             <strong> "Aceptar y continuar"</strong>, confirmas que has leído y aceptas nuestros 
             documentos legales.

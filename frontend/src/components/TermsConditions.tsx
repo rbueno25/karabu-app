@@ -22,13 +22,13 @@ export default function TermsConditions() {
           <section>
             <h2 className="text-lg font-bold text-brand-navy mb-3">1. Aceptación de los términos</h2>
             <p className="text-sm">
-              Al utilizar el sitio web <strong>karabuviajes.com</strong> y los servicios de Karabu Visas y Viajes, aceptas estos Términos y Condiciones. Si no estás de acuerdo, por favor no utilices nuestros servicios.
+              Al utilizar el sitio web <strong>karabuviajes.com</strong> y los servicios de Karabu Viajes y Visas, aceptas estos Términos y Condiciones. Si no estás de acuerdo, por favor no utilices nuestros servicios.
             </p>
           </section>
 
           <section>
             <h2 className="text-lg font-bold text-brand-navy mb-3">2. Servicios ofrecidos</h2>
-            <p className="text-sm">Karabu Visas y Viajes ofrece:</p>
+            <p className="text-sm">Karabu Viajes y Visas ofrece:</p>
             <ul className="list-disc pl-5 mt-2 space-y-1 text-sm">
               <li>Cotización y reserva de paquetes turísticos</li>
               <li>Asesoría en trámites de visa</li>
@@ -81,7 +81,7 @@ export default function TermsConditions() {
           <section>
             <h2 className="text-lg font-bold text-brand-navy mb-3">7. Limitación de responsabilidad</h2>
             <p className="text-sm">
-              Karabu Visas y Viajes actúa como intermediario y no se hace responsable por:
+              Karabu Viajes y Visas actúa como intermediario y no se hace responsable por:
             </p>
             <ul className="list-disc pl-5 mt-2 space-y-1 text-sm">
               <li>Cancelaciones o retrasos de aerolíneas</li>
@@ -98,7 +98,7 @@ export default function TermsConditions() {
           <section>
             <h2 className="text-lg font-bold text-brand-navy mb-3">8. Propiedad intelectual</h2>
             <p className="text-sm">
-              Todo el contenido de este sitio web (textos, imágenes, logotipos, diseño) es propiedad de Karabu Visas y Viajes. Queda prohibida su reproducción total o parcial sin autorización expresa.
+              Todo el contenido de este sitio web (textos, imágenes, logotipos, diseño) es propiedad de Karabu Viajes y Visas. Queda prohibida su reproducción total o parcial sin autorización expresa.
             </p>
           </section>
 

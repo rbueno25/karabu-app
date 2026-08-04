@@ -53,7 +53,7 @@ export default function PrivacyPolicy() {
           <section>
             <h2 className="text-lg font-bold text-brand-navy mb-3">4. No compartimos tu información</h2>
             <p className="text-sm">
-              Karabu Visas y Viajes <strong>no vende, alquila ni comparte</strong> tu información personal con terceros con fines comerciales. Solo compartimos datos con proveedores de servicios turísticos (aerolíneas, hoteles, aseguradoras) cuando es estrictamente necesario para completar tu reserva.
+              Karabu Viajes y Visas <strong>no vende, alquila ni comparte</strong> tu información personal con terceros con fines comerciales. Solo compartimos datos con proveedores de servicios turísticos (aerolíneas, hoteles, aseguradoras) cuando es estrictamente necesario para completar tu reserva.
             </p>
           </section>
 

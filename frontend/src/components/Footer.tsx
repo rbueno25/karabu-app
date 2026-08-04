@@ -186,7 +186,7 @@ export default function Footer({ onNavigate, onSelectDestination }: FooterProps)
         {/* Bottom Legal bar */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-sans text-slate-500">
           <span>
-            © 2026 Karabu Visas y Viajes. Todos los derechos reservados.
+            © 2026 Karabu Viajes y Visas. Todos los derechos reservados.
           </span>
           
           <div className="flex items-center gap-6">

@@ -1,5 +1,5 @@
 /**
- * Types for Karabu Visas y Viajes Application
+ * Types for Karabu Viajes y Visas Application
  */
 
 export interface Destination {
