@@ -18,6 +18,7 @@ import CTA from './components/CTA';
 import Footer from './components/Footer';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import TermsConditions from './components/TermsConditions';
+import LegalConsentModal from './components/LegalConsentModal';
 
 // Admin — .jsx files, allowJs is enabled
 import { AuthProvider } from './admin/AuthContext';
@@ -85,6 +86,7 @@ function LandingPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans selection:bg-brand-turquoise/20 selection:text-brand-navy antialiased">
+      <LegalConsentModal />
       <Header activeSection={activeSection} onNavigate={handleNavigate} />
       <main>
         <Hero onExploreDestinations={() => handleNavigate('destinos')} onContact={() => handleNavigate('cotizacion')} />
