@@ -107,7 +107,7 @@ export default function Hero({ onExploreDestinations, onContact }: HeroProps) {
               className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white lg:text-brand-navy tracking-tight leading-tight"
             >
               Cotiza el viaje de<br />
-              tus sueños <span className="text-brand-turquoise">en minutos</span>
+              tus sueños <span className="text-brand-turquoise">con Karabu</span>
             </motion.h1>
 
             {/* Description */}
