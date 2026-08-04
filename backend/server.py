@@ -1027,7 +1027,6 @@ async def list_destinations(
     q: Optional[str] = None,
     status_f: Optional[str] = None,
     db: AsyncSession = Depends(get_db),
-    _u=Depends(get_current_user),
 ):
     stmt = select(Destination).order_by(Destination.created_at.desc()).limit(500)
     if q:
