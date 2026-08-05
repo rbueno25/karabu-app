@@ -311,6 +311,9 @@ export default function ClientQuotationView() {
               </span>
               <h3 className="text-lg font-bold text-slate-900 dark:text-white mt-1.5">{broker.name}</h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">{broker.role || 'Especialista de Viajes'} · {broker.department || 'Asesoría personalizada'}</p>
+              {broker.phone && (
+                <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 font-mono">{broker.phone}</p>
+              )}
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 mt-3">
                 {broker.phone && (
                   <a href={`https://wa.me/${broker.phone.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 transition-colors">
