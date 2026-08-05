@@ -298,6 +298,16 @@ export default function QuotationSheet() {
 
             <hr className="border-gray-100 dark:border-zinc-800" />
 
+            {/* Precio de la Propuesta */}
+            <Section title="Precio de la Propuesta" icon={DollarSign}>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="col-span-2"><Field label="Monto Cotizado" required><input data-testid="quotation-amount" type="number" step="0.01" min={0} required value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} className={inputCls} /></Field></div>
+                <div><Field label="Moneda" required><select data-testid="quotation-currency" value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })} className={inputCls}><option>USD</option><option>DOP</option><option>COP</option><option>EUR</option><option>MXN</option></select></Field></div>
+              </div>
+            </Section>
+
+            <hr className="border-gray-100 dark:border-zinc-800" />
+
             {/* Configuración */}
             <Section title="Configuración del Entregable" icon={Eye} defaultOpen={false}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -361,12 +371,17 @@ export default function QuotationSheet() {
                   <div className="p-4 text-center border border-dashed border-gray-200 dark:border-gray-700 rounded-xl text-xs text-gray-400">Sin servicios. Usa el formulario o los atajos.</div>
                 )}
 
-                {/* Resumen */}
+                {/* Resumen con comisión */}
                 <div className="p-4 rounded-xl bg-gradient-to-r from-gray-50 to-[#0D9387]/5 dark:from-zinc-800/50 dark:to-zinc-800/30 border border-gray-100 dark:border-zinc-800 space-y-3">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-sm">
                     <div className="flex items-center gap-2"><span className="font-semibold text-gray-600 dark:text-gray-400">Suma servicios:</span><span className="font-bold text-gray-900 dark:text-white">{formatCurrency(sumServices, form.currency)}</span></div>
-                    <div className="flex items-center gap-2"><span className="font-semibold text-gray-600 dark:text-gray-400">Monto total:</span><span className="font-bold text-[#0D9387] text-lg">{formatCurrency(totalAmount, form.currency)}</span></div>
+                    <div className="flex items-center gap-2"><span className="font-semibold text-gray-600 dark:text-gray-400">Total:</span><span className="font-bold text-[#0D9387] text-lg">{formatCurrency(totalAmount, form.currency)}</span></div>
                   </div>
+                  {Number(form.tax_percent) > 0 && (
+                    <div className="p-2.5 rounded-xl bg-[#0D9387]/10 border border-[#0D9387]/20 text-[#0D9387] text-xs font-semibold flex items-center gap-2">
+                      <Sparkles className="h-4 w-4" />Comisión: {form.tax_percent}% = {formatCurrency(totalAmount * Number(form.tax_percent) / 100, form.currency)} → Total final cliente: {formatCurrency(totalAmount * (1 + Number(form.tax_percent) / 100), form.currency)}
+                    </div>
+                  )}
                   {isOverBudget ? (
                     <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/50 text-red-600 dark:text-red-400 text-xs font-semibold flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <span className="flex items-center gap-1.5"><AlertTriangle className="h-4 w-4 shrink-0" />Servicios ({formatCurrency(sumServices, form.currency)}) exceden el total ({formatCurrency(totalAmount, form.currency)})</span>
@@ -378,16 +393,6 @@ export default function QuotationSheet() {
                     <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-400 text-xs font-semibold flex items-center gap-2"><CheckCircle className="h-4 w-4" />Servicios y total coinciden</div>
                   ) : null}
                 </div>
-              </div>
-            </Section>
-
-            <hr className="border-gray-100 dark:border-zinc-800" />
-
-            {/* Precio */}
-            <Section title="Precio de la Propuesta" icon={DollarSign}>
-              <div className="grid grid-cols-3 gap-3">
-                <div className="col-span-2"><Field label="Monto Cotizado" required><input data-testid="quotation-amount" type="number" step="0.01" min={0} required value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} className={inputCls} /></Field></div>
-                <div><Field label="Moneda" required><select data-testid="quotation-currency" value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })} className={inputCls}><option>USD</option><option>DOP</option><option>COP</option><option>EUR</option><option>MXN</option></select></Field></div>
               </div>
             </Section>
 

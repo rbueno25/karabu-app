@@ -6,7 +6,8 @@ import {
   Compass, Loader2, AlertCircle, RefreshCw, ShieldCheck,
   CheckCircle2, Calendar, Building2, Bed, Users, CreditCard,
   DollarSign, Sun, Moon, ArrowDown, RotateCcw, Check, Plane,
-  Car, Share2, MapPin, Sparkles, MessageSquare, Send, Award
+  Car, Share2, MapPin, Sparkles, MessageSquare, Send, Award,
+  Phone, Mail
 } from 'lucide-react';
 
 export default function ClientQuotationView() {
@@ -126,29 +127,32 @@ export default function ClientQuotationView() {
   const travelers = q.travelers || 1;
   const adults = q.form_data?.adultsCount ?? travelers;
   const children = q.form_data?.childrenCount ?? 0;
-  const totalAmount = q.amount || 0;
-  const perPersonAmount = travelers > 0 ? Math.round(totalAmount / travelers) : totalAmount;
-  const status = q.status || 'enviada';
 
-  const defaultServices = [
-    { name: 'Vuelos ida y vuelta', price: Math.round(totalAmount * 0.3), icon: Plane },
-    { name: `Hospedaje (${hotelName})`, price: Math.round(totalAmount * 0.55), icon: Building2 },
-    { name: 'Traslados aeropuerto - hotel', price: Math.round(totalAmount * 0.08), icon: Car },
-    { name: 'Seguro de viaje médico', price: Math.round(totalAmount * 0.07), icon: ShieldCheck }
-  ];
+  // Nights calculation for P/P/N
+  const nights = (() => {
+    if (!travelDate || !returnDate || travelDate === '—' || returnDate === '—') return 1;
+    const d1 = new Date(travelDate + 'T12:00');
+    const d2 = new Date(returnDate + 'T12:00');
+    const diff = Math.round((d2.getTime() - d1.getTime()) / 86400000);
+    return diff > 0 ? diff : 1;
+  })();
+
+  const totalAmount = q.amount || 0;
+  const taxPercent = q.tax_percent ?? 0;
+  const totalWithTax = Math.round(totalAmount * (1 + taxPercent / 100));
+  const perPersonAmount = travelers > 0 ? Math.round(totalWithTax / travelers) : totalWithTax;
+  const perNightPerPerson = nights > 0 && travelers > 0 ? Math.round(totalWithTax / nights / travelers) : totalWithTax;
+  const status = q.status || 'enviada';
+  const broker = data?.broker || {};
 
   const customServices = Array.isArray(q.services) && q.services.length > 0 ? q.services : null;
-  const activeServices = customServices || defaultServices;
-  const sumActiveServices = activeServices.reduce((acc, s) => acc + (Number(s.price) || 0), 0);
-  const serviceFeePrice = totalAmount > sumActiveServices ? totalAmount - sumActiveServices : 0;
+  const hasServices = customServices && customServices.length > 0;
+  const sumActiveServices = hasServices ? customServices.reduce((acc, s) => acc + (Number(s.price) || 0), 0) : 0;
+  const serviceFeePrice = hasServices ? (totalAmount > sumActiveServices ? totalAmount - sumActiveServices : 0) : 0;
 
-  const bookingPrice = q.booking_price || Math.round(totalAmount * 1.15);
-  const expediaPrice = q.expedia_price || Math.round(totalAmount * 1.12);
+  const bookingPrice = q.booking_price || Math.round(totalWithTax * 1.15);
+  const expediaPrice = q.expedia_price || Math.round(totalWithTax * 1.12);
   const heroBgImage = q.hero_image || q.gallery_images?.[0] || `https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&q=80&w=1920`;
-  const depositPercent = q.deposit_percent || 0;
-  const depositAmount = Math.round(totalAmount * depositPercent / 100);
-  const taxPercent = q.tax_percent ?? 0;
-  const taxAmount = Math.round(totalAmount * taxPercent / 100);
 
   return (
     <div className="min-h-screen bg-white dark:bg-[#070F1E] text-slate-900 dark:text-slate-100 transition-colors duration-300 font-sans selection:bg-[#0D9387] selection:text-white">
@@ -196,7 +200,7 @@ export default function ClientQuotationView() {
             <MapPin className="w-3.5 h-3.5 text-[#0D9387]" /><span>Destino: {destination}</span>
           </div>
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight drop-shadow-xl leading-tight">¡Hola <span className="text-white">{clientName}</span>!</h1>
-          <p className="text-xl sm:text-2xl text-slate-100 font-bold mt-2 drop-shadow-md">Tu viaje a <span className="text-teal-300">{destination}</span> está listo</p>
+          <p className="text-xl sm:text-2xl text-slate-100 font-bold mt-2 drop-shadow-md">Tu cotización a <span className="text-teal-300">{destination}</span> está lista</p>
         </div>
 
         {/* BARRA GLASS CON DATOS */}
@@ -219,9 +223,9 @@ export default function ClientQuotationView() {
               <div className="flex items-center justify-between p-3 rounded-xl bg-[#0D9387]/20 border border-[#0D9387]/40">
                 <div className="flex items-center gap-2">
                   <CreditCard className="w-5 h-5 text-teal-300 shrink-0" />
-                  <div><span className="text-[10px] uppercase tracking-wider text-teal-200 font-bold block">Total</span><span className="text-xl sm:text-2xl font-black text-white">${totalAmount.toLocaleString()} <span className="text-xs text-teal-200">USD</span></span></div>
+                  <div><span className="text-[10px] uppercase tracking-wider text-teal-200 font-bold block">Total</span><span className="text-xl sm:text-2xl font-black text-white">${totalWithTax.toLocaleString()} <span className="text-xs text-teal-200">USD</span></span></div>
                 </div>
-                <div className="text-right border-l border-white/15 pl-3"><span className="text-[10px] text-slate-300 block">por persona</span><span className="text-sm font-bold text-teal-300">${perPersonAmount.toLocaleString()} USD</span></div>
+                <div className="text-right border-l border-white/15 pl-3"><span className="text-[10px] text-slate-300 block">P/P/N</span><span className="text-sm font-bold text-teal-300">${perNightPerPerson.toLocaleString()} USD</span></div>
               </div>
             </div>
 
@@ -283,60 +287,110 @@ export default function ClientQuotationView() {
       </section>
 
       {/* ═══════════════ BROKER CARD — TU ASESOR ═══════════════ */}
-      <section className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 relative z-20">
-        {data?.broker && <BrokerCard broker={data.broker} quotationId={currentId} />}
-      </section>
+      {broker.name && (
+        <section className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 relative z-20">
+          <div className="rounded-2xl sm:rounded-3xl bg-white dark:bg-[#0F2A4A] border border-slate-200 dark:border-slate-700 shadow-lg p-5 sm:p-6 flex flex-col sm:flex-row items-center gap-4">
+            <div className="shrink-0 relative">
+              {broker.avatar_url ? (
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden border-2 border-[#0D9387] shadow-md shadow-[#0D9387]/15">
+                  <img src={broker.avatar_url} alt={broker.name} className="w-full h-full object-cover" />
+                </div>
+              ) : (
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-[#0D9387] to-[#0F2A4A] text-white flex items-center justify-center text-xl sm:text-2xl font-bold border-2 border-[#0D9387]">
+                  {broker.name.split(" ").map(n => n[0]).slice(0, 2).join("").toUpperCase()}
+                </div>
+              )}
+              <div className="absolute -bottom-1 -right-1 p-1 rounded-full bg-emerald-500 text-white shadow-sm" title="Asesor verificado">
+                <ShieldCheck className="w-3.5 h-3.5" />
+              </div>
+            </div>
+            <div className="flex-1 text-center sm:text-left">
+              <span className="text-[10px] font-extrabold uppercase tracking-widest px-2 py-0.5 rounded-full bg-[#0F2A4A] text-white text-xs">
+                {broker.agency_name || 'Karabu Viajes'}
+              </span>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white mt-1.5">{broker.name}</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">{broker.role || 'Especialista de Viajes'} · {broker.department || 'Asesoría personalizada'}</p>
+              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 mt-3">
+                {broker.phone && (
+                  <a href={`https://wa.me/${broker.phone.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 transition-colors">
+                    <Phone className="w-3.5 h-3.5" />WhatsApp
+                  </a>
+                )}
+                {broker.email && (
+                  <a href={`mailto:${broker.email}`} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 transition-colors">
+                    <Mail className="w-3.5 h-3.5 text-[#0D9387]" />{broker.email}
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ═══════════════ SECTION 2 — DESGLOSE ═══════════════ */}
       <section id="desglose" className="w-full py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-slate-50 dark:bg-[#070F1E] border-t border-slate-200 dark:border-slate-800 transition-colors">
         <div className="max-w-4xl mx-auto space-y-12">
-          <div className="text-center">
-            <span className="text-xs font-bold uppercase tracking-widest text-[#0D9387] bg-[#0D9387]/10 px-3 py-1 rounded-full border border-[#0D9387]/20">Desglose transparente</span>
-            <h2 className="text-2xl sm:text-4xl font-extrabold text-[#0F2A4A] dark:text-white tracking-tight mt-3">Desglose de tu inversión</h2>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-md mx-auto">Detalle puntual de cada servicio incluido en la tarifa final</p>
-            <div className="w-16 h-1 bg-[#0D9387] mx-auto mt-3 rounded-full" />
-          </div>
 
-          {/* Precio por persona */}
+          {/* Resumen de tarifa */}
           <div className="bg-white dark:bg-[#0F2A4A]/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
               <div>
-                <span className="text-xs font-bold uppercase tracking-wider text-[#0D9387] block mb-1">Cálculo de tarifa</span>
-                <h3 className="text-xl font-bold text-[#0F2A4A] dark:text-white flex items-center gap-2"><Users className="w-5 h-5 text-[#0D9387]" />Precio por persona: ${perPersonAmount.toLocaleString()} USD</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Basado en {travelers} {travelers === 1 ? 'viajero' : 'viajeros'}</p>
+                <span className="text-xs font-bold uppercase tracking-wider text-[#0D9387] block mb-1">Resumen de tarifa</span>
+                <h3 className="text-xl font-bold text-[#0F2A4A] dark:text-white flex items-center gap-2">
+                  <Building2 className="w-5 h-5 text-[#0D9387]" />
+                  {hotelName}
+                  {roomType && <span className="text-base font-normal text-slate-500"> · {roomType}</span>}
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  {nights} {nights === 1 ? 'noche' : 'noches'} · {travelers} {travelers === 1 ? 'viajero' : 'viajeros'} · {q.currency || 'USD'}
+                </p>
               </div>
               <div className="bg-slate-100 dark:bg-black/40 border border-slate-200 dark:border-slate-700 px-5 py-3 rounded-xl text-center sm:text-right">
-                <span className="text-xs text-slate-500 dark:text-slate-400 block font-mono">Fórmula:</span>
-                <span className="text-base sm:text-lg font-mono font-bold text-[#0D9387]">{travelers} × ${perPersonAmount.toLocaleString()} = ${totalAmount.toLocaleString()} USD</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 block">P/P/N</span>
+                <span className="text-lg font-mono font-bold text-[#0D9387]">${perNightPerPerson.toLocaleString()} USD</span>
               </div>
             </div>
           </div>
 
-          {/* Servicios con precios */}
-          <div className="bg-white dark:bg-[#0F2A4A]/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm">
-            <h3 className="text-lg font-bold text-[#0F2A4A] dark:text-white mb-6 flex items-center gap-2"><Sparkles className="w-5 h-5 text-[#0D9387]" />Servicios incluidos y desglose individual</h3>
-            <div className="space-y-3">
-              {activeServices.map((srv, idx) => {
-                const IconComponent = srv.icon || (srv.name?.toLowerCase().includes('vuelo') ? Plane : srv.name?.toLowerCase().includes('hospedaj') || srv.name?.toLowerCase().includes('hotel') ? Building2 : srv.name?.toLowerCase().includes('traslado') ? Car : srv.name?.toLowerCase().includes('seguro') ? ShieldCheck : CheckCircle2);
-                return (
-                  <div key={srv.id || idx} className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 dark:bg-[#070F1E]/60 border border-slate-200/80 dark:border-slate-800 text-sm font-semibold text-slate-800 dark:text-slate-200">
-                    <div className="flex items-center gap-3"><span className="w-8 h-8 rounded-lg bg-[#0D9387]/15 text-[#0D9387] flex items-center justify-center shrink-0"><IconComponent className="w-4 h-4" /></span><span>{srv.name}</span></div>
-                    <span className="font-bold text-[#0F2A4A] dark:text-white">${(Number(srv.price) || 0).toLocaleString()} USD</span>
+          {/* Servicios — solo si el asesor los agregó */}
+          {hasServices && (
+            <div className="bg-white dark:bg-[#0F2A4A]/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm">
+              <h3 className="text-lg font-bold text-[#0F2A4A] dark:text-white mb-6 flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-[#0D9387]" />Servicios incluidos
+              </h3>
+              <div className="space-y-3">
+                {customServices.map((srv, idx) => {
+                  const IconComponent = srv.name?.toLowerCase().includes('vuelo') ? Plane : srv.name?.toLowerCase().includes('hospedaj') || srv.name?.toLowerCase().includes('hotel') ? Building2 : srv.name?.toLowerCase().includes('traslado') ? Car : srv.name?.toLowerCase().includes('seguro') ? ShieldCheck : CheckCircle2;
+                  return (
+                    <div key={srv.id || idx} className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 dark:bg-[#070F1E]/60 border border-slate-200/80 dark:border-slate-800 text-sm font-semibold text-slate-800 dark:text-slate-200">
+                      <div className="flex items-center gap-3"><span className="w-8 h-8 rounded-lg bg-[#0D9387]/15 text-[#0D9387] flex items-center justify-center shrink-0"><IconComponent className="w-4 h-4" /></span><span>{srv.name}</span></div>
+                      <span className="font-bold text-[#0F2A4A] dark:text-white">${(Number(srv.price) || 0).toLocaleString()} USD</span>
+                    </div>
+                  );
+                })}
+                {serviceFeePrice > 0 && (
+                  <div className="flex items-center justify-between p-3.5 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/30 text-sm font-semibold text-emerald-900 dark:text-emerald-200">
+                    <div className="flex items-center gap-3"><span className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0"><Award className="w-4 h-4" /></span><span>Gastos de gestión</span></div>
+                    <span className="font-bold text-[#0F2A4A] dark:text-white">${serviceFeePrice.toLocaleString()} USD</span>
                   </div>
-                );
-              })}
-              {serviceFeePrice > 0 && (
-                <div className="flex items-center justify-between p-3.5 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/30 text-sm font-semibold text-emerald-900 dark:text-emerald-200">
-                  <div className="flex items-center gap-3"><span className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0"><Award className="w-4 h-4" /></span><span>Gastos de gestión y soporte Karabu 24/7</span></div>
-                  <span className="font-bold text-[#0F2A4A] dark:text-white">${serviceFeePrice.toLocaleString()} USD</span>
-                </div>
-              )}
+                )}
+              </div>
+              <div className="mt-6 pt-4 border-t-2 border-slate-200 dark:border-slate-700 flex items-center justify-between bg-[#0D9387]/10 p-4 rounded-xl border border-[#0D9387]/30">
+                <span className="text-base font-extrabold text-[#0F2A4A] dark:text-white">Total</span>
+                <span className="text-2xl font-black text-[#0D9387]">${totalWithTax.toLocaleString()} USD</span>
+              </div>
             </div>
-            <div className="mt-6 pt-4 border-t-2 border-slate-200 dark:border-slate-700 flex items-center justify-between bg-[#0D9387]/10 p-4 rounded-xl border border-[#0D9387]/30">
-              <span className="text-base font-extrabold text-[#0F2A4A] dark:text-white">Total Final Karabu:</span>
-              <span className="text-2xl font-black text-[#0D9387]">${totalAmount.toLocaleString()} USD</span>
+          )}
+
+          {/* Hotel-only total when no services */}
+          {!hasServices && (
+            <div className="bg-white dark:bg-[#0F2A4A]/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm">
+              <div className="flex items-center justify-between bg-[#0D9387]/10 p-4 rounded-xl border border-[#0D9387]/30">
+                <span className="text-base font-extrabold text-[#0F2A4A] dark:text-white">Total</span>
+                <span className="text-2xl font-black text-[#0D9387]">${totalWithTax.toLocaleString()} USD</span>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Comparativa con logos */}
           <div className="bg-white dark:bg-[#0F2A4A]/40 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-xl">
@@ -348,7 +402,7 @@ export default function ClientQuotationView() {
               <div className="rounded-2xl border-2 border-[#0D9387] bg-white dark:bg-[#0F2A4A] overflow-hidden shadow-xl flex flex-col items-center p-5 text-center">
                 <div className="w-full h-36 rounded-xl bg-white flex items-center justify-center p-3 mb-4 shadow-inner"><img src="/karabu-comparador.jpeg" alt="Karabu" className="h-full w-full object-contain rounded-lg" /></div>
                 <div className="text-sm font-extrabold text-[#0F2A4A] dark:text-white uppercase tracking-wider mb-1">Karabu Viajes</div>
-                <div className="text-2xl sm:text-3xl font-black text-[#0D9387]">${totalAmount.toLocaleString()} <span className="text-xs font-bold text-slate-500">USD</span></div>
+                <div className="text-2xl sm:text-3xl font-black text-[#0D9387]">${totalWithTax.toLocaleString()} <span className="text-xs font-bold text-slate-500">USD</span></div>
               </div>
               <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 overflow-hidden shadow-md flex flex-col items-center p-5 text-center">
                 <div className="w-full h-36 rounded-xl bg-[#003580] flex items-center justify-center p-3 mb-4 shadow-inner"><img src="/booking-logo.svg" alt="Booking" className="h-full w-full object-contain rounded-lg" /></div>
