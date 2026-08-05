@@ -2,6 +2,7 @@ import React, { useState, useRef } from "react";
 import { Upload, Link as LinkIcon, X, Image as ImageIcon, Loader2, Check } from "lucide-react";
 import api from "../lib/api";
 import { toast } from "sonner";
+import { API_BASE } from "../lib/api";
 
 const inputCls = "w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-[#0D9387] focus:ring-2 focus:ring-[#0D9387]/20 outline-none transition-colors";
 
@@ -49,7 +50,7 @@ export default function ImageUpload({ value = "", onChange, label = "Cargar imag
       const { data } = await api.post("/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      const fullUrl = data.url.startsWith("http") ? data.url : `${window.location.origin}${data.url}`;
+      const fullUrl = data.url.startsWith("http") ? data.url : `${API_BASE.replace(/\/api$/, '')}${data.url}`;
       onChange(fullUrl);
       toast.success("Imagen cargada correctamente");
       setModalOpen(false);
