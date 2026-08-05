@@ -5,6 +5,7 @@ import PageHeader from "./PageHeader";
 import StatusBadge from "./StatusBadge";
 import EmptyState from "./EmptyState";
 import { formatDate, formatCurrency } from "../lib/format";
+import { formatPhoneWithCode } from "../utils/phone";
 import { toast } from "sonner";
 import { 
   ArrowLeft, Calendar, User, DollarSign, Plus, Pencil, 
@@ -305,7 +306,7 @@ export default function ReservationDetail() {
                 </Link>
                 <div className="text-xs text-gray-500 dark:text-gray-300 space-y-1">
                   <p className="flex items-center gap-1.5"><Mail className="h-3.5 w-3.5" /> {client.email}</p>
-                  <p className="flex items-center gap-1.5"><Phone className="h-3.5 w-3.5" /> {client.phone}</p>
+                  <p className="flex items-center gap-1.5"><Phone className="h-3.5 w-3.5" /> {formatPhoneWithCode(client.phone)}</p>
                 </div>
               </div>
             ) : (

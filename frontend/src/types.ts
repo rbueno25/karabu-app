@@ -70,5 +70,6 @@ export interface ContactFormInput {
   travelType: string;
   hotelCategory: string;
   roomType: string;
+  roomsCount: number;
   comments: string;
 }

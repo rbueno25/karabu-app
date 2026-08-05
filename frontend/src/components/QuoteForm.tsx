@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { ContactFormInput } from '../types';
 import { DayPicker } from 'react-day-picker';
+import { handlePhoneInput } from '../utils/phone';
 import 'react-day-picker/style.css';
 
 interface QuoteFormProps {
@@ -53,6 +54,7 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
     travelType: 'Vacaciones',
     hotelCategory: '4 estrellas',
     roomType: 'Sencilla',
+    roomsCount: 1,
     comments: ''
   });
 
@@ -133,10 +135,10 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
     }
   };
 
-  const handleCounterChange = (field: 'adultsCount' | 'childrenCount' | 'babiesCount', direction: 'inc' | 'dec') => {
+  const handleCounterChange = (field: 'adultsCount' | 'childrenCount' | 'babiesCount' | 'roomsCount', direction: 'inc' | 'dec') => {
     setFormData((prev) => {
       const val = prev[field];
-      const minVal = field === 'adultsCount' ? 1 : 0;
+      const minVal = field === 'adultsCount' || field === 'roomsCount' ? 1 : 0;
       const newVal = direction === 'inc' ? val + 1 : Math.max(minVal, val - 1);
       return { ...prev, [field]: newVal };
     });
@@ -196,6 +198,7 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
         adultsCount: formData.adultsCount,
         childrenCount: formData.childrenCount,
         babiesCount: formData.babiesCount,
+        roomsCount: formData.roomsCount,
         budgetRange: formData.budgetRange,
         additionalServices: formData.additionalServices,
         travelType: formData.travelType,
@@ -228,6 +231,7 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
         travelType: 'Vacaciones',
         hotelCategory: '4 estrellas',
         roomType: 'Sencilla',
+        roomsCount: 1,
         comments: ''
       });
       setErrors({});
@@ -362,7 +366,7 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
                           id="phone"
                           name="phone"
                           value={formData.phone}
-                          onChange={handleInputChange}
+                          onChange={(e) => setFormData((prev) => ({ ...prev, phone: handlePhoneInput(e.target.value) }))}
                           placeholder="809-306-2424"
                           className={`font-sans text-sm px-3.5 py-2.5 rounded-lg border bg-slate-50 focus:bg-white focus:outline-none transition-colors ${
                             errors.phone ? 'border-red-500 ring-1 ring-red-200' : 'border-slate-200 focus:border-brand-turquoise'
@@ -578,7 +582,7 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
                     </div>
 
                     {/* Numeric Counters for Travelers */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       {/* Adults */}
                       <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/60 flex items-center justify-between">
                         <div className="flex flex-col">
@@ -626,6 +630,33 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
                           <button
                             type="button"
                             onClick={() => handleCounterChange('childrenCount', 'inc')}
+                            className="w-7 h-7 rounded-full bg-white border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:scale-90 transition-all shadow-sm"
+                          >
+                            <Plus className="w-3.5 h-3.5 stroke-[3]" />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Rooms */}
+                      <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/60 flex items-center justify-between">
+                        <div className="flex flex-col">
+                          <span className="font-display font-bold text-xs text-brand-navy">Habitaciones</span>
+                          <span className="text-[10px] text-slate-400 font-sans font-medium">Cantidad de habitaciones</span>
+                        </div>
+                        <div className="flex items-center gap-2.5">
+                          <button
+                            type="button"
+                            onClick={() => handleCounterChange('roomsCount', 'dec')}
+                            className="w-7 h-7 rounded-full bg-white border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:scale-90 transition-all shadow-sm"
+                          >
+                            <Minus className="w-3.5 h-3.5 stroke-[3]" />
+                          </button>
+                          <span className="font-display font-extrabold text-sm text-brand-navy w-4 text-center">
+                            {formData.roomsCount}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleCounterChange('roomsCount', 'inc')}
                             className="w-7 h-7 rounded-full bg-white border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:scale-90 transition-all shadow-sm"
                           >
                             <Plus className="w-3.5 h-3.5 stroke-[3]" />

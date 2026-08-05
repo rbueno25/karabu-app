@@ -4,6 +4,7 @@ import PageHeader from "./PageHeader";
 import { Loader2, Building2, ImageIcon, Share2, DollarSign, Percent, Mail, FileText, Lock, User, Key } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "./AuthContext";
+import { handlePhoneInput } from "../utils/phone";
 
 const SECTIONS = [
   { id: "empresa", label: "Empresa", icon: Building2 },
@@ -132,7 +133,7 @@ export default function Settings() {
                   <input type="email" value={form.company_email} onChange={(e) => setForm({ ...form, company_email: e.target.value })} className={inputCls} disabled={!canEdit} />
                 </Field>
                 <Field label="Teléfono">
-                  <input value={form.company_phone} onChange={(e) => setForm({ ...form, company_phone: e.target.value })} className={inputCls} disabled={!canEdit} />
+                  <input value={form.company_phone} onChange={(e) => setForm({ ...form, company_phone: handlePhoneInput(e.target.value) })} className={inputCls} disabled={!canEdit} />
                 </Field>
               </div>
               <Field label="Dirección">
@@ -230,7 +231,7 @@ export default function Settings() {
                 <input value={profileForm.name} onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })} className={inputCls} />
               </Field>
               <Field label="Teléfono / WhatsApp">
-                <input value={profileForm.phone} onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })} className={inputCls} />
+                <input value={profileForm.phone} onChange={(e) => setProfileForm({ ...profileForm, phone: handlePhoneInput(e.target.value) })} className={inputCls} />
               </Field>
               <Field label="Email">
                 <input value={user?.email || ""} disabled className={`${inputCls} opacity-60`} />

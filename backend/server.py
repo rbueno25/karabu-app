@@ -248,6 +248,7 @@ class LeadIn(BaseModel):
     adultsCount: int = 1
     childrenCount: int = 0
     babiesCount: int = 0
+    roomsCount: int = 1
     budgetRange: str = ""
     additionalServices: list = []
     travelType: str = ""
@@ -763,6 +764,7 @@ async def create_lead(body: LeadIn, db: AsyncSession = Depends(get_db), _rl=Depe
         "adultsCount": body.adultsCount,
         "childrenCount": body.childrenCount,
         "babiesCount": body.babiesCount,
+        "roomsCount": body.roomsCount,
         "budgetRange": body.budgetRange,
         "additionalServices": body.additionalServices,
         "travelType": body.travelType,

@@ -7,6 +7,7 @@ import {
 import Logo from "../components/Logo";
 import api from "../lib/api";
 import { formatCurrency, formatDate } from "../lib/format";
+import { formatPhoneWithCode } from "../utils/phone";
 
 const EMISOR = {
   name: "Karabu Viajes & Visas S.R.L.",
@@ -132,7 +133,7 @@ export default function InvoiceView() {
                 <p className="font-bold text-slate-800 dark:text-zinc-200">{EMISOR.name}</p>
                 <p>RNC: <span className="font-semibold text-slate-700 dark:text-zinc-300">{EMISOR.rnc}</span></p>
                 <p className="flex items-center gap-1"><MapPin className="w-3 h-3 text-[#0D9387]" />{EMISOR.address}</p>
-                <p><Phone className="w-3 h-3 text-[#0D9387] inline mr-1" />{EMISOR.phone} • <Mail className="w-3 h-3 text-[#0D9387] inline mr-1" />{EMISOR.email}</p>
+                <p><Phone className="w-3 h-3 text-[#0D9387] inline mr-1" />{formatPhoneWithCode(EMISOR.phone)} • <Mail className="w-3 h-3 text-[#0D9387] inline mr-1" />{EMISOR.email}</p>
               </div>
             </div>
             <div className="text-left sm:text-right space-y-2 bg-slate-50 dark:bg-zinc-800/60 p-4 rounded-2xl border border-slate-200/80 dark:border-zinc-700/80 min-w-[240px]">
@@ -159,7 +160,7 @@ export default function InvoiceView() {
               <p className="flex items-center gap-2">
                 {client.email && <><Mail className="w-3.5 h-3.5 text-[#0D9387]" />{client.email}</>}
                 {client.email && client.phone && " • "}
-                {client.phone && <><Phone className="w-3.5 h-3.5 text-[#0D9387]" />{client.phone}</>}
+                {client.phone && <><Phone className="w-3.5 h-3.5 text-[#0D9387]" />{formatPhoneWithCode(client.phone)}</>}
               </p>
             </div>
           </div>

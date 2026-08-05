@@ -7,6 +7,7 @@ import EmptyState from "./EmptyState";
 import { Plus, Search, Loader2, Pencil, Trash2, Users as UsersIcon, X } from "lucide-react";
 import { toast } from "sonner";
 import { formatDate } from "../lib/format";
+import { handlePhoneInput, formatPhoneWithCode } from "../utils/phone";
 
 const empty = {
   first_name: "",
@@ -202,7 +203,7 @@ export default function Clients() {
                       </Link>
                     </td>
                     <td className="px-6 py-3 text-gray-700 dark:text-gray-300">{c.email}</td>
-                    <td className="px-6 py-3 text-gray-700 dark:text-gray-300">{c.phone}</td>
+                    <td className="px-6 py-3 text-gray-700 dark:text-gray-300">{formatPhoneWithCode(c.phone)}</td>
                     <td className="px-6 py-3 text-gray-600 dark:text-gray-300">{formatDate(c.created_at)}</td>
                     <td className="px-6 py-3"><StatusBadge value={c.status} /></td>
                     <td className="px-6 py-3 text-right">
@@ -281,7 +282,7 @@ export default function Clients() {
               </Field>
               <div className="grid grid-cols-2 gap-4">
                 <Field label="Teléfono" required>
-                  <input data-testid="client-phone" required value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className={inputCls} />
+                  <input data-testid="client-phone" required value={form.phone} onChange={(e) => setForm({ ...form, phone: handlePhoneInput(e.target.value) })} className={inputCls} />
                 </Field>
                 <Field label="Documento">
                   <input value={form.document_id} onChange={(e) => setForm({ ...form, document_id: e.target.value })} className={inputCls} />

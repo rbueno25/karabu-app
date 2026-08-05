@@ -9,6 +9,7 @@ import ImageUpload from "./ImageUpload";
 import { toast } from "sonner";
 import { formatDate } from "../lib/format";
 import { useAuth } from "./AuthContext";
+import { handlePhoneInput } from "../utils/phone";
 
 const empty = { username: "", name: "", email: "", role: "advisor", status: "activo", phone: "", avatar_url: "", department: "", notes: "", password: "" };
 const inputCls = "w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-[#0D9387] focus:ring-2 focus:ring-[#0D9387]/20 outline-none";
@@ -262,7 +263,7 @@ export default function Users() {
                 />
               </Field>
               <Field label="Teléfono / WhatsApp">
-                <input data-testid="user-phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="+57 300 123 4567" className={inputCls} />
+                <input data-testid="user-phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: handlePhoneInput(e.target.value) })} placeholder="809-555-1234" className={inputCls} />
               </Field>
               <Field label="Departamento / Sucursal">
                 <input data-testid="user-department" value={form.department} onChange={(e) => setForm({ ...form, department: e.target.value })} placeholder="Ej. Ventas, Soporte, Sucursal Norte" className={inputCls} />

@@ -5,9 +5,9 @@ import PageHeader from "./PageHeader";
 import StatusBadge from "./StatusBadge";
 import EmptyState from "./EmptyState";
 import { formatDate, formatCurrency } from "../lib/format";
+import { handlePhoneInput, formatPhoneWithCode } from "../utils/phone";
 import { toast } from "sonner";
-import { 
-  ArrowLeft, User, Mail, Phone, MapPin, FileText, 
+import { ArrowLeft, User, Mail, Phone, MapPin, FileText,
   CalendarCheck, CreditCard, History, Loader2, Save, Trash2 
 } from "lucide-react";
 
@@ -217,7 +217,7 @@ export default function ClientDetail() {
                 <Phone className="h-4 w-4 text-gray-400 dark:text-gray-400 mt-0.5" />
                 <div className="flex-1">
                   <span className="text-xs text-gray-400 dark:text-gray-400 block font-medium">Teléfono</span>
-                  <a href={`tel:${client.phone}`} className="text-gray-700 dark:text-gray-300 hover:text-[#0D9387] font-medium">{client.phone}</a>
+                  <a href={`tel:${client.phone}`} className="text-gray-700 dark:text-gray-300 hover:text-[#0D9387] font-medium">{formatPhoneWithCode(client.phone)}</a>
                 </div>
               </div>
               <div className="flex items-start gap-3">
@@ -329,8 +329,8 @@ export default function ClientDetail() {
                       <input 
                         data-testid="client-phone"
                         required 
-                        value={form.phone} 
-                        onChange={(e) => setForm({ ...form, phone: e.target.value })} 
+                        value={form.phone}
+                        onChange={(e) => setForm({ ...form, phone: handlePhoneInput(e.target.value) })}
                         className={inputCls} 
                       />
                     </Field>

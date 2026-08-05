@@ -4,6 +4,7 @@ import api, { formatApiError } from "../lib/api";
 import StatusBadge from "./StatusBadge";
 import ImageUpload from "./ImageUpload";
 import { formatDate, formatCurrency } from "../lib/format";
+import { formatPhoneWithCode } from "../utils/phone";
 import { toast } from "sonner";
 import { 
   ArrowLeft, FileText, User, Mail, Phone, Calendar, 
@@ -259,7 +260,7 @@ export default function QuotationSheet() {
                   <div className="min-w-0 flex-1 space-y-1">
                     <h4 className="font-bold text-sm text-gray-900 dark:text-gray-100 truncate">{client.first_name} {client.last_name}</h4>
                     <a href={`mailto:${client.email}`} className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-[#0D9387] transition-colors truncate"><Mail className="h-3 w-3 shrink-0" />{client.email || 'Sin correo'}</a>
-                    {client.phone && <a href={`tel:${client.phone}`} className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-[#0D9387] transition-colors"><Phone className="h-3 w-3 shrink-0" />{client.phone}</a>}
+                    {client.phone && <a href={`tel:${client.phone}`} className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-[#0D9387] transition-colors"><Phone className="h-3 w-3 shrink-0" />{formatPhoneWithCode(client.phone)}</a>}
                   </div>
                 </div>
               </div>
@@ -441,7 +442,7 @@ export default function QuotationSheet() {
               <div className="space-y-2 text-sm">
                 {quotation.form_data.fullName && <Row label="Nombre" value={quotation.form_data.fullName} bold />}
                 {quotation.form_data.email && <Row label="Email" value={quotation.form_data.email} />}
-                {quotation.form_data.phone && <Row label="Teléfono" value={quotation.form_data.phone} />}
+                {quotation.form_data.phone && <Row label="Teléfono" value={formatPhoneWithCode(quotation.form_data.phone)} />}
                 {quotation.form_data.hotelCategory && <Row label="Categoría hotel" value={quotation.form_data.hotelCategory} />}
                 {quotation.form_data.roomType && <Row label="Tipo habitación" value={quotation.form_data.roomType} />}
                 {quotation.form_data.preferredHotel && <Row label="Hotel preferido" value={quotation.form_data.preferredHotel} />}
