@@ -19,7 +19,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from database import Base, engine, get_db, init_db, AsyncSessionLocal
-from models import User, Client, Quotation, Reservation, Payment, Destination, Package, Setting, Pais, Ciudad, Lugar, Notification
+from models import User, Client, Quotation, Reservation, Payment, Destination, Package, Setting, Pais, Ciudad, Lugar, Notification, Upload
 import re
 
 # -------------------- Sanitizer --------------------
@@ -1915,42 +1915,50 @@ async def shutdown():
 
 
 # -------------------- File Upload --------------------
-import shutil
+import base64
 from fastapi import UploadFile, File as FileParam
-
-UPLOADS_DIR = ROOT_DIR / "uploads"
-UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
+from fastapi.responses import Response as FastAPIResponse
 
 ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg", ".bmp"}
 MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10 MB
 
 @api.post("/upload")
-async def upload_file(file: UploadFile = FileParam(...), u=Depends(get_current_user)):
-    """Upload an image file. Returns the public URL."""
+async def upload_file(file: UploadFile = FileParam(...), u=Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    """Upload an image file. Stores in DB (persists across Render deploys). Returns public URL."""
     ext = Path(file.filename or "image.png").suffix.lower()
     if ext not in ALLOWED_EXTENSIONS:
         raise HTTPException(status_code=400, detail=f"Formato no permitido. Usa: {', '.join(ALLOWED_EXTENSIONS)}")
-    
-    # Read and validate size
+
     contents = await file.read()
     if len(contents) > MAX_UPLOAD_SIZE:
         raise HTTPException(status_code=400, detail="La imagen no debe superar 10 MB")
-    
-    # Save with unique name
-    safe_name = f"{new_id()}{ext}"
-    dest_path = UPLOADS_DIR / safe_name
-    with open(dest_path, "wb") as f:
-        f.write(contents)
-    
-    url = f"/uploads/{safe_name}"
-    logger.info(f"Uploaded: {url} by user {u['email']}")
-    return {"url": url, "filename": safe_name}
+
+    mime_map = {".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png",
+                ".gif": "image/gif", ".webp": "image/webp", ".svg": "image/svg+xml", ".bmp": "image/bmp"}
+    mime_type = mime_map.get(ext, "application/octet-stream")
+    b64 = base64.b64encode(contents).decode("ascii")
+
+    fid = new_id()
+    db_upload = Upload(id=fid, filename=file.filename or "image.png", mime_type=mime_type, data=b64, created_by=u["id"])
+    db.add(db_upload)
+    await db.flush()
+
+    url = f"/api/files/{fid}"
+    logger.info(f"Uploaded to DB: {url} by user {u['email']}")
+    return {"url": url, "filename": file.filename, "id": fid}
+
+
+@api.get("/files/{fid}")
+async def serve_file(fid: str, db: AsyncSession = Depends(get_db)):
+    """Serve an uploaded file from the database."""
+    result = await db.execute(select(Upload).where(Upload.id == fid))
+    upload = result.scalar_one_or_none()
+    if not upload:
+        raise HTTPException(status_code=404, detail="Archivo no encontrado")
+    decoded = base64.b64decode(upload.data)
+    return FastAPIResponse(content=decoded, media_type=upload.mime_type)
 
 app.include_router(api)
-
-# Mount uploads for static serving
-from fastapi.staticfiles import StaticFiles
-app.mount("/uploads", StaticFiles(directory=str(UPLOADS_DIR)), name="uploads")
 
 # -------------------- Security Headers Middleware --------------------
 from starlette.middleware.base import BaseHTTPMiddleware

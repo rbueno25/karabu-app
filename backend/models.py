@@ -383,3 +383,23 @@ class Notification(Base):
             "read": self.read,
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }
+
+
+class Upload(Base):
+    """Stores uploaded files in the database (bypasses ephemeral Render filesystem)."""
+    __tablename__ = "uploads"
+
+    id = Column(String, primary_key=True, default=new_id)
+    filename = Column(String, nullable=False)
+    mime_type = Column(String, nullable=False)
+    data = Column(Text, nullable=False)  # base64-encoded file content
+    created_by = Column(String, ForeignKey("users.id"), nullable=True)
+    created_at = Column(DateTime(timezone=True), nullable=False, default=utcnow)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "filename": self.filename,
+            "mime_type": self.mime_type,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+        }
