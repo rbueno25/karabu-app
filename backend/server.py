@@ -248,12 +248,13 @@ class LeadIn(BaseModel):
     adultsCount: int = 1
     childrenCount: int = 0
     babiesCount: int = 0
-    roomsCount: int = 1
     budgetRange: str = ""
     additionalServices: list = []
     travelType: str = ""
     hotelCategory: str = ""
-    roomType: str = ""
+    roomsSingle: int = 1
+    roomsDouble: int = 0
+    roomsTriple: int = 0
     preferredContact: str = "ambos"
     comments: str = ""
 
@@ -719,6 +720,14 @@ async def delete_quotation(qid: str, db: AsyncSession = Depends(get_db), _u=Depe
 
 
 # -------------------- Public Leads (no auth) --------------------
+def _build_room_summary(single: int, double: int, triple: int) -> str:
+    """Build a human-readable room summary, e.g. '1 Sencilla, 2 Doble'."""
+    parts = []
+    if single > 0: parts.append(f"{single} Sencilla")
+    if double > 0: parts.append(f"{double} Doble")
+    if triple > 0: parts.append(f"{triple} Triple")
+    return ", ".join(parts) if parts else "1 Sencilla"
+
 @api.post("/leads")
 async def create_lead(body: LeadIn, db: AsyncSession = Depends(get_db), _rl=Depends(rate_limit(5, 60))):
     """Public endpoint: landing page form → creates client + quotation."""
@@ -729,7 +738,8 @@ async def create_lead(body: LeadIn, db: AsyncSession = Depends(get_db), _rl=Depe
     body.country = sanitize_html(body.country)
     body.city = sanitize_html(body.city)
     body.hotelCategory = sanitize_html(body.hotelCategory)
-    body.roomType = sanitize_html(body.roomType)
+
+    # Sanitize room counts (ints, no sanitize needed)
 
     email = body.email.strip().lower()
 
@@ -764,12 +774,13 @@ async def create_lead(body: LeadIn, db: AsyncSession = Depends(get_db), _rl=Depe
         "adultsCount": body.adultsCount,
         "childrenCount": body.childrenCount,
         "babiesCount": body.babiesCount,
-        "roomsCount": body.roomsCount,
         "budgetRange": body.budgetRange,
         "additionalServices": body.additionalServices,
         "travelType": body.travelType,
         "hotelCategory": body.hotelCategory,
-        "roomType": body.roomType,
+        "roomsSingle": body.roomsSingle,
+        "roomsDouble": body.roomsDouble,
+        "roomsTriple": body.roomsTriple,
         "preferredContact": body.preferredContact,
         "comments": body.comments,
     }
@@ -791,7 +802,7 @@ async def create_lead(body: LeadIn, db: AsyncSession = Depends(get_db), _rl=Depe
         currency="USD",
         notes=body.comments or "",
         form_data=form_data,
-        room_type=body.roomType,
+        room_type=_build_room_summary(body.roomsSingle, body.roomsDouble, body.roomsTriple),
         hero_image=hero_image,
         status="borrador",
         sent_via=body.preferredContact,

@@ -53,8 +53,9 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
     preferredContact: 'ambos',
     travelType: 'Vacaciones',
     hotelCategory: '4 estrellas',
-    roomType: 'Sencilla',
-    roomsCount: 1,
+    roomsSingle: 1,
+    roomsDouble: 0,
+    roomsTriple: 0,
     comments: ''
   });
 
@@ -135,10 +136,10 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
     }
   };
 
-  const handleCounterChange = (field: 'adultsCount' | 'childrenCount' | 'babiesCount' | 'roomsCount', direction: 'inc' | 'dec') => {
+  const handleCounterChange = (field: 'adultsCount' | 'childrenCount' | 'babiesCount' | 'roomsSingle' | 'roomsDouble' | 'roomsTriple', direction: 'inc' | 'dec') => {
     setFormData((prev) => {
       const val = prev[field];
-      const minVal = field === 'adultsCount' || field === 'roomsCount' ? 1 : 0;
+      const minVal = field === 'adultsCount' || field === 'roomsSingle' ? 1 : 0;
       const newVal = direction === 'inc' ? val + 1 : Math.max(minVal, val - 1);
       return { ...prev, [field]: newVal };
     });
@@ -198,12 +199,13 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
         adultsCount: formData.adultsCount,
         childrenCount: formData.childrenCount,
         babiesCount: formData.babiesCount,
-        roomsCount: formData.roomsCount,
         budgetRange: formData.budgetRange,
         additionalServices: formData.additionalServices,
         travelType: formData.travelType,
         hotelCategory: formData.hotelCategory,
-        roomType: formData.roomType,
+        roomsSingle: formData.roomsSingle,
+        roomsDouble: formData.roomsDouble,
+        roomsTriple: formData.roomsTriple,
         preferredContact: formData.preferredContact,
         comments: formData.comments,
       };
@@ -230,8 +232,9 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
         preferredContact: 'ambos',
         travelType: 'Vacaciones',
         hotelCategory: '4 estrellas',
-        roomType: 'Sencilla',
-        roomsCount: 1,
+        roomsSingle: 1,
+        roomsDouble: 0,
+        roomsTriple: 0,
         comments: ''
       });
       setErrors({});
@@ -582,7 +585,7 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
                     </div>
 
                     {/* Numeric Counters for Travelers */}
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {/* Adults */}
                       <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/60 flex items-center justify-between">
                         <div className="flex flex-col">
@@ -637,33 +640,6 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
                         </div>
                       </div>
 
-                      {/* Rooms */}
-                      <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/60 flex items-center justify-between">
-                        <div className="flex flex-col">
-                          <span className="font-display font-bold text-xs text-brand-navy">Habitaciones</span>
-                          <span className="text-[10px] text-slate-400 font-sans font-medium">Cantidad de habitaciones</span>
-                        </div>
-                        <div className="flex items-center gap-2.5">
-                          <button
-                            type="button"
-                            onClick={() => handleCounterChange('roomsCount', 'dec')}
-                            className="w-7 h-7 rounded-full bg-white border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:scale-90 transition-all shadow-sm"
-                          >
-                            <Minus className="w-3.5 h-3.5 stroke-[3]" />
-                          </button>
-                          <span className="font-display font-extrabold text-sm text-brand-navy w-4 text-center">
-                            {formData.roomsCount}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => handleCounterChange('roomsCount', 'inc')}
-                            className="w-7 h-7 rounded-full bg-white border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:scale-90 transition-all shadow-sm"
-                          >
-                            <Plus className="w-3.5 h-3.5 stroke-[3]" />
-                          </button>
-                        </div>
-                      </div>
-
                     </div>
 
                     {/* Presupuesto aproximado */}
@@ -703,7 +679,7 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
                       </h4>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {/* Tipo de Viaje */}
                       <div className="flex flex-col gap-1.5">
                         <label htmlFor="travelType" className="font-display font-bold text-[11px] text-slate-500 uppercase tracking-wide">
@@ -757,28 +733,45 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
                           </div>
                         </div>
                       </div>
+                    </div>
 
-                      {/* Tipo de habitación */}
-                      <div className="flex flex-col gap-1.5">
-                        <label htmlFor="roomType" className="font-display font-bold text-[11px] text-slate-500 uppercase tracking-wide">
-                          Tipo de habitación
-                        </label>
-                        <div className="relative">
-                          <select
-                            id="roomType"
-                            name="roomType"
-                            value={formData.roomType}
-                            onChange={handleInputChange}
-                            className="w-full font-sans text-sm px-3.5 py-2.5 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:border-brand-turquoise transition-all cursor-pointer appearance-none pr-10"
-                          >
-                            <option value="Sencilla">Sencilla</option>
-                            <option value="Doble">Doble</option>
-                            <option value="Triple">Triple</option>
-                          </select>
-                          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
-                            <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                              <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-                            </svg>
+                    {/* Habitaciones */}
+                    <div className="flex flex-col gap-3">
+                      <label className="font-display font-bold text-[11px] text-slate-500 uppercase tracking-wide">
+                        Habitaciones
+                      </label>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        {/* Sencilla */}
+                        <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/60 flex items-center justify-between">
+                          <div className="flex flex-col">
+                            <span className="font-display font-bold text-xs text-brand-navy">Sencilla</span>
+                          </div>
+                          <div className="flex items-center gap-2.5">
+                            <button type="button" onClick={() => handleCounterChange('roomsSingle', 'dec')} className="w-7 h-7 rounded-full bg-white border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:scale-90 transition-all shadow-sm"><Minus className="w-3.5 h-3.5 stroke-[3]" /></button>
+                            <span className="font-display font-extrabold text-sm text-brand-navy w-4 text-center">{formData.roomsSingle}</span>
+                            <button type="button" onClick={() => handleCounterChange('roomsSingle', 'inc')} className="w-7 h-7 rounded-full bg-white border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:scale-90 transition-all shadow-sm"><Plus className="w-3.5 h-3.5 stroke-[3]" /></button>
+                          </div>
+                        </div>
+                        {/* Doble */}
+                        <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/60 flex items-center justify-between">
+                          <div className="flex flex-col">
+                            <span className="font-display font-bold text-xs text-brand-navy">Doble</span>
+                          </div>
+                          <div className="flex items-center gap-2.5">
+                            <button type="button" onClick={() => handleCounterChange('roomsDouble', 'dec')} className="w-7 h-7 rounded-full bg-white border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:scale-90 transition-all shadow-sm"><Minus className="w-3.5 h-3.5 stroke-[3]" /></button>
+                            <span className="font-display font-extrabold text-sm text-brand-navy w-4 text-center">{formData.roomsDouble}</span>
+                            <button type="button" onClick={() => handleCounterChange('roomsDouble', 'inc')} className="w-7 h-7 rounded-full bg-white border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:scale-90 transition-all shadow-sm"><Plus className="w-3.5 h-3.5 stroke-[3]" /></button>
+                          </div>
+                        </div>
+                        {/* Triple */}
+                        <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/60 flex items-center justify-between">
+                          <div className="flex flex-col">
+                            <span className="font-display font-bold text-xs text-brand-navy">Triple</span>
+                          </div>
+                          <div className="flex items-center gap-2.5">
+                            <button type="button" onClick={() => handleCounterChange('roomsTriple', 'dec')} className="w-7 h-7 rounded-full bg-white border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:scale-90 transition-all shadow-sm"><Minus className="w-3.5 h-3.5 stroke-[3]" /></button>
+                            <span className="font-display font-extrabold text-sm text-brand-navy w-4 text-center">{formData.roomsTriple}</span>
+                            <button type="button" onClick={() => handleCounterChange('roomsTriple', 'inc')} className="w-7 h-7 rounded-full bg-white border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:scale-90 transition-all shadow-sm"><Plus className="w-3.5 h-3.5 stroke-[3]" /></button>
                           </div>
                         </div>
                       </div>

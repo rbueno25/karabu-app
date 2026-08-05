@@ -69,7 +69,8 @@ export interface ContactFormInput {
   preferredContact: string; // 'email' | 'whatsapp' | 'ambos'
   travelType: string;
   hotelCategory: string;
-  roomType: string;
-  roomsCount: number;
+  roomsSingle: number;
+  roomsDouble: number;
+  roomsTriple: number;
   comments: string;
 }
