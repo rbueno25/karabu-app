@@ -288,8 +288,9 @@ export default function ClientQuotationView() {
 
       {/* ═══════════════ BROKER CARD — TU ASESOR ═══════════════ */}
       {broker.name && (
-        <section className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 relative z-20">
-          <div className="rounded-2xl sm:rounded-3xl bg-white dark:bg-[#0F2A4A] border border-slate-200 dark:border-slate-700 shadow-lg p-5 sm:p-6 flex flex-col sm:flex-row items-center gap-4">
+        <section className="w-full bg-white dark:bg-[#070F1E] py-8 sm:py-12 border-b border-slate-200 dark:border-slate-800">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="rounded-2xl sm:rounded-3xl bg-white dark:bg-[#0F2A4A] border border-slate-200 dark:border-slate-700 shadow-lg p-5 sm:p-6 flex flex-col sm:flex-row items-center gap-4">
             <div className="shrink-0 relative">
               {broker.avatar_url ? (
                 <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden border-2 border-[#0D9387] shadow-md shadow-[#0D9387]/15">
@@ -323,6 +324,7 @@ export default function ClientQuotationView() {
                 )}
               </div>
             </div>
+          </div>
           </div>
         </section>
       )}
