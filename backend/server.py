@@ -534,7 +534,7 @@ async def list_quotations(
     return await _enrich_with_client(docs, db)
 
 @api.get("/quotations/{qid}")
-async def get_quotation(qid: str, db: AsyncSession = Depends(get_db)):
+async def get_quotation(qid: str, db: AsyncSession = Depends(get_db), u=Depends(get_optional_user)):
     result = await db.execute(select(Quotation).where(Quotation.id == qid))
     q = result.scalar_one_or_none()
     if not q:
@@ -542,8 +542,27 @@ async def get_quotation(qid: str, db: AsyncSession = Depends(get_db)):
     doc = q.to_dict()
     client_r = await db.execute(select(Client).where(Client.id == q.client_id))
     client = client_r.scalar_one_or_none()
-    broker_r = await db.execute(select(User).where(User.id == q.created_by))
-    broker = broker_r.scalar_one_or_none()
+    
+    # Resolve broker: use created_by user, fall back to current user if authenticated
+    broker = None
+    if q.created_by:
+        broker_r = await db.execute(select(User).where(User.id == q.created_by))
+        broker = broker_r.scalar_one_or_none()
+    if not broker and u:
+        broker_r = await db.execute(select(User).where(User.id == u["id"]))
+        broker = broker_r.scalar_one_or_none()
+    
+    # Format rooms summary from form_data
+    form_data = doc.get("form_data") or {}
+    rooms_parts = []
+    if form_data.get("habitacionesSencilla"):
+        rooms_parts.append(f"{form_data['habitacionesSencilla']} Sencilla")
+    if form_data.get("habitacionesDoble"):
+        rooms_parts.append(f"{form_data['habitacionesDoble']} Doble")
+    if form_data.get("habitacionesTriple"):
+        rooms_parts.append(f"{form_data['habitacionesTriple']} Triple")
+    rooms_summary = ", ".join(rooms_parts) if rooms_parts else ""
+    
     return {
         "quotation": doc,
         "client": client.to_dict() if client else None,
@@ -555,8 +574,9 @@ async def get_quotation(qid: str, db: AsyncSession = Depends(get_db)):
             "avatar_url": broker.avatar_url if broker else "",
             "role": broker.role if broker else "advisor",
             "department": broker.department if broker else "",
-            "agency_name": "Karabu Viajes",
-        }
+            "agency_name": broker.department or "Karabu Viajes",
+        },
+        "rooms_summary": rooms_summary,
     }
 
 @api.post("/quotations")
