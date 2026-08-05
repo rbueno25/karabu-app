@@ -70,4 +70,7 @@ export interface ContactFormInput {
   travelType: string;
   hotelCategory: string;
   comments: string;
+  habitacionesSencilla: number;
+  habitacionesDoble: number;
+  habitacionesTriple: number;
 }

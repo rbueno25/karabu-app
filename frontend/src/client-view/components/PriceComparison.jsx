@@ -1,5 +1,5 @@
 import React from 'react';
-import { Hotel, TrendingDown, TrendingUp, DollarSign } from 'lucide-react';
+import { Hotel, TrendingDown, TrendingUp, DollarSign, Users, Moon } from 'lucide-react';
 
 export function PriceComparison({ quotation }) {
   const hasBooking = quotation.booking_price && Number(quotation.booking_price) > 0;
@@ -12,8 +12,17 @@ export function PriceComparison({ quotation }) {
   const formatPrice = (val) => `$${Number(val).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ${quotation.currency}`;
   const savings = hasBooking ? Number(quotation.booking_price) - karabuPrice : null;
 
+  // P/P/N calculation
+  const travelers = quotation.travelers || 1;
+  const calcNights = (start, end) => {
+    if (!start || !end) return null;
+    return Math.ceil(Math.abs(new Date(end).getTime() - new Date(start).getTime()) / (1000 * 60 * 60 * 24));
+  };
+  const nights = calcNights(quotation.travel_date, quotation.return_date);
+  const ppn = nights && travelers > 0 ? Math.round(karabuPrice / nights / travelers) : null;
+
   return (
-    <div className="w-full my-8 p-6 sm:p-8 rounded-2xl sm:rounded-3xl bg-white dark:bg-[#0D1B2A] border border-[#00A896]/20 dark:border-[#00A896]/30 shadow-sm relative overflow-hidden">
+    <div className="w-full my-6 p-6 sm:p-8 rounded-2xl sm:rounded-3xl bg-white dark:bg-[#0D1B2A] border border-[#00A896]/20 dark:border-[#00A896]/30 shadow-sm relative overflow-hidden">
       <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-bl from-[#00A896]/5 via-transparent to-transparent pointer-events-none rounded-bl-full" />
 
       <div className="flex items-center gap-3 mb-5 pb-4 border-b border-slate-100 dark:border-slate-800">
@@ -37,17 +46,34 @@ export function PriceComparison({ quotation }) {
         </div>
       )}
 
+      {/* P/P/N highlight */}
+      {ppn && nights && (
+        <div className="mb-5 p-4 rounded-xl bg-[#FF6B35]/5 dark:bg-[#FF6B35]/10 border border-[#FF6B35]/20 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-[#FF6B35]/15 text-[#FF6B35]">
+              <Moon className="w-4 h-4" />
+            </div>
+            <div>
+              <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Precio por Persona por Noche (P/P/N)</span>
+              <span className="text-xl font-black text-[#FF6B35]">${ppn.toLocaleString()} {quotation.currency}</span>
+            </div>
+          </div>
+          <div className="text-right text-xs text-slate-400 dark:text-slate-500">
+            <div className="flex items-center gap-1 justify-end"><Users className="w-3 h-3" /> {travelers} pers.</div>
+            <div className="flex items-center gap-1 justify-end"><Moon className="w-3 h-3" /> {nights} noches</div>
+          </div>
+        </div>
+      )}
+
       {/* Price comparison grid */}
       {(hasBooking || hasExpedia) && (
         <div className="grid grid-cols-3 gap-4">
-          {/* Karabu */}
           <div className="p-4 rounded-xl bg-[#00A896]/10 border-2 border-[#00A896]/40 text-center relative">
             <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-[#00A896] text-white">Karabu</span>
             <span className="text-lg font-black text-[#00A896] block mt-2">{formatPrice(karabuPrice)}</span>
-            <span className="text-[10px] text-slate-400 dark:text-slate-500">Total final</span>
+            <span className="text-[10px] text-slate-400 dark:text-slate-500">Total</span>
           </div>
 
-          {/* Booking */}
           {hasBooking && (
             <div className="p-4 rounded-xl bg-[#003B95]/5 dark:bg-[#003B95]/10 border border-[#003B95]/20 text-center">
               <span className="text-xs font-bold text-[#003B95] dark:text-blue-300 block mb-1">Booking.com</span>
@@ -55,7 +81,6 @@ export function PriceComparison({ quotation }) {
             </div>
           )}
 
-          {/* Expedia */}
           {hasExpedia && (
             <div className="p-4 rounded-xl bg-[#FFC107]/5 dark:bg-[#FFC107]/10 border border-[#FFC107]/20 text-center">
               <span className="text-xs font-bold text-amber-600 dark:text-amber-300 block mb-1">Expedia</span>

@@ -50,7 +50,10 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
     preferredContact: 'ambos',
     travelType: 'Vacaciones',
     hotelCategory: '4 estrellas',
-    comments: ''
+    comments: '',
+    habitacionesSencilla: 1,
+    habitacionesDoble: 0,
+    habitacionesTriple: 0,
   });
 
   const [errors, setErrors] = useState<Partial<Record<keyof ContactFormInput, string>>>({});
@@ -91,7 +94,7 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
     }
   };
 
-  const handleCounterChange = (field: 'adultsCount' | 'childrenCount' | 'babiesCount', direction: 'inc' | 'dec') => {
+  const handleCounterChange = (field: 'adultsCount' | 'childrenCount' | 'babiesCount' | 'habitacionesSencilla' | 'habitacionesDoble' | 'habitacionesTriple', direction: 'inc' | 'dec') => {
     setFormData((prev) => {
       const val = prev[field];
       const minVal = field === 'adultsCount' ? 1 : 0;
@@ -160,6 +163,9 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
         hotelCategory: formData.hotelCategory,
         preferredContact: formData.preferredContact,
         comments: formData.comments,
+        habitacionesSencilla: formData.habitacionesSencilla,
+        habitacionesDoble: formData.habitacionesDoble,
+        habitacionesTriple: formData.habitacionesTriple,
       };
 
       const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
@@ -184,14 +190,21 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
     const servicesText = formData.additionalServices.length > 0 
       ? `\n🔌 Servicios extra: ${formData.additionalServices.join(', ')}` 
       : '';
+    const roomsText = formData.habitacionesSencilla || formData.habitacionesDoble || formData.habitacionesTriple
+      ? `\\n🛏️ Habitaciones: ${[
+          formData.habitacionesSencilla > 0 ? `${formData.habitacionesSencilla} Sencilla` : '',
+          formData.habitacionesDoble > 0 ? `${formData.habitacionesDoble} Doble` : '',
+          formData.habitacionesTriple > 0 ? `${formData.habitacionesTriple} Triple` : '',
+        ].filter(Boolean).join(', ')}`
+      : '';
     const text = `¡Hola Karabu! Acabo de enviar mi cotización en la web:
 👤 Nombre: ${formData.fullName}
 📧 Email: ${formData.email}
 📞 WhatsApp: ${formData.phone}
 
-🌎 Destino: ${formData.country}${formData.city ? `, ${formData.city}` : ''}${formData.preferredHotel ? `\n🏨 Preferencia: ${formData.preferredHotel}` : ''}
+🌎 Destino: ${formData.country}${formData.city ? `, ${formData.city}` : ''}${formData.preferredHotel ? `\\n🏨 Preferencia: ${formData.preferredHotel}` : ''}
 📅 Fechas: del ${formData.departureDate} al ${formData.returnDate} (${formData.flexibleDates === 'Sí' ? 'Fechas flexibles' : 'Fechas exactas'})
-👥 Viajeros: ${formData.adultsCount} Adulto(s), ${formData.childrenCount} Niño(s), ${formData.babiesCount} Bebé(s)
+👥 Viajeros: ${formData.adultsCount} Adulto(s), ${formData.childrenCount} Niño(s), ${formData.babiesCount} Bebé(s)${roomsText}
 💰 Presupuesto: ${formData.budgetRange}
 🏨 Categoría de Hotel: ${formData.hotelCategory}
 🗺️ Tipo de viaje: ${formData.travelType}${servicesText}
@@ -575,6 +588,48 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
                           >
                             <Plus className="w-3.5 h-3.5 stroke-[3]" />
                           </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Habitaciones */}
+                    <div className="mt-4 pt-4 border-t border-slate-200/50">
+                      <span className="font-display font-bold text-[11px] text-slate-500 uppercase tracking-wide block mb-3">
+                        Cantidad de Habitaciones
+                      </span>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/60 flex items-center justify-between">
+                          <div className="flex flex-col">
+                            <span className="font-display font-bold text-xs text-brand-navy">Sencilla</span>
+                            <span className="text-[10px] text-slate-400 font-sans font-medium">1 persona</span>
+                          </div>
+                          <div className="flex items-center gap-2.5">
+                            <button type="button" onClick={() => handleCounterChange('habitacionesSencilla', 'dec')} className="w-7 h-7 rounded-full bg-white border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:scale-90 transition-all shadow-sm"><Minus className="w-3.5 h-3.5 stroke-[3]" /></button>
+                            <span className="font-display font-extrabold text-sm text-brand-navy w-4 text-center">{formData.habitacionesSencilla}</span>
+                            <button type="button" onClick={() => handleCounterChange('habitacionesSencilla', 'inc')} className="w-7 h-7 rounded-full bg-white border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:scale-90 transition-all shadow-sm"><Plus className="w-3.5 h-3.5 stroke-[3]" /></button>
+                          </div>
+                        </div>
+                        <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/60 flex items-center justify-between">
+                          <div className="flex flex-col">
+                            <span className="font-display font-bold text-xs text-brand-navy">Doble</span>
+                            <span className="text-[10px] text-slate-400 font-sans font-medium">2 personas</span>
+                          </div>
+                          <div className="flex items-center gap-2.5">
+                            <button type="button" onClick={() => handleCounterChange('habitacionesDoble', 'dec')} className="w-7 h-7 rounded-full bg-white border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:scale-90 transition-all shadow-sm"><Minus className="w-3.5 h-3.5 stroke-[3]" /></button>
+                            <span className="font-display font-extrabold text-sm text-brand-navy w-4 text-center">{formData.habitacionesDoble}</span>
+                            <button type="button" onClick={() => handleCounterChange('habitacionesDoble', 'inc')} className="w-7 h-7 rounded-full bg-white border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:scale-90 transition-all shadow-sm"><Plus className="w-3.5 h-3.5 stroke-[3]" /></button>
+                          </div>
+                        </div>
+                        <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/60 flex items-center justify-between">
+                          <div className="flex flex-col">
+                            <span className="font-display font-bold text-xs text-brand-navy">Triple</span>
+                            <span className="text-[10px] text-slate-400 font-sans font-medium">3 personas</span>
+                          </div>
+                          <div className="flex items-center gap-2.5">
+                            <button type="button" onClick={() => handleCounterChange('habitacionesTriple', 'dec')} className="w-7 h-7 rounded-full bg-white border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:scale-90 transition-all shadow-sm"><Minus className="w-3.5 h-3.5 stroke-[3]" /></button>
+                            <span className="font-display font-extrabold text-sm text-brand-navy w-4 text-center">{formData.habitacionesTriple}</span>
+                            <button type="button" onClick={() => handleCounterChange('habitacionesTriple', 'inc')} className="w-7 h-7 rounded-full bg-white border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:scale-90 transition-all shadow-sm"><Plus className="w-3.5 h-3.5 stroke-[3]" /></button>
+                          </div>
                         </div>
                       </div>
                     </div>

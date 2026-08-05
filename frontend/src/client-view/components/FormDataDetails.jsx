@@ -1,12 +1,18 @@
 import React from 'react';
-import { ClipboardList, Hotel, Sparkles, PhoneCall, MessageSquare, Briefcase, CheckCircle2, UserCheck, Heart, Tag } from 'lucide-react';
+import { ClipboardList, Hotel, Sparkles, PhoneCall, MessageSquare, Briefcase, CheckCircle2, UserCheck, Heart, Tag, BedDouble } from 'lucide-react';
 
 export function FormDataDetails({ formData }) {
   if (!formData) return null;
   const hasServices = formData.additionalServices && formData.additionalServices.length > 0;
 
+  // Habitaciones
+  const sencilla = formData.habitacionesSencilla ?? 0;
+  const doble = formData.habitacionesDoble ?? 0;
+  const triple = formData.habitacionesTriple ?? 0;
+  const hasRooms = sencilla + doble + triple > 0;
+
   return (
-    <div className="w-full my-8 p-6 sm:p-8 rounded-2xl sm:rounded-3xl bg-white dark:bg-[#0D1B2A] border border-slate-200/80 dark:border-slate-800 shadow-sm relative overflow-hidden">
+    <div className="w-full my-6 p-6 sm:p-8 rounded-2xl sm:rounded-3xl bg-white dark:bg-[#0D1B2A] border border-slate-200/80 dark:border-slate-800 shadow-sm relative overflow-hidden">
       <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-[#00A896]/10 via-transparent to-transparent pointer-events-none rounded-bl-full" />
       <div className="flex flex-wrap items-center justify-between gap-3 mb-6 pb-4 border-b border-slate-100 dark:border-slate-800">
         <div className="flex items-center gap-3">
@@ -75,6 +81,22 @@ export function FormDataDetails({ formData }) {
             <div className="flex items-center gap-2">
               <UserCheck className="w-4 h-4 text-slate-600 dark:text-slate-300" />
               <span className="text-sm font-bold text-slate-800 dark:text-slate-100">{formData.fullName}</span>
+            </div>
+          </div>
+        )}
+        {/* Habitaciones */}
+        {hasRooms && (
+          <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+            <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Habitaciones</span>
+            <div className="flex items-center gap-2">
+              <BedDouble className="w-4 h-4 text-[#00A896]" />
+              <span className="text-sm font-bold text-slate-800 dark:text-slate-100">
+                {[
+                  sencilla > 0 ? `${sencilla} Sencilla` : '',
+                  doble > 0 ? `${doble} Doble` : '',
+                  triple > 0 ? `${triple} Triple` : '',
+                ].filter(Boolean).join(', ')}
+              </span>
             </div>
           </div>
         )}

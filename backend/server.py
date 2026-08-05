@@ -164,6 +164,9 @@ class LeadIn(BaseModel):
     hotelCategory: str = ""
     preferredContact: str = "ambos"
     comments: str = ""
+    habitacionesSencilla: int = 0
+    habitacionesDoble: int = 0
+    habitacionesTriple: int = 0
 
 class PassengerIn(BaseModel):
     name: str
@@ -404,13 +407,29 @@ async def get_quotation(qid: str, db: AsyncSession = Depends(get_db)):
     client = client_r.scalar_one_or_none()
     broker_r = await db.execute(select(User).where(User.id == q.created_by))
     broker = broker_r.scalar_one_or_none()
+    # Format rooms summary from form_data
+    form_data = doc.get("form_data") or {}
+    rooms_parts = []
+    if form_data.get("habitacionesSencilla"):
+        rooms_parts.append(f"{form_data['habitacionesSencilla']} Sencilla")
+    if form_data.get("habitacionesDoble"):
+        rooms_parts.append(f"{form_data['habitacionesDoble']} Doble")
+    if form_data.get("habitacionesTriple"):
+        rooms_parts.append(f"{form_data['habitacionesTriple']} Triple")
+    rooms_summary = ", ".join(rooms_parts) if rooms_parts else ""
+
     return {
         "quotation": doc,
         "client": client.to_dict() if client else None,
         "broker": {
             "name": broker.name if broker else "Asesor Karabu",
             "email": broker.email if broker else "",
-        }
+            "phone": broker.phone if broker else "",
+            "avatar_url": broker.avatar_url if broker else "",
+            "role": broker.role if broker else "advisor",
+            "agency_name": broker.department if broker else "Karabu Viajes",
+        },
+        "rooms_summary": rooms_summary,
     }
 
 @api.post("/quotations")
@@ -577,6 +596,9 @@ async def create_lead(body: LeadIn, db: AsyncSession = Depends(get_db)):
         "hotelCategory": body.hotelCategory,
         "preferredContact": body.preferredContact,
         "comments": body.comments,
+        "habitacionesSencilla": body.habitacionesSencilla,
+        "habitacionesDoble": body.habitacionesDoble,
+        "habitacionesTriple": body.habitacionesTriple,
     }
 
     total_travelers = body.adultsCount + body.childrenCount + body.babiesCount
