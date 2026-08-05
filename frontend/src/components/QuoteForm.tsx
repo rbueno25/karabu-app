@@ -139,7 +139,7 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
   const handleCounterChange = (field: 'adultsCount' | 'childrenCount' | 'babiesCount' | 'roomsSingle' | 'roomsDouble' | 'roomsTriple', direction: 'inc' | 'dec') => {
     setFormData((prev) => {
       const val = prev[field];
-      const minVal = field === 'adultsCount' || field === 'roomsSingle' ? 1 : 0;
+      const minVal = field === 'adultsCount' ? 1 : 0;
       const newVal = direction === 'inc' ? val + 1 : Math.max(minVal, val - 1);
       return { ...prev, [field]: newVal };
     });
@@ -642,6 +642,39 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
 
                     </div>
 
+                    {/* Habitaciones */}
+                    <div className="flex flex-col gap-3">
+                      <label className="font-display font-bold text-[11px] text-slate-500 uppercase tracking-wide">
+                        Habitaciones
+                      </label>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/60 flex items-center justify-between">
+                          <div className="flex flex-col"><span className="font-display font-bold text-xs text-brand-navy">Sencilla</span></div>
+                          <div className="flex items-center gap-2.5">
+                            <button type="button" onClick={() => handleCounterChange('roomsSingle', 'dec')} className="w-7 h-7 rounded-full bg-white border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:scale-90 transition-all shadow-sm"><Minus className="w-3.5 h-3.5 stroke-[3]" /></button>
+                            <span className="font-display font-extrabold text-sm text-brand-navy w-4 text-center">{formData.roomsSingle}</span>
+                            <button type="button" onClick={() => handleCounterChange('roomsSingle', 'inc')} className="w-7 h-7 rounded-full bg-white border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:scale-90 transition-all shadow-sm"><Plus className="w-3.5 h-3.5 stroke-[3]" /></button>
+                          </div>
+                        </div>
+                        <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/60 flex items-center justify-between">
+                          <div className="flex flex-col"><span className="font-display font-bold text-xs text-brand-navy">Doble</span></div>
+                          <div className="flex items-center gap-2.5">
+                            <button type="button" onClick={() => handleCounterChange('roomsDouble', 'dec')} className="w-7 h-7 rounded-full bg-white border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:scale-90 transition-all shadow-sm"><Minus className="w-3.5 h-3.5 stroke-[3]" /></button>
+                            <span className="font-display font-extrabold text-sm text-brand-navy w-4 text-center">{formData.roomsDouble}</span>
+                            <button type="button" onClick={() => handleCounterChange('roomsDouble', 'inc')} className="w-7 h-7 rounded-full bg-white border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:scale-90 transition-all shadow-sm"><Plus className="w-3.5 h-3.5 stroke-[3]" /></button>
+                          </div>
+                        </div>
+                        <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/60 flex items-center justify-between">
+                          <div className="flex flex-col"><span className="font-display font-bold text-xs text-brand-navy">Triple</span></div>
+                          <div className="flex items-center gap-2.5">
+                            <button type="button" onClick={() => handleCounterChange('roomsTriple', 'dec')} className="w-7 h-7 rounded-full bg-white border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:scale-90 transition-all shadow-sm"><Minus className="w-3.5 h-3.5 stroke-[3]" /></button>
+                            <span className="font-display font-extrabold text-sm text-brand-navy w-4 text-center">{formData.roomsTriple}</span>
+                            <button type="button" onClick={() => handleCounterChange('roomsTriple', 'inc')} className="w-7 h-7 rounded-full bg-white border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:scale-90 transition-all shadow-sm"><Plus className="w-3.5 h-3.5 stroke-[3]" /></button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
                     {/* Presupuesto aproximado */}
                     <div className="flex flex-col gap-1.5 mt-2">
                       <label htmlFor="budgetRange" className="font-display font-bold text-[11px] text-slate-500 uppercase tracking-wide">
@@ -730,48 +763,6 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
                             <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                               <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
                             </svg>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Habitaciones */}
-                    <div className="flex flex-col gap-3">
-                      <label className="font-display font-bold text-[11px] text-slate-500 uppercase tracking-wide">
-                        Habitaciones
-                      </label>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        {/* Sencilla */}
-                        <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/60 flex items-center justify-between">
-                          <div className="flex flex-col">
-                            <span className="font-display font-bold text-xs text-brand-navy">Sencilla</span>
-                          </div>
-                          <div className="flex items-center gap-2.5">
-                            <button type="button" onClick={() => handleCounterChange('roomsSingle', 'dec')} className="w-7 h-7 rounded-full bg-white border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:scale-90 transition-all shadow-sm"><Minus className="w-3.5 h-3.5 stroke-[3]" /></button>
-                            <span className="font-display font-extrabold text-sm text-brand-navy w-4 text-center">{formData.roomsSingle}</span>
-                            <button type="button" onClick={() => handleCounterChange('roomsSingle', 'inc')} className="w-7 h-7 rounded-full bg-white border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:scale-90 transition-all shadow-sm"><Plus className="w-3.5 h-3.5 stroke-[3]" /></button>
-                          </div>
-                        </div>
-                        {/* Doble */}
-                        <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/60 flex items-center justify-between">
-                          <div className="flex flex-col">
-                            <span className="font-display font-bold text-xs text-brand-navy">Doble</span>
-                          </div>
-                          <div className="flex items-center gap-2.5">
-                            <button type="button" onClick={() => handleCounterChange('roomsDouble', 'dec')} className="w-7 h-7 rounded-full bg-white border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:scale-90 transition-all shadow-sm"><Minus className="w-3.5 h-3.5 stroke-[3]" /></button>
-                            <span className="font-display font-extrabold text-sm text-brand-navy w-4 text-center">{formData.roomsDouble}</span>
-                            <button type="button" onClick={() => handleCounterChange('roomsDouble', 'inc')} className="w-7 h-7 rounded-full bg-white border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:scale-90 transition-all shadow-sm"><Plus className="w-3.5 h-3.5 stroke-[3]" /></button>
-                          </div>
-                        </div>
-                        {/* Triple */}
-                        <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/60 flex items-center justify-between">
-                          <div className="flex flex-col">
-                            <span className="font-display font-bold text-xs text-brand-navy">Triple</span>
-                          </div>
-                          <div className="flex items-center gap-2.5">
-                            <button type="button" onClick={() => handleCounterChange('roomsTriple', 'dec')} className="w-7 h-7 rounded-full bg-white border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:scale-90 transition-all shadow-sm"><Minus className="w-3.5 h-3.5 stroke-[3]" /></button>
-                            <span className="font-display font-extrabold text-sm text-brand-navy w-4 text-center">{formData.roomsTriple}</span>
-                            <button type="button" onClick={() => handleCounterChange('roomsTriple', 'inc')} className="w-7 h-7 rounded-full bg-white border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:scale-90 transition-all shadow-sm"><Plus className="w-3.5 h-3.5 stroke-[3]" /></button>
                           </div>
                         </div>
                       </div>

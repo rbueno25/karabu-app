@@ -178,7 +178,7 @@ async def get_destination_image(db: AsyncSession, destination_name: str) -> str:
     d = result.scalar_one_or_none()
     if d and d.image_url:
         return d.image_url
-    # Try partial match (destination name contains query or vice versa)
+    # Try partial match (destination name or country contains query or vice versa)
     result = await db.execute(
         select(Destination).where(
             or_(
@@ -191,6 +191,21 @@ async def get_destination_image(db: AsyncSession, destination_name: str) -> str:
     d = result.scalar_one_or_none()
     if d and d.image_url:
         return d.image_url
+    # If destination_name is "Country, City", try matching just the city
+    parts = [p.strip() for p in destination_name.split(",") if p.strip()]
+    if len(parts) > 1:
+        result = await db.execute(
+            select(Destination).where(
+                or_(
+                    Destination.name.ilike(f"%{parts[1]}%"),
+                    Destination.name.ilike(f"%{parts[0]}%"),
+                ),
+                Destination.status == "activo",
+            )
+        )
+        d = result.scalar_one_or_none()
+        if d and d.image_url:
+            return d.image_url
     return ""
 
 def require_admin(user: dict):
@@ -726,7 +741,7 @@ def _build_room_summary(single: int, double: int, triple: int) -> str:
     if single > 0: parts.append(f"{single} Sencilla")
     if double > 0: parts.append(f"{double} Doble")
     if triple > 0: parts.append(f"{triple} Triple")
-    return ", ".join(parts) if parts else "1 Sencilla"
+    return ", ".join(parts) if parts else ""
 
 @api.post("/leads")
 async def create_lead(body: LeadIn, db: AsyncSession = Depends(get_db), _rl=Depends(rate_limit(5, 60))):
