@@ -100,7 +100,13 @@ class Quotation(Base):
     amount = Column(Float, default=0)
     currency = Column(String, default="USD")
     notes = Column(Text, default="")
+    client_notes = Column(Text, default="")  # mensajes del cliente: cambios solicitados, rechazo, etc.
     assigned_hotel = Column(String, default="")  # hotel assigned by advisor if client didn't specify
+    room_type = Column(String, default="")  # tipo de habitación (ej: Doble Deluxe, Suite)
+    services = Column(JSON, default=list)  # desglose por servicio [{name, price}, ...]
+    deposit_percent = Column(Float, default=0)  # % de anticipo/seña a pagar
+    hero_image = Column(String, default="")  # imagen personalizada del hero
+    tax_percent = Column(Float, default=0)  # comisión extra sobre el total (solo interno)
     booking_price = Column(Float, nullable=True)  # comparison: Booking.com price
     expedia_price = Column(Float, nullable=True)  # comparison: Expedia price
     form_data = Column(JSON, default=dict)  # raw form submission data for public leads
@@ -118,8 +124,15 @@ class Quotation(Base):
             "id": self.id, "client_id": self.client_id, "destination": self.destination,
             "travel_date": self.travel_date, "return_date": self.return_date,
             "travelers": self.travelers, "amount": self.amount, "currency": self.currency,
-            "notes": self.notes, "status": self.status,
+            "notes": self.notes,
+            "client_notes": self.client_notes or "",
+            "status": self.status,
             "assigned_hotel": self.assigned_hotel,
+            "room_type": self.room_type,
+            "services": self.services or [],
+            "deposit_percent": self.deposit_percent,
+            "hero_image": self.hero_image,
+            "tax_percent": self.tax_percent,
             "booking_price": self.booking_price, "expedia_price": self.expedia_price,
             "form_data": self.form_data or {},
             "sent_via": self.sent_via, "sent_at": self.sent_at,
@@ -368,5 +381,25 @@ class Notification(Base):
             "message": self.message,
             "link": self.link,
             "read": self.read,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+        }
+
+
+class Upload(Base):
+    """Stores uploaded files in the database (bypasses ephemeral Render filesystem)."""
+    __tablename__ = "uploads"
+
+    id = Column(String, primary_key=True, default=new_id)
+    filename = Column(String, nullable=False)
+    mime_type = Column(String, nullable=False)
+    data = Column(Text, nullable=False)  # base64-encoded file content
+    created_by = Column(String, ForeignKey("users.id"), nullable=True)
+    created_at = Column(DateTime(timezone=True), nullable=False, default=utcnow)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "filename": self.filename,
+            "mime_type": self.mime_type,
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }

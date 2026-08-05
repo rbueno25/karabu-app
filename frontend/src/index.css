@@ -36,3 +36,25 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Global cursor pointer for interactive elements */
+button, a, select, [role="button"], input[type="submit"], input[type="button"] {
+  cursor: pointer;
+}
+
+
+/* Compact DayPicker for mobile forms */
+.rdp-compact {
+  --rdp-day-size: 36px;
+  --rdp-font-size: 13px;
+  --rdp-accent-color: #00A896;
+  --rdp-background-color: #00A89615;
+}
+.rdp-compact .rdp-month_caption {
+  font-size: 14px;
+  font-weight: 700;
+}
+.rdp-compact .rdp-weekday {
+  font-size: 11px;
+  color: #94a3b8;
+}
+

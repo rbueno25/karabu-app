@@ -40,7 +40,7 @@ export default function Testimonials() {
   ];
 
   return (
-    <section className="py-20 bg-white relative border-b border-slate-100">
+    <section className="py-14 lg:py-20 bg-white relative border-b border-slate-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-8">
@@ -58,7 +58,7 @@ export default function Testimonials() {
             </div>
 
             {/* Testimonials Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-6">
               {reviews.map((rev, idx) => (
                 <motion.div
                   key={rev.id}

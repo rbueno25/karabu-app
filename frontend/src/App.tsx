@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect, lazy, Suspense } from 'react';
-import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate, useSearchParams } from 'react-router-dom';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import Stats from './components/Stats';
@@ -16,6 +16,10 @@ import QuoteForm from './components/QuoteForm';
 import Testimonials from './components/Testimonials';
 import CTA from './components/CTA';
 import Footer from './components/Footer';
+import PrivacyPolicy from './components/PrivacyPolicy';
+import TermsConditions from './components/TermsConditions';
+import DestinationBrowser from './components/DestinationBrowser';
+import LegalConsentModal from './components/LegalConsentModal';
 
 // Admin — .jsx files, allowJs is enabled
 import { AuthProvider } from './admin/AuthContext';
@@ -38,7 +42,9 @@ const ReservationDetail = lazy(() => import('./admin/ReservationDetail'));
 const Payments = lazy(() => import('./admin/Payments'));
 const AdminDestinations = lazy(() => import('./admin/Destinations'));
 const UsersPage = lazy(() => import('./admin/Users'));
+const UserCreate = lazy(() => import('./admin/UserCreate'));
 const Settings = lazy(() => import('./admin/Settings'));
+const InvoiceView = lazy(() => import('./admin/InvoiceView'));
 
 function AdminLoader() {
   return (
@@ -52,6 +58,7 @@ function AdminLoader() {
 function LandingPage() {
   const [activeSection, setActiveSection] = useState('inicio');
   const [preselectedDestination, setPreselectedDestination] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const handleNavigate = (sectionId: string) => {
     const target = document.getElementById(sectionId);
@@ -65,6 +72,23 @@ function LandingPage() {
     setPreselectedDestination(destName);
     handleNavigate('cotizacion');
   };
+
+  // Read ?dest= and ?destCountry= params from navigation
+  useEffect(() => {
+    const dest = searchParams.get('dest');
+    if (dest) {
+      const destCountry = searchParams.get('destCountry') || '';
+      // Store country for QuoteForm
+      if (destCountry) {
+        sessionStorage.setItem('karabu_preselected_country', destCountry);
+      }
+      setPreselectedDestination(dest);
+      // Clean URL
+      setSearchParams({}, { replace: true });
+      // Delay scroll to let DOM render
+      setTimeout(() => handleNavigate('cotizacion'), 300);
+    }
+  }, []);
 
   useEffect(() => {
     const sections = ['inicio', 'destinos', 'servicios', 'por-que-elegirnos', 'cotizacion', 'contacto'];
@@ -81,6 +105,7 @@ function LandingPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans selection:bg-brand-turquoise/20 selection:text-brand-navy antialiased">
+      <LegalConsentModal />
       <Header activeSection={activeSection} onNavigate={handleNavigate} />
       <main>
         <Hero onExploreDestinations={() => handleNavigate('destinos')} onContact={() => handleNavigate('cotizacion')} />
@@ -113,6 +138,9 @@ export default function App() {
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginRoute />} />
+          <Route path="/privacidad" element={<PrivacyPolicy />} />
+          <Route path="/terminos" element={<TermsConditions />} />
+          <Route path="/destinos" element={<DestinationBrowser />} />
           <Route
             path="/admin"
             element={
@@ -130,12 +158,15 @@ export default function App() {
             <Route path="reservas/:id" element={<Suspense fallback={<AdminLoader />}><ReservationDetail /></Suspense>} />
             <Route path="pagos" element={<Suspense fallback={<AdminLoader />}><Payments /></Suspense>} />
             <Route path="destinos" element={<Suspense fallback={<AdminLoader />}><AdminDestinations /></Suspense>} />
+            <Route path="usuarios/nuevo" element={<Suspense fallback={<AdminLoader />}><UserCreate /></Suspense>} />
             <Route path="usuarios" element={<Suspense fallback={<AdminLoader />}><UsersPage /></Suspense>} />
             <Route path="configuracion" element={<Suspense fallback={<AdminLoader />}><Settings /></Suspense>} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
           {/* Public client quotation view — no auth required */}
           <Route path="/cotizacion/:id" element={<Suspense fallback={<AdminLoader />}><ClientQuotationView /></Suspense>} />
+          {/* Public invoice view — no auth required */}
+          <Route path="/factura/:id" element={<Suspense fallback={<AdminLoader />}><InvoiceView /></Suspense>} />
         </Routes>
       </AuthProvider>
       </ThemeProvider>

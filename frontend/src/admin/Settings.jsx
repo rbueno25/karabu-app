@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import api, { formatApiError } from "../lib/api";
 import PageHeader from "./PageHeader";
-import { Loader2, Building2, ImageIcon, Share2, DollarSign, Percent, Mail, FileText, Lock } from "lucide-react";
+import { Loader2, Building2, ImageIcon, Share2, DollarSign, Percent, Mail, FileText, Lock, User, Key } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "./AuthContext";
+import { handlePhoneInput } from "../utils/phone";
 
 const SECTIONS = [
   { id: "empresa", label: "Empresa", icon: Building2 },
@@ -14,9 +15,10 @@ const SECTIONS = [
   { id: "correo", label: "Correo", icon: Mail },
   { id: "plantillas", label: "Plantillas", icon: FileText },
   { id: "seguridad", label: "Seguridad", icon: Lock },
+  { id: "perfil", label: "Mi Perfil", icon: User },
 ];
 
-const inputCls = "w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#132D52] text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none";
+const inputCls = "w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-[#0D9387] focus:ring-2 focus:ring-[#0D9387]/20 outline-none";
 
 export default function Settings() {
   const { user } = useAuth();
@@ -26,6 +28,34 @@ export default function Settings() {
   const [form, setForm] = useState(null);
 
   const canEdit = user && (user.role === "super_admin" || user.role === "admin");
+
+  // Profile state
+  const [profileForm, setProfileForm] = useState({
+    name: user?.name || "",
+    phone: user?.phone || "",
+    current_password: "",
+    new_password: "",
+  });
+  const [savingProfile, setSavingProfile] = useState(false);
+
+  const handleProfileSave = async (e) => {
+    e.preventDefault();
+    setSavingProfile(true);
+    try {
+      const body = { name: profileForm.name, phone: profileForm.phone };
+      if (profileForm.new_password) {
+        body.current_password = profileForm.current_password;
+        body.new_password = profileForm.new_password;
+      }
+      await api.put("/profile", body);
+      toast.success("Perfil actualizado");
+      setProfileForm(p => ({ ...p, current_password: "", new_password: "" }));
+    } catch (e) {
+      toast.error(formatApiError(e.response?.data?.detail) || "Error al actualizar perfil");
+    } finally {
+      setSavingProfile(false);
+    }
+  };
 
   useEffect(() => {
     (async () => {
@@ -67,7 +97,7 @@ export default function Settings() {
 
       <div className="grid grid-cols-12 gap-6">
         <aside className="col-span-12 md:col-span-3">
-          <nav className="bg-white dark:bg-[#0F2444] rounded-[16px] border border-gray-200 dark:border-[#1A3356] p-2 shadow-[0_1px_3px_0_rgba(0,0,0,0.04)]">
+          <nav className="bg-white dark:bg-zinc-900 rounded-[16px] border border-gray-200 dark:border-zinc-800 p-2 shadow-[0_1px_3px_0_rgba(0,0,0,0.04)]">
             {SECTIONS.map(({ id, label, icon: Icon }) => (
               <button
                 key={id}
@@ -76,7 +106,7 @@ export default function Settings() {
                 data-testid={`settings-tab-${id}`}
                 className={[
                   "w-full flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium transition-colors text-left",
-                  section === id ? "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300" : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800",
+                  section === id ? "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-teal-300" : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800",
                 ].join(" ")}
               >
                 <Icon className="h-4 w-4" /> {label}
@@ -85,7 +115,7 @@ export default function Settings() {
           </nav>
         </aside>
 
-        <form onSubmit={save} className="col-span-12 md:col-span-9 bg-white dark:bg-[#0F2444] rounded-[16px] border border-gray-200 dark:border-[#1A3356] p-6 shadow-[0_1px_3px_0_rgba(0,0,0,0.04)] space-y-6" data-testid="settings-form">
+        <form onSubmit={save} className="col-span-12 md:col-span-9 bg-white dark:bg-zinc-900 rounded-[16px] border border-gray-200 dark:border-zinc-800 p-6 shadow-[0_1px_3px_0_rgba(0,0,0,0.04)] space-y-6" data-testid="settings-form">
           {!canEdit && (
             <div className="text-sm text-yellow-700 dark:text-yellow-300 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 rounded-[10px] px-3 py-2">
               Solo lectura. Únicamente los administradores pueden modificar la configuración.
@@ -103,7 +133,7 @@ export default function Settings() {
                   <input type="email" value={form.company_email} onChange={(e) => setForm({ ...form, company_email: e.target.value })} className={inputCls} disabled={!canEdit} />
                 </Field>
                 <Field label="Teléfono">
-                  <input value={form.company_phone} onChange={(e) => setForm({ ...form, company_phone: e.target.value })} className={inputCls} disabled={!canEdit} />
+                  <input value={form.company_phone} onChange={(e) => setForm({ ...form, company_phone: handlePhoneInput(e.target.value) })} className={inputCls} disabled={!canEdit} />
                 </Field>
               </div>
               <Field label="Dirección">
@@ -119,7 +149,7 @@ export default function Settings() {
                 <input value={form.logo_url} onChange={(e) => setForm({ ...form, logo_url: e.target.value })} className={inputCls} placeholder="https://…" disabled={!canEdit} />
               </Field>
               {form.logo_url ? (
-                <div className="border border-gray-200 dark:border-[#1A3356] rounded-[10px] p-4 bg-gray-50 dark:bg-[#132D52]">
+                <div className="border border-gray-200 dark:border-zinc-800 rounded-[10px] p-4 bg-gray-50 dark:bg-zinc-800">
                   <div className="text-xs text-gray-500 dark:text-gray-300 mb-2">Vista previa</div>
                   <img src={form.logo_url} alt="Logo" className="max-h-24 object-contain" />
                 </div>
@@ -188,15 +218,46 @@ export default function Settings() {
                 <input type="number" min={1} max={168} value={form.session_hours} onChange={(e) => setForm({ ...form, session_hours: e.target.value })} className={inputCls} disabled={!canEdit} />
               </Field>
               <label className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
-                <input type="checkbox" checked={!!form.require_2fa} onChange={(e) => setForm({ ...form, require_2fa: e.target.checked })} disabled={!canEdit} className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500" />
+                <input type="checkbox" checked={!!form.require_2fa} onChange={(e) => setForm({ ...form, require_2fa: e.target.checked })} disabled={!canEdit} className="rounded border-gray-300 dark:border-gray-600 text-[#0D9387] focus:ring-[#0D9387]" />
                 Requerir autenticación en dos pasos (2FA) — próximamente
               </label>
             </div>
           )}
 
+          {section === "perfil" && (
+            <form onSubmit={handleProfileSave} className="space-y-4">
+              <SectionTitle>Mi Perfil</SectionTitle>
+              <Field label="Nombre completo">
+                <input value={profileForm.name} onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })} className={inputCls} />
+              </Field>
+              <Field label="Teléfono / WhatsApp">
+                <input value={profileForm.phone} onChange={(e) => setProfileForm({ ...profileForm, phone: handlePhoneInput(e.target.value) })} className={inputCls} />
+              </Field>
+              <Field label="Email">
+                <input value={user?.email || ""} disabled className={`${inputCls} opacity-60`} />
+                <p className="text-xs text-gray-400 mt-1">El email no se puede cambiar. Contacta al administrador.</p>
+              </Field>
+
+              <hr className="border-gray-100 dark:border-zinc-800" />
+              <SectionTitle className="text-sm">Cambiar contraseña</SectionTitle>
+              <Field label="Contraseña actual">
+                <input type="password" value={profileForm.current_password} onChange={(e) => setProfileForm({ ...profileForm, current_password: e.target.value })} className={inputCls} placeholder="••••••••" />
+              </Field>
+              <Field label="Nueva contraseña">
+                <input type="password" value={profileForm.new_password} onChange={(e) => setProfileForm({ ...profileForm, new_password: e.target.value })} className={inputCls} placeholder="Mínimo 6 caracteres" />
+              </Field>
+
+              <div className="flex items-center justify-end pt-4 border-t border-gray-100 dark:border-zinc-800">
+                <button type="submit" disabled={savingProfile} className="inline-flex items-center gap-2 bg-[#0D9387] hover:bg-[#0b7d72] text-white rounded-[10px] px-4 py-2 text-sm font-medium disabled:opacity-60">
+                  {savingProfile && <Loader2 className="h-4 w-4 animate-spin" />} Actualizar perfil
+                </button>
+              </div>
+            </form>
+          )}
+
           {canEdit && (
-            <div className="flex items-center justify-end pt-4 border-t border-gray-100 dark:border-[#1A3356]">
-              <button type="submit" disabled={saving} data-testid="settings-save-btn" className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] px-4 py-2 text-sm font-medium disabled:opacity-60">
+            <div className="flex items-center justify-end pt-4 border-t border-gray-100 dark:border-zinc-800">
+              <button type="submit" disabled={saving} data-testid="settings-save-btn" className="inline-flex items-center gap-2 bg-[#0D9387] hover:bg-[#0b7d72] text-white rounded-[10px] px-4 py-2 text-sm font-medium disabled:opacity-60">
                 {saving && <Loader2 className="h-4 w-4 animate-spin" />} Guardar cambios
               </button>
             </div>
@@ -208,7 +269,7 @@ export default function Settings() {
 }
 
 function SectionTitle({ children }) {
-  return <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-[#1A3356] pb-3">{children}</h3>;
+  return <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-zinc-800 pb-3">{children}</h3>;
 }
 
 function Field({ label, required, children }) {

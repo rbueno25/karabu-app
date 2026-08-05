@@ -82,14 +82,14 @@ export default function Payments() {
           <button
             onClick={openCreate}
             data-testid="payments-new-btn"
-            className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] px-4 py-2 text-sm font-medium transition-colors shadow-sm"
+            className="inline-flex items-center gap-2 bg-[#0D9387] hover:bg-[#0b7d72] text-white rounded-[10px] px-4 py-2 text-sm font-medium transition-colors shadow-sm"
           >
             <Plus className="h-4 w-4" /> Registrar pago
           </button>
         }
       />
 
-      <div className="bg-white dark:bg-[#0F2444] rounded-[16px] border border-gray-200 dark:border-[#1A3356] shadow-[0_1px_3px_0_rgba(0,0,0,0.04)] overflow-hidden">
+      <div className="bg-white dark:bg-zinc-900 rounded-[16px] border border-gray-200 dark:border-zinc-800 shadow-[0_1px_3px_0_rgba(0,0,0,0.04)] overflow-hidden">
         {loading ? (
           <div className="p-10 text-center text-gray-500 dark:text-gray-300 flex items-center justify-center gap-2">
             <Loader2 className="h-4 w-4 animate-spin" /> Cargando…
@@ -98,7 +98,7 @@ export default function Payments() {
           <EmptyState title="Sin pagos" description="Registra el primer pago para una reserva." icon={CreditCard} />
         ) : (
           <table className="w-full text-sm" data-testid="payments-table">
-            <thead className="bg-gray-50 dark:bg-[#132D52] border-b border-gray-200 dark:border-[#1A3356]">
+            <thead className="bg-gray-50 dark:bg-zinc-800 border-b border-gray-200 dark:border-zinc-800">
               <tr>
                 <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Cliente</th>
                 <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Reserva</th>
@@ -111,7 +111,7 @@ export default function Payments() {
             </thead>
             <tbody>
               {items.map((p) => (
-                <tr key={p.id} className="border-b border-gray-100 dark:border-[#1A3356] last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800">
+                <tr key={p.id} className="border-b border-gray-100 dark:border-zinc-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800">
                   <td className="px-6 py-3 text-gray-900 dark:text-gray-100 font-medium">{p.client_name}</td>
                   <td className="px-6 py-3 text-gray-700 dark:text-gray-300">{p.reservation_destination}</td>
                   <td className="px-6 py-3 text-gray-600 dark:text-gray-300">{formatDate(p.payment_date || p.created_at)}</td>
@@ -132,7 +132,7 @@ export default function Payments() {
 
       {modalOpen && (
         <div data-testid="payment-modal" className="fixed inset-0 z-50 flex items-start justify-center bg-gray-900/50 backdrop-blur-sm p-4 overflow-y-auto">
-          <form onSubmit={save} className="mt-16 bg-white dark:bg-[#0F2444] rounded-[16px] shadow-xl border border-gray-200 dark:border-[#1A3356] w-full max-w-lg p-6">
+          <form onSubmit={save} className="mt-16 bg-white dark:bg-zinc-900 rounded-[16px] shadow-xl border border-gray-200 dark:border-zinc-800 w-full max-w-lg p-6">
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Registrar pago</h3>
               <button type="button" onClick={() => setModalOpen(false)} className="h-8 w-8 rounded-[8px] hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center">
@@ -186,10 +186,10 @@ export default function Payments() {
             </div>
 
             <div className="mt-6 flex items-center justify-end gap-2">
-              <button type="button" onClick={() => setModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-[#1A3356] rounded-[10px] hover:bg-gray-50 dark:hover:bg-gray-800">
+              <button type="button" onClick={() => setModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-zinc-800 rounded-[10px] hover:bg-gray-50 dark:hover:bg-gray-800">
                 Cancelar
               </button>
-              <button type="submit" disabled={saving} data-testid="payment-save-btn" className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] px-4 py-2 text-sm font-medium disabled:opacity-60">
+              <button type="submit" disabled={saving} data-testid="payment-save-btn" className="inline-flex items-center gap-2 bg-[#0D9387] hover:bg-[#0b7d72] text-white rounded-[10px] px-4 py-2 text-sm font-medium disabled:opacity-60">
                 {saving && <Loader2 className="h-4 w-4 animate-spin" />} Guardar
               </button>
             </div>
@@ -200,7 +200,7 @@ export default function Payments() {
   );
 }
 
-const inputCls = "w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#132D52] text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none";
+const inputCls = "w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-[#0D9387] focus:ring-2 focus:ring-[#0D9387]/20 outline-none";
 
 function Field({ label, required, children }) {
   return (

@@ -5,6 +5,7 @@ import PageHeader from "./PageHeader";
 import StatusBadge from "./StatusBadge";
 import EmptyState from "./EmptyState";
 import { formatDate, formatCurrency } from "../lib/format";
+import { formatPhoneWithCode } from "../utils/phone";
 import { toast } from "sonner";
 import { 
   ArrowLeft, Calendar, User, DollarSign, Plus, Pencil, 
@@ -12,7 +13,7 @@ import {
   Mail, Phone
 } from "lucide-react";
 
-const inputCls = "w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#132D52] text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-shadow";
+const inputCls = "w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-[#0D9387] focus:ring-2 focus:ring-[#0D9387]/20 outline-none transition-shadow";
 
 export default function ReservationDetail() {
   const { id } = useParams();
@@ -263,7 +264,7 @@ export default function ReservationDetail() {
       <div className="flex items-center gap-3">
         <Link 
           to="/admin/reservas" 
-          className="h-9 w-9 border border-gray-200 dark:border-[#1A3356] rounded-[10px] bg-white dark:bg-[#0F2444] flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+          className="h-9 w-9 border border-gray-200 dark:border-zinc-800 rounded-[10px] bg-white dark:bg-zinc-900 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
           data-testid="reservation-back-btn"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -282,7 +283,7 @@ export default function ReservationDetail() {
             onClick={openPaymentModal}
             data-testid="payment-add-btn"
             disabled={form.status === "cancelada"}
-            className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] px-4 py-2 text-sm font-semibold transition-colors shadow-sm disabled:opacity-30 disabled:hover:bg-blue-600"
+            className="inline-flex items-center gap-2 bg-[#0D9387] hover:bg-[#0b7d72] text-white rounded-[10px] px-4 py-2 text-sm font-semibold transition-colors shadow-sm disabled:opacity-30 disabled:hover:bg-[#0D9387]"
           >
             <CreditCard className="h-4 w-4" /> Registrar Pago
           </button>
@@ -293,19 +294,19 @@ export default function ReservationDetail() {
         {/* Left Column: Quick summary and Accounts */}
         <aside className="col-span-12 lg:col-span-4 space-y-6">
           {/* Client summary */}
-          <div className="bg-white dark:bg-[#0F2444] rounded-[16px] border border-gray-200 dark:border-[#1A3356] p-6 shadow-[0_1px_3px_0_rgba(0,0,0,0.05)]">
+          <div className="bg-white dark:bg-zinc-900 rounded-[16px] border border-gray-200 dark:border-zinc-800 p-6 shadow-[0_1px_3px_0_rgba(0,0,0,0.05)]">
             <span className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-400 block mb-3">Cliente de la Reserva</span>
             {client ? (
               <div className="space-y-2">
                 <Link 
                   to={`/admin/clientes/${client.id}`}
-                  className="text-base font-bold text-blue-600 hover:text-blue-800 hover:underline block"
+                  className="text-base font-bold text-[#0D9387] hover:text-[#0b7d72] hover:underline block"
                 >
                   {client.first_name} {client.last_name}
                 </Link>
                 <div className="text-xs text-gray-500 dark:text-gray-300 space-y-1">
                   <p className="flex items-center gap-1.5"><Mail className="h-3.5 w-3.5" /> {client.email}</p>
-                  <p className="flex items-center gap-1.5"><Phone className="h-3.5 w-3.5" /> {client.phone}</p>
+                  <p className="flex items-center gap-1.5"><Phone className="h-3.5 w-3.5" /> {formatPhoneWithCode(client.phone)}</p>
                 </div>
               </div>
             ) : (
@@ -314,8 +315,8 @@ export default function ReservationDetail() {
           </div>
 
           {/* Pricing & Payments summary */}
-          <div className="bg-white dark:bg-[#0F2444] rounded-[16px] border border-gray-200 dark:border-[#1A3356] p-6 shadow-[0_1px_3px_0_rgba(0,0,0,0.05)]">
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-[#1A3356] pb-3 mb-4">Estado Financiero</h3>
+          <div className="bg-white dark:bg-zinc-900 rounded-[16px] border border-gray-200 dark:border-zinc-800 p-6 shadow-[0_1px_3px_0_rgba(0,0,0,0.05)]">
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-zinc-800 pb-3 mb-4">Estado Financiero</h3>
             <div className="space-y-3.5">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500 dark:text-gray-300 font-medium">Monto Total:</span>
@@ -325,7 +326,7 @@ export default function ReservationDetail() {
                 <span className="text-gray-500 dark:text-gray-300 font-medium">Monto Pagado:</span>
                 <span className="font-bold text-green-600">{formatCurrency(calculatedPaidAmount, form.currency)}</span>
               </div>
-              <div className="flex justify-between text-sm pt-2 border-t border-gray-100 dark:border-[#1A3356]">
+              <div className="flex justify-between text-sm pt-2 border-t border-gray-100 dark:border-zinc-800">
                 <span className="text-gray-500 dark:text-gray-300 font-semibold">Pendiente:</span>
                 <span className={`font-extrabold ${calculatedPendingAmount > 0 ? "text-yellow-600" : "text-gray-500 dark:text-gray-300"}`}>
                   {formatCurrency(calculatedPendingAmount, form.currency)}
@@ -337,9 +338,9 @@ export default function ReservationDetail() {
 
         {/* Right Column: Tabbed Panels */}
         <main className="col-span-12 lg:col-span-8 space-y-6">
-          <div className="bg-white dark:bg-[#0F2444] rounded-[16px] border border-gray-200 dark:border-[#1A3356] shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] overflow-hidden">
+          <div className="bg-white dark:bg-zinc-900 rounded-[16px] border border-gray-200 dark:border-zinc-800 shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] overflow-hidden">
             {/* Tabs Header */}
-            <div className="bg-gray-50 dark:bg-[#132D52]/50 border-b border-gray-200 dark:border-[#1A3356] px-6 py-2 flex items-center gap-1 overflow-x-auto">
+            <div className="bg-gray-50 dark:bg-zinc-800/50 border-b border-gray-200 dark:border-zinc-800 px-6 py-2 flex items-center gap-1 overflow-x-auto">
               {[
                 { id: "info", label: "Detalles", icon: Info },
                 { id: "pasajeros", label: "Pasajeros", icon: User },
@@ -353,7 +354,7 @@ export default function ReservationDetail() {
                   className={[
                     "flex items-center gap-2 px-3.5 py-2.5 rounded-[10px] text-xs font-semibold uppercase tracking-wider transition-colors",
                     tab === t.id 
-                      ? "bg-white dark:bg-[#0F2444] text-blue-600 shadow-sm border border-gray-200 dark:border-[#1A3356]" 
+                      ? "bg-white dark:bg-zinc-900 text-[#0D9387] shadow-sm border border-gray-200 dark:border-zinc-800" 
                       : "text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/55"
                   ].join(" ")}
                 >
@@ -476,7 +477,7 @@ export default function ReservationDetail() {
                     />
                   </Field>
 
-                  <div className="pt-4 border-t border-gray-100 dark:border-[#1A3356] flex items-center justify-between">
+                  <div className="pt-4 border-t border-gray-100 dark:border-zinc-800 flex items-center justify-between">
                     <button
                       type="button"
                       onClick={handleDeleteReservation}
@@ -489,7 +490,7 @@ export default function ReservationDetail() {
                       type="submit"
                       disabled={savingDetails}
                       data-testid="reservation-save-btn"
-                      className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] px-4 py-2 text-sm font-semibold transition-colors shadow-sm disabled:opacity-60"
+                      className="inline-flex items-center gap-2 bg-[#0D9387] hover:bg-[#0b7d72] text-white rounded-[10px] px-4 py-2 text-sm font-semibold transition-colors shadow-sm disabled:opacity-60"
                     >
                       {savingDetails ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                       Guardar Cambios
@@ -506,7 +507,7 @@ export default function ReservationDetail() {
                     <button 
                       onClick={() => openPassengerModal()}
                       data-testid="passenger-add-btn"
-                      className="inline-flex items-center gap-1.5 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 text-blue-600 rounded-[8px] px-3 py-1.5 text-xs font-semibold transition-colors"
+                      className="inline-flex items-center gap-1.5 bg-blue-50 dark:bg-blue-900/30 hover:bg-[#0D9387]/10 text-[#0D9387] rounded-[8px] px-3 py-1.5 text-xs font-semibold transition-colors"
                     >
                       <Plus className="h-3.5 w-3.5" /> Agregar Pasajero
                     </button>
@@ -521,7 +522,7 @@ export default function ReservationDetail() {
                   ) : (
                     <div className="overflow-x-auto border border-gray-150 rounded-[10px]">
                       <table className="w-full text-sm text-left">
-                        <thead className="bg-gray-50 dark:bg-[#132D52] border-b border-gray-150">
+                        <thead className="bg-gray-50 dark:bg-zinc-800 border-b border-gray-150">
                           <tr>
                             <th className="px-4 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Nombre Completo</th>
                             <th className="px-4 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Documento</th>
@@ -531,7 +532,7 @@ export default function ReservationDetail() {
                         </thead>
                         <tbody>
                           {form.passengers.map((p, idx) => (
-                            <tr key={idx} className="border-b border-gray-100 dark:border-[#1A3356] last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                            <tr key={idx} className="border-b border-gray-100 dark:border-zinc-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50">
                               <td className="px-4 py-3 font-semibold text-gray-900 dark:text-gray-100">{p.name}</td>
                               <td className="px-4 py-3 text-gray-700 dark:text-gray-300 font-mono text-xs">{p.document_id || "—"}</td>
                               <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{p.birth_date ? formatDate(p.birth_date) : "—"}</td>
@@ -572,7 +573,7 @@ export default function ReservationDetail() {
                     <button 
                       onClick={openDocumentModal}
                       data-testid="document-add-btn"
-                      className="inline-flex items-center gap-1.5 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 text-blue-600 rounded-[8px] px-3 py-1.5 text-xs font-semibold transition-colors"
+                      className="inline-flex items-center gap-1.5 bg-blue-50 dark:bg-blue-900/30 hover:bg-[#0D9387]/10 text-[#0D9387] rounded-[8px] px-3 py-1.5 text-xs font-semibold transition-colors"
                     >
                       <Plus className="h-3.5 w-3.5" /> Agregar Documento
                     </button>
@@ -587,9 +588,9 @@ export default function ReservationDetail() {
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {form.documents.map((doc, idx) => (
-                        <div key={idx} className="flex items-center justify-between p-3 border border-gray-150 rounded-[10px] bg-gray-50 dark:bg-[#132D52]/30 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                        <div key={idx} className="flex items-center justify-between p-3 border border-gray-150 rounded-[10px] bg-gray-50 dark:bg-zinc-800/30 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                           <div className="flex items-start gap-3 min-w-0">
-                            <div className="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-[8px] text-blue-600 shrink-0">
+                            <div className="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-[8px] text-[#0D9387] shrink-0">
                               <FileText className="h-4 w-4" />
                             </div>
                             <div className="min-w-0">
@@ -602,7 +603,7 @@ export default function ReservationDetail() {
                               href={doc.url} 
                               target="_blank" 
                               rel="noopener noreferrer"
-                              className="h-7 w-7 rounded-[6px] hover:bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600"
+                              className="h-7 w-7 rounded-[6px] hover:bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-[#0D9387]"
                               aria-label="Abrir documento"
                             >
                               <ExternalLink className="h-3.5 w-3.5" />
@@ -631,7 +632,7 @@ export default function ReservationDetail() {
                     <button 
                       onClick={openPaymentModal}
                       disabled={form.status === "cancelada"}
-                      className="inline-flex items-center gap-1.5 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 text-blue-600 rounded-[8px] px-3 py-1.5 text-xs font-semibold transition-colors disabled:opacity-30 disabled:hover:bg-blue-50 dark:bg-blue-900/30"
+                      className="inline-flex items-center gap-1.5 bg-blue-50 dark:bg-blue-900/30 hover:bg-[#0D9387]/10 text-[#0D9387] rounded-[8px] px-3 py-1.5 text-xs font-semibold transition-colors disabled:opacity-30 disabled:hover:bg-[#0D9387]/10 dark:bg-[#0D9387]/10"
                     >
                       <Plus className="h-3.5 w-3.5" /> Registrar Pago
                     </button>
@@ -646,7 +647,7 @@ export default function ReservationDetail() {
                   ) : (
                     <div className="overflow-x-auto border border-gray-150 rounded-[10px]">
                       <table className="w-full text-sm text-left">
-                        <thead className="bg-gray-50 dark:bg-[#132D52] border-b border-gray-150">
+                        <thead className="bg-gray-50 dark:bg-zinc-800 border-b border-gray-150">
                           <tr>
                             <th className="px-4 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Fecha</th>
                             <th className="px-4 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Método</th>
@@ -657,7 +658,7 @@ export default function ReservationDetail() {
                         </thead>
                         <tbody>
                           {payments.map(p => (
-                            <tr key={p.id} className="border-b border-gray-100 dark:border-[#1A3356] last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                            <tr key={p.id} className="border-b border-gray-100 dark:border-zinc-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50">
                               <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{formatDate(p.payment_date || p.created_at)}</td>
                               <td className="px-4 py-3 text-gray-700 dark:text-gray-300 capitalize font-medium">{p.method}</td>
                               <td className="px-4 py-3 text-gray-600 dark:text-gray-300 font-mono text-xs">{p.reference || "—"}</td>
@@ -679,7 +680,7 @@ export default function ReservationDetail() {
       {/* Passenger Modal */}
       {passengerModalOpen && (
         <div data-testid="passenger-modal" className="fixed inset-0 z-50 flex items-start justify-center bg-gray-900/50 backdrop-blur-sm p-4 overflow-y-auto">
-          <form onSubmit={savePassenger} className="mt-16 bg-white dark:bg-[#0F2444] rounded-[16px] shadow-xl border border-gray-200 dark:border-[#1A3356] w-full max-w-md p-6">
+          <form onSubmit={savePassenger} className="mt-16 bg-white dark:bg-zinc-900 rounded-[16px] shadow-xl border border-gray-200 dark:border-zinc-800 w-full max-w-md p-6">
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">
                 {editingPassengerIdx !== null ? "Editar Pasajero" : "Agregar Pasajero"}
@@ -719,8 +720,8 @@ export default function ReservationDetail() {
             </div>
 
             <div className="mt-6 flex items-center justify-end gap-2">
-              <button type="button" onClick={() => setPassengerModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-[#1A3356] rounded-[10px] hover:bg-gray-50 dark:hover:bg-gray-800">Cancelar</button>
-              <button type="submit" disabled={savingPassenger} data-testid="passenger-save-btn" className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] px-4 py-2 text-sm font-semibold disabled:opacity-60">
+              <button type="button" onClick={() => setPassengerModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-zinc-800 rounded-[10px] hover:bg-gray-50 dark:hover:bg-gray-800">Cancelar</button>
+              <button type="submit" disabled={savingPassenger} data-testid="passenger-save-btn" className="inline-flex items-center gap-2 bg-[#0D9387] hover:bg-[#0b7d72] text-white rounded-[10px] px-4 py-2 text-sm font-semibold disabled:opacity-60">
                 {savingPassenger ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Guardar
               </button>
             </div>
@@ -731,7 +732,7 @@ export default function ReservationDetail() {
       {/* Document Modal */}
       {documentModalOpen && (
         <div data-testid="document-modal" className="fixed inset-0 z-50 flex items-start justify-center bg-gray-900/50 backdrop-blur-sm p-4 overflow-y-auto">
-          <form onSubmit={saveDocument} className="mt-16 bg-white dark:bg-[#0F2444] rounded-[16px] shadow-xl border border-gray-200 dark:border-[#1A3356] w-full max-w-md p-6">
+          <form onSubmit={saveDocument} className="mt-16 bg-white dark:bg-zinc-900 rounded-[16px] shadow-xl border border-gray-200 dark:border-zinc-800 w-full max-w-md p-6">
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">Agregar Documento</h3>
               <button type="button" onClick={() => setDocumentModalOpen(false)} className="h-8 w-8 rounded-[8px] hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center">
@@ -764,8 +765,8 @@ export default function ReservationDetail() {
             </div>
 
             <div className="mt-6 flex items-center justify-end gap-2">
-              <button type="button" onClick={() => setDocumentModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-[#1A3356] rounded-[10px] hover:bg-gray-50 dark:hover:bg-gray-800">Cancelar</button>
-              <button type="submit" disabled={savingDocument} data-testid="document-save-btn" className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] px-4 py-2 text-sm font-semibold disabled:opacity-60">
+              <button type="button" onClick={() => setDocumentModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-zinc-800 rounded-[10px] hover:bg-gray-50 dark:hover:bg-gray-800">Cancelar</button>
+              <button type="submit" disabled={savingDocument} data-testid="document-save-btn" className="inline-flex items-center gap-2 bg-[#0D9387] hover:bg-[#0b7d72] text-white rounded-[10px] px-4 py-2 text-sm font-semibold disabled:opacity-60">
                 {savingDocument ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Guardar
               </button>
             </div>
@@ -776,7 +777,7 @@ export default function ReservationDetail() {
       {/* Payment Modal */}
       {paymentModalOpen && (
         <div data-testid="payment-modal" className="fixed inset-0 z-50 flex items-start justify-center bg-gray-900/50 backdrop-blur-sm p-4 overflow-y-auto">
-          <form onSubmit={savePayment} className="mt-16 bg-white dark:bg-[#0F2444] rounded-[16px] shadow-xl border border-gray-200 dark:border-[#1A3356] w-full max-w-md p-6">
+          <form onSubmit={savePayment} className="mt-16 bg-white dark:bg-zinc-900 rounded-[16px] shadow-xl border border-gray-200 dark:border-zinc-800 w-full max-w-md p-6">
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">Registrar Pago</h3>
               <button type="button" onClick={() => setPaymentModalOpen(false)} className="h-8 w-8 rounded-[8px] hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center">
@@ -831,8 +832,8 @@ export default function ReservationDetail() {
             </div>
 
             <div className="mt-6 flex items-center justify-end gap-2">
-              <button type="button" onClick={() => setPaymentModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-[#1A3356] rounded-[10px] hover:bg-gray-50 dark:hover:bg-gray-800">Cancelar</button>
-              <button type="submit" disabled={savingPayment} data-testid="payment-save-btn" className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] px-4 py-2 text-sm font-semibold disabled:opacity-60">
+              <button type="button" onClick={() => setPaymentModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-zinc-800 rounded-[10px] hover:bg-gray-50 dark:hover:bg-gray-800">Cancelar</button>
+              <button type="submit" disabled={savingPayment} data-testid="payment-save-btn" className="inline-flex items-center gap-2 bg-[#0D9387] hover:bg-[#0b7d72] text-white rounded-[10px] px-4 py-2 text-sm font-semibold disabled:opacity-60">
                 {savingPayment ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Registrar
               </button>
             </div>

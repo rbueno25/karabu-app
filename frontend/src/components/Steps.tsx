@@ -4,55 +4,30 @@ import { MessageSquare, FileText, CalendarCheck, Compass } from 'lucide-react';
 
 export default function Steps() {
   const steps = [
-    {
-      id: 1,
-      title: "Cuéntanos tu plan",
-      description: "Llena el formulario o escríbenos por WhatsApp con tu destino, fechas y presupuesto.",
-      icon: <MessageSquare className="w-5 h-5" />
-    },
-    {
-      id: 2,
-      title: "Recibe tu cotización",
-      description: "Te enviamos una propuesta clara y detallada, con precios transparentes y sin sorpresas.",
-      icon: <FileText className="w-5 h-5" />
-    },
-    {
-      id: 3,
-      title: "Confirma y reserva",
-      description: "Aparta tu viaje con un monto inicial. Nos encargamos de vuelos, hoteles y traslados.",
-      icon: <CalendarCheck className="w-5 h-5" />
-    },
-    {
-      id: 4,
-      title: "Viaja con confianza",
-      description: "Disfruta tu viaje. Te acompañamos con soporte antes y durante toda tu experiencia.",
-      icon: <Compass className="w-5 h-5" />
-    }
+    { id: 1, title: "Cuéntanos", desc: "Llena el formulario con tu destino y fechas.", icon: <MessageSquare className="w-4 h-4" /> },
+    { id: 2, title: "Cotización", desc: "Recibe una propuesta clara y detallada.", icon: <FileText className="w-4 h-4" /> },
+    { id: 3, title: "Reserva", desc: "Confirma y aparta con un monto inicial.", icon: <CalendarCheck className="w-4 h-4" /> },
+    { id: 4, title: "Viaja", desc: "Disfruta con soporte 24/7.", icon: <Compass className="w-4 h-4" /> }
   ];
 
   return (
-    <section className="py-20 bg-slate-50 relative border-b border-slate-150/60">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="pt-12 pb-2 lg:py-20 bg-slate-50 relative border-b border-slate-150/60">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         
-        {/* Section Header */}
-        <div className="text-center max-w-2xl mx-auto mb-20 flex flex-col gap-3">
-          <span className="text-sm font-bold text-brand-turquoise tracking-widest uppercase">
+        <div className="text-center max-w-2xl mx-auto mb-8 lg:mb-20 flex flex-col gap-2 lg:gap-3">
+          <span className="text-xs lg:text-sm font-bold text-brand-turquoise tracking-widest uppercase">
             ASÍ DE FÁCIL
           </span>
-          <h2 className="font-display text-3xl sm:text-4xl font-extrabold text-brand-navy tracking-tight">
+          <h2 className="font-display text-xl lg:text-4xl font-extrabold text-brand-navy tracking-tight">
             Cotiza tu viaje en 4 pasos
           </h2>
-          <div className="h-1 w-16 bg-brand-turquoise mx-auto rounded-full mt-1" />
+          <div className="h-1 w-12 lg:w-16 bg-brand-turquoise mx-auto rounded-full mt-1" />
         </div>
 
-        {/* Stepper Timeline */}
         <div className="relative">
-          
-          {/* Horizontal line connector for desktop */}
-          <div className="hidden lg:block absolute top-10 left-[14%] right-[14%] h-0 border-t border-dashed border-brand-turquoise/30 pointer-events-none z-0" />
+          <div className="hidden lg:block absolute top-8 left-[14%] right-[14%] h-0 border-t border-dashed border-brand-turquoise/30 pointer-events-none z-0" />
 
-          {/* Stepper Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-12 lg:gap-8 relative z-10">
+          <div className="grid grid-cols-4 gap-2 lg:gap-8 relative z-10">
             {steps.map((step, idx) => (
               <motion.div
                 key={step.id}
@@ -62,37 +37,26 @@ export default function Steps() {
                 transition={{ duration: 0.5, delay: idx * 0.1 }}
                 className="flex flex-col items-center text-center group"
               >
-                
-                {/* Step Circle with Icon & Number Badge */}
-                <div className="relative mb-6">
-                  {/* Outer circle glow */}
-                  <div className="absolute inset-[-4px] bg-brand-turquoise/5 rounded-full scale-0 group-hover:scale-110 transition-transform duration-300" />
-                  
-                  {/* Core Circle */}
-                  <div className="w-20 h-20 rounded-full bg-white border-2 border-brand-turquoise flex items-center justify-center text-brand-turquoise shadow-md group-hover:bg-brand-turquoise group-hover:text-white transition-all duration-300">
+                <div className="relative mb-2 lg:mb-6">
+                  <div className="w-10 h-10 lg:w-20 lg:h-20 rounded-full bg-white border-2 border-brand-turquoise flex items-center justify-center text-brand-turquoise shadow-md group-hover:bg-brand-turquoise group-hover:text-white transition-all duration-300">
                     {step.icon}
                   </div>
-
-                  {/* Top-Right Number Badge */}
-                  <div className="absolute -top-1.5 -right-1.5 w-7 h-7 rounded-full bg-brand-orange text-white font-mono text-xs font-bold flex items-center justify-center shadow-md">
+                  <div className="absolute -top-1 -right-1 w-5 h-5 lg:w-7 lg:h-7 rounded-full bg-brand-orange text-white font-mono text-[10px] lg:text-xs font-bold flex items-center justify-center shadow-md">
                     {step.id}
                   </div>
                 </div>
 
-                {/* Step text contents */}
-                <div className="flex flex-col gap-2 px-4">
-                  <h3 className="font-display font-extrabold text-lg sm:text-xl text-brand-navy group-hover:text-brand-turquoise transition-colors">
+                <div className="flex flex-col gap-1 px-0.5">
+                  <h3 className="font-display font-extrabold text-[11px] lg:text-xl text-brand-navy group-hover:text-brand-turquoise transition-colors leading-tight">
                     {step.title}
                   </h3>
-                  <p className="text-slate-500 font-sans text-sm leading-relaxed max-w-xs mx-auto">
-                    {step.description}
+                  <p className="text-slate-500 font-sans text-[9px] lg:text-sm leading-tight max-w-xs mx-auto">
+                    {step.desc}
                   </p>
                 </div>
-
               </motion.div>
             ))}
           </div>
-
         </div>
 
       </div>

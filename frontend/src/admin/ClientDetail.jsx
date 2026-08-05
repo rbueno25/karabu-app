@@ -5,13 +5,13 @@ import PageHeader from "./PageHeader";
 import StatusBadge from "./StatusBadge";
 import EmptyState from "./EmptyState";
 import { formatDate, formatCurrency } from "../lib/format";
+import { handlePhoneInput, formatPhoneWithCode } from "../utils/phone";
 import { toast } from "sonner";
-import { 
-  ArrowLeft, User, Mail, Phone, MapPin, FileText, 
+import { ArrowLeft, User, Mail, Phone, MapPin, FileText,
   CalendarCheck, CreditCard, History, Loader2, Save, Trash2 
 } from "lucide-react";
 
-const inputCls = "w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#132D52] text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-shadow";
+const inputCls = "w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-[#0D9387] focus:ring-2 focus:ring-[#0D9387]/20 outline-none transition-shadow";
 
 export default function ClientDetail() {
   const { id } = useParams();
@@ -141,7 +141,7 @@ export default function ClientDetail() {
         type: "reservation",
         title: `Reserva Creada`,
         desc: `Reserva confirmada de viaje a ${r.destination} por un total de ${formatCurrency(r.total_amount, r.currency)} (${r.status}).`,
-        color: r.status === "pagada" ? "bg-green-500" : r.status === "cancelada" ? "bg-gray-50 dark:bg-[#132D52]0" : "bg-blue-50 dark:bg-blue-900/300",
+        color: r.status === "pagada" ? "bg-green-500" : r.status === "cancelada" ? "bg-gray-50 dark:bg-zinc-8000" : "bg-blue-50 dark:bg-blue-900/300",
         icon: CalendarCheck
       });
     });
@@ -177,7 +177,7 @@ export default function ClientDetail() {
       <div className="flex items-center gap-3">
         <Link 
           to="/admin/clientes" 
-          className="h-9 w-9 border border-gray-200 dark:border-[#1A3356] rounded-[10px] bg-white dark:bg-[#0F2444] flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+          className="h-9 w-9 border border-gray-200 dark:border-zinc-800 rounded-[10px] bg-white dark:bg-zinc-900 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
           data-testid="client-back-btn"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -196,9 +196,9 @@ export default function ClientDetail() {
       <div className="grid grid-cols-12 gap-6">
         {/* Profile Summary Card */}
         <aside className="col-span-12 lg:col-span-4 space-y-6">
-          <div className="bg-white dark:bg-[#0F2444] rounded-[16px] border border-gray-200 dark:border-[#1A3356] p-6 shadow-[0_1px_3px_0_rgba(0,0,0,0.05),_0_1px_2px_-1px_rgba(0,0,0,0.05)]">
-            <div className="flex flex-col items-center text-center pb-6 border-b border-gray-100 dark:border-[#1A3356]">
-              <div className="h-16 w-16 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xl font-bold mb-3">
+          <div className="bg-white dark:bg-zinc-900 rounded-[16px] border border-gray-200 dark:border-zinc-800 p-6 shadow-[0_1px_3px_0_rgba(0,0,0,0.05),_0_1px_2px_-1px_rgba(0,0,0,0.05)]">
+            <div className="flex flex-col items-center text-center pb-6 border-b border-gray-100 dark:border-zinc-800">
+              <div className="h-16 w-16 rounded-full bg-[#0D9387]/10 text-[#0D9387] flex items-center justify-center text-xl font-bold mb-3">
                 {client.first_name[0]}{client.last_name[0]}
               </div>
               <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">{client.first_name} {client.last_name}</h3>
@@ -210,14 +210,14 @@ export default function ClientDetail() {
                 <Mail className="h-4 w-4 text-gray-400 dark:text-gray-400 mt-0.5" />
                 <div className="flex-1 min-w-0">
                   <span className="text-xs text-gray-400 dark:text-gray-400 block font-medium">Correo Electrónico</span>
-                  <a href={`mailto:${client.email}`} className="text-gray-700 dark:text-gray-300 hover:text-blue-600 break-all font-medium">{client.email}</a>
+                  <a href={`mailto:${client.email}`} className="text-gray-700 dark:text-gray-300 hover:text-[#0D9387] break-all font-medium">{client.email}</a>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <Phone className="h-4 w-4 text-gray-400 dark:text-gray-400 mt-0.5" />
                 <div className="flex-1">
                   <span className="text-xs text-gray-400 dark:text-gray-400 block font-medium">Teléfono</span>
-                  <a href={`tel:${client.phone}`} className="text-gray-700 dark:text-gray-300 hover:text-blue-600 font-medium">{client.phone}</a>
+                  <a href={`tel:${client.phone}`} className="text-gray-700 dark:text-gray-300 hover:text-[#0D9387] font-medium">{formatPhoneWithCode(client.phone)}</a>
                 </div>
               </div>
               <div className="flex items-start gap-3">
@@ -236,17 +236,17 @@ export default function ClientDetail() {
               </div>
             </div>
 
-            <div className="pt-4 border-t border-gray-100 dark:border-[#1A3356] flex items-center justify-around text-center">
+            <div className="pt-4 border-t border-gray-100 dark:border-zinc-800 flex items-center justify-around text-center">
               <div>
                 <span className="text-lg font-bold text-gray-900 dark:text-gray-100 block">{reservations.length}</span>
                 <span className="text-xs text-gray-400 dark:text-gray-400 font-medium">Reservas</span>
               </div>
-              <div className="border-r border-gray-200 dark:border-[#1A3356] h-8"></div>
+              <div className="border-r border-gray-200 dark:border-zinc-800 h-8"></div>
               <div>
                 <span className="text-lg font-bold text-gray-900 dark:text-gray-100 block">{quotations.length}</span>
                 <span className="text-xs text-gray-400 dark:text-gray-400 font-medium">Cotizaciones</span>
               </div>
-              <div className="border-r border-gray-200 dark:border-[#1A3356] h-8"></div>
+              <div className="border-r border-gray-200 dark:border-zinc-800 h-8"></div>
               <div>
                 <span className="text-lg font-bold text-gray-900 dark:text-gray-100 block">
                   {formatCurrency(payments.reduce((sum, p) => sum + (p.status === "completado" ? p.amount : 0), 0))}
@@ -259,9 +259,9 @@ export default function ClientDetail() {
 
         {/* Details Tabs Card */}
         <main className="col-span-12 lg:col-span-8 space-y-6">
-          <div className="bg-white dark:bg-[#0F2444] rounded-[16px] border border-gray-200 dark:border-[#1A3356] shadow-[0_1px_3px_0_rgba(0,0,0,0.05),_0_1px_2px_-1px_rgba(0,0,0,0.05)] overflow-hidden">
+          <div className="bg-white dark:bg-zinc-900 rounded-[16px] border border-gray-200 dark:border-zinc-800 shadow-[0_1px_3px_0_rgba(0,0,0,0.05),_0_1px_2px_-1px_rgba(0,0,0,0.05)] overflow-hidden">
             {/* Tabs Header */}
-            <div className="bg-gray-50 dark:bg-[#132D52]/50 border-b border-gray-200 dark:border-[#1A3356] px-6 py-2 flex items-center gap-1 overflow-x-auto">
+            <div className="bg-gray-50 dark:bg-zinc-800/50 border-b border-gray-200 dark:border-zinc-800 px-6 py-2 flex items-center gap-1 overflow-x-auto">
               {[
                 { id: "info", label: "Perfil", icon: User },
                 { id: "reservas", label: "Reservas", icon: CalendarCheck },
@@ -277,7 +277,7 @@ export default function ClientDetail() {
                   className={[
                     "flex items-center gap-2 px-3.5 py-2.5 rounded-[10px] text-xs font-semibold uppercase tracking-wider transition-colors",
                     tab === t.id 
-                      ? "bg-white dark:bg-[#0F2444] text-blue-600 shadow-sm border border-gray-200 dark:border-[#1A3356]" 
+                      ? "bg-white dark:bg-zinc-900 text-[#0D9387] shadow-sm border border-gray-200 dark:border-zinc-800" 
                       : "text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/55"
                   ].join(" ")}
                 >
@@ -329,8 +329,8 @@ export default function ClientDetail() {
                       <input 
                         data-testid="client-phone"
                         required 
-                        value={form.phone} 
-                        onChange={(e) => setForm({ ...form, phone: e.target.value })} 
+                        value={form.phone}
+                        onChange={(e) => setForm({ ...form, phone: handlePhoneInput(e.target.value) })}
                         className={inputCls} 
                       />
                     </Field>
@@ -362,7 +362,7 @@ export default function ClientDetail() {
                     </select>
                   </Field>
 
-                  <div className="pt-4 border-t border-gray-100 dark:border-[#1A3356] flex items-center justify-between">
+                  <div className="pt-4 border-t border-gray-100 dark:border-zinc-800 flex items-center justify-between">
                     <button
                       type="button"
                       onClick={handleDelete}
@@ -376,7 +376,7 @@ export default function ClientDetail() {
                       type="submit"
                       disabled={saving}
                       data-testid="client-save-btn"
-                      className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] px-4 py-2 text-sm font-semibold transition-colors shadow-sm disabled:opacity-60"
+                      className="inline-flex items-center gap-2 bg-[#0D9387] hover:bg-[#0b7d72] text-white rounded-[10px] px-4 py-2 text-sm font-semibold transition-colors shadow-sm disabled:opacity-60"
                     >
                       {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                       Guardar Cambios
@@ -395,9 +395,9 @@ export default function ClientDetail() {
                       icon={CalendarCheck} 
                     />
                   ) : (
-                    <div className="overflow-x-auto border border-gray-200 dark:border-[#1A3356] rounded-[10px]">
+                    <div className="overflow-x-auto border border-gray-200 dark:border-zinc-800 rounded-[10px]">
                       <table className="w-full text-sm text-left">
-                        <thead className="bg-gray-50 dark:bg-[#132D52] border-b border-gray-200 dark:border-[#1A3356]">
+                        <thead className="bg-gray-50 dark:bg-zinc-800 border-b border-gray-200 dark:border-zinc-800">
                           <tr>
                             <th className="px-4 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Destino</th>
                             <th className="px-4 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Fecha Salida</th>
@@ -408,7 +408,7 @@ export default function ClientDetail() {
                         </thead>
                         <tbody>
                           {reservations.map(r => (
-                            <tr key={r.id} className="border-b border-gray-100 dark:border-[#1A3356] last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800">
+                            <tr key={r.id} className="border-b border-gray-100 dark:border-zinc-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800">
                               <td className="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">{r.destination}</td>
                               <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{formatDate(r.departure_date)}</td>
                               <td className="px-4 py-3 text-gray-900 dark:text-gray-100">{formatCurrency(r.total_amount, r.currency)}</td>
@@ -416,7 +416,7 @@ export default function ClientDetail() {
                               <td className="px-4 py-3 text-right">
                                 <Link 
                                   to={`/admin/reservas/${r.id}`}
-                                  className="text-blue-600 hover:text-blue-800 text-xs font-semibold hover:underline"
+                                  className="text-[#0D9387] hover:text-[#0b7d72] text-xs font-semibold hover:underline"
                                 >
                                   Detalle
                                 </Link>
@@ -440,9 +440,9 @@ export default function ClientDetail() {
                       icon={FileText} 
                     />
                   ) : (
-                    <div className="overflow-x-auto border border-gray-200 dark:border-[#1A3356] rounded-[10px]">
+                    <div className="overflow-x-auto border border-gray-200 dark:border-zinc-800 rounded-[10px]">
                       <table className="w-full text-sm text-left">
-                        <thead className="bg-gray-50 dark:bg-[#132D52] border-b border-gray-200 dark:border-[#1A3356]">
+                        <thead className="bg-gray-50 dark:bg-zinc-800 border-b border-gray-200 dark:border-zinc-800">
                           <tr>
                             <th className="px-4 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Destino</th>
                             <th className="px-4 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Fecha Viaje</th>
@@ -453,7 +453,7 @@ export default function ClientDetail() {
                         </thead>
                         <tbody>
                           {quotations.map(q => (
-                            <tr key={q.id} className="border-b border-gray-100 dark:border-[#1A3356] last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800">
+                            <tr key={q.id} className="border-b border-gray-100 dark:border-zinc-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800">
                               <td className="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">{q.destination}</td>
                               <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{q.travel_date ? formatDate(q.travel_date) : "Sin definir"}</td>
                               <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{q.travelers}</td>
@@ -478,9 +478,9 @@ export default function ClientDetail() {
                       icon={CreditCard} 
                     />
                   ) : (
-                    <div className="overflow-x-auto border border-gray-200 dark:border-[#1A3356] rounded-[10px]">
+                    <div className="overflow-x-auto border border-gray-200 dark:border-zinc-800 rounded-[10px]">
                       <table className="w-full text-sm text-left">
-                        <thead className="bg-gray-50 dark:bg-[#132D52] border-b border-gray-200 dark:border-[#1A3356]">
+                        <thead className="bg-gray-50 dark:bg-zinc-800 border-b border-gray-200 dark:border-zinc-800">
                           <tr>
                             <th className="px-4 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Fecha</th>
                             <th className="px-4 py-2.5 text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Método</th>
@@ -491,7 +491,7 @@ export default function ClientDetail() {
                         </thead>
                         <tbody>
                           {payments.map(p => (
-                            <tr key={p.id} className="border-b border-gray-100 dark:border-[#1A3356] last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800">
+                            <tr key={p.id} className="border-b border-gray-100 dark:border-zinc-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800">
                               <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{formatDate(p.payment_date || p.created_at)}</td>
                               <td className="px-4 py-3 text-gray-700 dark:text-gray-300 capitalize">{p.method}</td>
                               <td className="px-4 py-3 text-gray-600 dark:text-gray-300 font-mono text-xs">{p.reference || "—"}</td>
@@ -518,14 +518,14 @@ export default function ClientDetail() {
                     value={notesText}
                     onChange={(e) => setNotesText(e.target.value)}
                     placeholder="Escribe observaciones, preferencias de viaje del cliente, historial de contacto, etc..."
-                    className="w-full rounded-[10px] border border-gray-300 dark:border-gray-600 px-3.5 py-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-shadow"
+                    className="w-full rounded-[10px] border border-gray-300 dark:border-gray-600 px-3.5 py-3 text-sm focus:border-[#0D9387] focus:ring-2 focus:ring-[#0D9387]/20 outline-none transition-shadow"
                   />
                   <div className="flex justify-end">
                     <button
                       onClick={handleSaveNotes}
                       disabled={savingNotes}
                       data-testid="client-notes-save-btn"
-                      className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] px-4 py-2 text-sm font-semibold transition-colors shadow-sm disabled:opacity-60"
+                      className="inline-flex items-center gap-2 bg-[#0D9387] hover:bg-[#0b7d72] text-white rounded-[10px] px-4 py-2 text-sm font-semibold transition-colors shadow-sm disabled:opacity-60"
                     >
                       {savingNotes ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                       Guardar Notas
@@ -552,7 +552,7 @@ export default function ClientDetail() {
                             <Icon className="h-3 w-3" />
                           </div>
                           {/* Event details */}
-                          <div className="flex-1 bg-gray-50 dark:bg-[#132D52]/50 hover:bg-gray-50 dark:hover:bg-gray-800 border border-gray-100 dark:border-[#1A3356] rounded-[12px] p-4 transition-colors">
+                          <div className="flex-1 bg-gray-50 dark:bg-zinc-800/50 hover:bg-gray-50 dark:hover:bg-gray-800 border border-gray-100 dark:border-zinc-800 rounded-[12px] p-4 transition-colors">
                             <div className="flex items-center justify-between flex-wrap gap-2 mb-1.5">
                               <h5 className="text-sm font-semibold text-gray-900 dark:text-gray-100">{event.title}</h5>
                               <span className="text-xs text-gray-400 dark:text-gray-400">{formatDate(event.date)}</span>

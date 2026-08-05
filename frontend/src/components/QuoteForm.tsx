@@ -25,6 +25,9 @@ import {
   Smartphone
 } from 'lucide-react';
 import { ContactFormInput } from '../types';
+import { DayPicker } from 'react-day-picker';
+import { handlePhoneInput } from '../utils/phone';
+import 'react-day-picker/style.css';
 
 interface QuoteFormProps {
   preselectedDestination: string;
@@ -50,15 +53,32 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
     preferredContact: 'ambos',
     travelType: 'Vacaciones',
     hotelCategory: '4 estrellas',
-    comments: '',
-    habitacionesSencilla: 1,
-    habitacionesDoble: 0,
-    habitacionesTriple: 0,
+    roomsSingle: 1,
+    roomsDouble: 0,
+    roomsTriple: 0,
+    comments: ''
   });
 
   const [errors, setErrors] = useState<Partial<Record<keyof ContactFormInput, string>>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [allDestinations, setAllDestinations] = useState<{name:string; country:string}[]>([]);
+
+  const API_BASE = import.meta.env.VITE_API_URL || 'https://karabu-srv.onrender.com';
+
+  // Fetch destinations for autocomplete
+  useEffect(() => {
+    fetch(API_BASE + '/api/destinations')
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data)) setAllDestinations(data);
+      })
+      .catch(() => {});
+  }, []);
+
+  // Unique countries for country datalist
+  const uniqueCountries = [...new Set(allDestinations.map(d => d.country))].sort();
 
   // Map destination names to country + city for auto-fill
   const destinationMap: Record<string, { country: string; city: string }> = {
@@ -76,7 +96,16 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
   useEffect(() => {
     if (preselectedDestination && preselectedDestination !== 'Todos' && preselectedDestination !== 'Todas') {
       const mapped = destinationMap[preselectedDestination];
-      if (mapped) {
+      // Check for country override from DestinationBrowser (stored in sessionStorage)
+      const overrideCountry = sessionStorage.getItem('karabu_preselected_country');
+      if (overrideCountry) {
+        sessionStorage.removeItem('karabu_preselected_country');
+        setFormData((prev) => ({
+          ...prev,
+          country: overrideCountry,
+          city: mapped ? mapped.city : preselectedDestination,
+        }));
+      } else if (mapped) {
         setFormData((prev) => ({ ...prev, country: mapped.country, city: mapped.city }));
       } else {
         // Unknown destination — fill as country
@@ -94,7 +123,20 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
     }
   };
 
-  const handleCounterChange = (field: 'adultsCount' | 'childrenCount' | 'babiesCount' | 'habitacionesSencilla' | 'habitacionesDoble' | 'habitacionesTriple', direction: 'inc' | 'dec') => {
+  // Auto-fill country when city matches a destination
+  const handleCityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const city = e.target.value;
+    setFormData((prev) => ({ ...prev, city }));
+    // Find matching destination and auto-fill country
+    const match = allDestinations.find(
+      d => d.name.toLowerCase() === city.toLowerCase().trim()
+    );
+    if (match) {
+      setFormData((prev) => ({ ...prev, country: match.country }));
+    }
+  };
+
+  const handleCounterChange = (field: 'adultsCount' | 'childrenCount' | 'babiesCount' | 'roomsSingle' | 'roomsDouble' | 'roomsTriple', direction: 'inc' | 'dec') => {
     setFormData((prev) => {
       const val = prev[field];
       const minVal = field === 'adultsCount' ? 1 : 0;
@@ -161,14 +203,13 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
         additionalServices: formData.additionalServices,
         travelType: formData.travelType,
         hotelCategory: formData.hotelCategory,
+        roomsSingle: formData.roomsSingle,
+        roomsDouble: formData.roomsDouble,
+        roomsTriple: formData.roomsTriple,
         preferredContact: formData.preferredContact,
         comments: formData.comments,
-        habitacionesSencilla: formData.habitacionesSencilla,
-        habitacionesDoble: formData.habitacionesDoble,
-        habitacionesTriple: formData.habitacionesTriple,
       };
 
-      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
       const res = await fetch(`${API_BASE}/api/leads`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -179,6 +220,25 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
 
       setIsSubmitting(false);
       setIsSuccess(true);
+      // Resetear formulario al estado inicial
+      setFormData({
+        fullName: '', email: '', phone: '',
+        country: '', city: '', preferredHotel: '',
+        departureDate: '', returnDate: '',
+        flexibleDates: 'No',
+        adultsCount: 2, childrenCount: 0, babiesCount: 0,
+        budgetRange: 'US$1,000–2,000',
+        additionalServices: [],
+        preferredContact: 'ambos',
+        travelType: 'Vacaciones',
+        hotelCategory: '4 estrellas',
+        roomsSingle: 1,
+        roomsDouble: 0,
+        roomsTriple: 0,
+        comments: ''
+      });
+      setErrors({});
+      onClearPreselected();
     } catch (err) {
       setIsSubmitting(false);
       alert('Hubo un error al enviar tu cotización. Intenta de nuevo o escríbenos por WhatsApp.');
@@ -190,21 +250,14 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
     const servicesText = formData.additionalServices.length > 0 
       ? `\n🔌 Servicios extra: ${formData.additionalServices.join(', ')}` 
       : '';
-    const roomsText = formData.habitacionesSencilla || formData.habitacionesDoble || formData.habitacionesTriple
-      ? `\\n🛏️ Habitaciones: ${[
-          formData.habitacionesSencilla > 0 ? `${formData.habitacionesSencilla} Sencilla` : '',
-          formData.habitacionesDoble > 0 ? `${formData.habitacionesDoble} Doble` : '',
-          formData.habitacionesTriple > 0 ? `${formData.habitacionesTriple} Triple` : '',
-        ].filter(Boolean).join(', ')}`
-      : '';
     const text = `¡Hola Karabu! Acabo de enviar mi cotización en la web:
 👤 Nombre: ${formData.fullName}
 📧 Email: ${formData.email}
 📞 WhatsApp: ${formData.phone}
 
-🌎 Destino: ${formData.country}${formData.city ? `, ${formData.city}` : ''}${formData.preferredHotel ? `\\n🏨 Preferencia: ${formData.preferredHotel}` : ''}
+🌎 Destino: ${formData.country}${formData.city ? `, ${formData.city}` : ''}${formData.preferredHotel ? `\n🏨 Preferencia: ${formData.preferredHotel}` : ''}
 📅 Fechas: del ${formData.departureDate} al ${formData.returnDate} (${formData.flexibleDates === 'Sí' ? 'Fechas flexibles' : 'Fechas exactas'})
-👥 Viajeros: ${formData.adultsCount} Adulto(s), ${formData.childrenCount} Niño(s), ${formData.babiesCount} Bebé(s)${roomsText}
+👥 Viajeros: ${formData.adultsCount} Adulto(s), ${formData.childrenCount} Niño(s), ${formData.babiesCount} Bebé(s)
 💰 Presupuesto: ${formData.budgetRange}
 🏨 Categoría de Hotel: ${formData.hotelCategory}
 🗺️ Tipo de viaje: ${formData.travelType}${servicesText}
@@ -217,7 +270,6 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
   // Services list mapping to Lucide Icons
   const servicesConfig = [
     { name: 'Vuelos', icon: <Plane className="w-5 h-5" /> },
-    { name: 'Hotel', icon: <Hotel className="w-5 h-5" /> },
     { name: 'Transporte', icon: <Car className="w-5 h-5" /> },
     { name: 'Seguro de viaje', icon: <Shield className="w-5 h-5" /> },
     { name: 'Visa', icon: <FileText className="w-5 h-5" /> },
@@ -230,77 +282,52 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
   const hotelCategoryOptions = ['3 estrellas', '4 estrellas', '5 estrellas', 'Todo incluido'];
 
   return (
-    <section id="cotizacion" className="py-20 bg-slate-100 relative scroll-mt-20">
+    <section id="cotizacion" className="pt-2 pb-14 lg:py-20 bg-slate-100 relative scroll-mt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Full Split Container Card */}
         <div className="bg-white rounded-3xl shadow-xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 border border-slate-200">
           
-          {/* Left Column - Brand Info & Trust Seals (Navy Blue with Travel Background Overlay) */}
-          <div className="lg:col-span-4 relative p-8 sm:p-12 text-white flex flex-col justify-between overflow-hidden group min-h-[400px] lg:min-h-full">
+          {/* Left Column - Full-bleed image, minimal overlay */}
+          <div className="hidden lg:flex lg:col-span-4 relative text-white flex-col justify-end overflow-hidden min-h-[400px] lg:min-h-full">
             
-            {/* Background Travel Scene Image with smooth slow zoom effect */}
+            {/* Background Image */}
             <div className="absolute inset-0 z-0">
               <img
-                src="/hero-main.jpg"
+                src="/form-bg.jpg"
                 alt="Fondo de viajes Karabu"
                 className="w-full h-full object-cover"
                 referrerPolicy="no-referrer"
               />
-              {/* Light overlay to keep text readable */}
-              <div className="absolute inset-0 bg-brand-navy/40" />
+              {/* Subtle gradient at bottom for text readability */}
+              <div className="absolute inset-0 bg-gradient-to-t from-brand-navy/70 via-brand-navy/20 to-transparent" />
             </div>
-
-            {/* Glowing neon accent for high-end depth */}
-            <div className="absolute -top-12 -right-12 w-72 h-72 bg-brand-turquoise/20 rounded-full blur-3xl pointer-events-none z-10" />
-            <div className="absolute -bottom-12 -left-12 w-64 h-64 bg-brand-orange/10 rounded-full blur-3xl pointer-events-none z-10" />
             
-            <div className="flex flex-col gap-6 relative z-10">
+            <div className="relative z-10 p-8 sm:p-10 pb-8">
               <span className="text-brand-turquoise text-xs font-extrabold uppercase tracking-[0.15em]">
                 SOLICITA TU COTIZACIÓN
               </span>
-              <h3 className="font-display text-3xl sm:text-4xl font-extrabold text-white leading-tight">
+              <h3 className="font-display text-3xl sm:text-4xl font-extrabold text-white leading-tight mt-3">
                 Cotiza tu viaje en minutos
               </h3>
-              <p className="text-slate-200 font-sans text-sm leading-relaxed opacity-95">
-                Completa el formulario y recibe una propuesta personalizada con paquetes de viaje, asesoría de visas y acompañamiento en cada paso.
-              </p>
-              
-              {/* Trust checklist */}
-              <div className="flex flex-col gap-4 mt-6">
-                {[
-                  'Cotización clara y sin compromiso',
-                  'Precios transparentes, sin letra pequeña',
-                  'La mejor opción para tu presupuesto',
-                  'Acompañamiento antes y durante tu viaje'
-                ].map((item, idx) => (
-                  <div key={idx} className="flex items-center gap-3">
-                    <div className="flex-shrink-0 w-5 h-5 rounded-full bg-brand-turquoise/20 flex items-center justify-center text-brand-turquoise border border-brand-turquoise/30">
-                      <Check className="w-3.5 h-3.5 stroke-[3]" />
-                    </div>
-                    <span className="font-sans text-sm text-slate-100 font-medium">{item}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Footer notice within left card */}
-            <div className="mt-12 pt-6 border-t border-white/15 flex items-start gap-3 relative z-10">
-              <Info className="w-5 h-5 text-brand-turquoise flex-shrink-0 mt-0.5" />
-              <p className="text-[11px] text-slate-200 leading-relaxed font-sans opacity-90">
-                La información enviada será recibida en el correo del propietario del proyecto para brindarte una atención personalizada de inmediato.
-              </p>
             </div>
           </div>
 
           {/* Right Column - Interactive Form Panel (White) */}
-          <div className="lg:col-span-8 p-6 sm:p-10 md:p-12 flex flex-col justify-center">
+          <div className="lg:col-span-8 p-4 sm:p-10 md:p-12 flex flex-col justify-center">
+
+            {/* Mobile-only header */}
+            <div className="lg:hidden text-center mb-4">
+              <span className="text-brand-turquoise text-xs font-extrabold uppercase tracking-[0.15em]">Solicita tu cotización</span>
+              <h3 className="font-display text-xl font-extrabold text-brand-navy mt-1">Cotiza tu viaje en minutos</h3>
+            </div>
+
             <motion.form
               key="quote-form"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               onSubmit={handleSubmit}
-              className="flex flex-col gap-8"
+              className="flex flex-col gap-4 lg:gap-8"
             >
                   
                   {/* --- SECTION 1: DATOS PERSONALES --- */}
@@ -342,7 +369,7 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
                           id="phone"
                           name="phone"
                           value={formData.phone}
-                          onChange={handleInputChange}
+                          onChange={(e) => setFormData((prev) => ({ ...prev, phone: handlePhoneInput(e.target.value) }))}
                           placeholder="809-306-2424"
                           className={`font-sans text-sm px-3.5 py-2.5 rounded-lg border bg-slate-50 focus:bg-white focus:outline-none transition-colors ${
                             errors.phone ? 'border-red-500 ring-1 ring-red-200' : 'border-slate-200 focus:border-brand-turquoise'
@@ -393,11 +420,15 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
                           name="country"
                           value={formData.country}
                           onChange={handleInputChange}
-                          placeholder="Ej: República Dominicana, España, etc."
+                          placeholder="Ej: República Dominicana, España..."
+                          list="countries-list"
                           className={`font-sans text-sm px-3.5 py-2.5 rounded-lg border bg-slate-50 focus:bg-white focus:outline-none transition-colors ${
                             errors.country ? 'border-red-500 ring-1 ring-red-200' : 'border-slate-200 focus:border-brand-turquoise'
                           }`}
                         />
+                        <datalist id="countries-list">
+                          {uniqueCountries.map(c => <option key={c} value={c} />)}
+                        </datalist>
                         {errors.country && <span className="text-[10px] text-red-500 font-sans">{errors.country}</span>}
                       </div>
 
@@ -411,10 +442,14 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
                           id="city"
                           name="city"
                           value={formData.city}
-                          onChange={handleInputChange}
-                          placeholder="Ej: Punta Cana, Madrid, etc."
+                          onChange={handleCityChange}
+                          placeholder="Ej: Punta Cana, Madrid, Miami..."
+                          list="cities-list"
                           className="font-sans text-sm px-3.5 py-2.5 rounded-lg border bg-slate-50 border-slate-200 focus:border-brand-turquoise focus:bg-white focus:outline-none transition-colors"
                         />
+                        <datalist id="cities-list">
+                          {allDestinations.map(d => <option key={d.name} value={d.name} />)}
+                        </datalist>
                       </div>
                     </div>
 
@@ -434,49 +469,90 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
                       />
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-2">
-                      {/* Departure Date */}
-                      <div className="flex flex-col gap-1.5">
-                        <label htmlFor="departureDate" className="font-display font-bold text-[11px] text-slate-500 uppercase tracking-wide">
-                          Fecha de salida *
-                        </label>
-                        <input
-                          type="date"
-                          id="departureDate"
-                          name="departureDate"
-                          value={formData.departureDate}
-                          onChange={handleInputChange}
-                          className={`font-sans text-sm px-3.5 py-2.5 rounded-lg border bg-slate-50 focus:bg-white focus:outline-none transition-colors ${
-                            errors.departureDate ? 'border-red-500 ring-1 ring-red-200' : 'border-slate-200 focus:border-brand-turquoise'
+                    {/* Date Range Picker */}
+                    <div className="flex flex-col gap-1.5">
+                      <label className="font-display font-bold text-[11px] text-slate-500 uppercase tracking-wide">
+                        Fechas de viaje *
+                      </label>
+                      
+                      {/* Trigger button */}
+                      <div className="relative">
+                        <button
+                          type="button"
+                          onClick={() => setShowCalendar(!showCalendar)}
+                          className={`w-full flex items-center gap-3 font-sans text-sm px-3.5 py-2.5 rounded-lg border bg-slate-50 hover:bg-white focus:bg-white focus:outline-none transition-colors text-left ${
+                            (errors.departureDate || errors.returnDate) ? 'border-red-500 ring-1 ring-red-200' : 'border-slate-200 focus:border-brand-turquoise'
                           }`}
-                        />
-                        {errors.departureDate && <span className="text-[10px] text-red-500 font-sans">{errors.departureDate}</span>}
+                        >
+                          <Calendar className="w-4 h-4 text-brand-turquoise flex-shrink-0" />
+                          {formData.departureDate && formData.returnDate ? (
+                            <span className="text-brand-navy font-medium">
+                              {new Date(formData.departureDate + 'T12:00').toLocaleDateString('es-DO', { day: 'numeric', month: 'short' })} → {new Date(formData.returnDate + 'T12:00').toLocaleDateString('es-DO', { day: 'numeric', month: 'short', year: 'numeric' })}
+                              <span className="text-slate-400 font-normal ml-1">
+                                ({Math.round((new Date(formData.returnDate + 'T12:00').getTime() - new Date(formData.departureDate + 'T12:00').getTime()) / 86400000)} noches)
+                              </span>
+                            </span>
+                          ) : (
+                            <span className="text-slate-400">Selecciona ida y vuelta</span>
+                          )}
+                        </button>
+
+                        {/* Calendar popover */}
+                        {showCalendar && (
+                          <div className="absolute left-0 sm:left-auto sm:right-0 z-50 mt-2 bg-white rounded-2xl shadow-2xl border border-slate-200 p-3 w-fit max-w-[calc(100vw-2rem)]">
+                            <DayPicker
+                              mode="range"
+                              selected={{
+                                from: formData.departureDate ? new Date(formData.departureDate + 'T12:00') : undefined,
+                                to: formData.returnDate ? new Date(formData.returnDate + 'T12:00') : undefined,
+                              }}
+                              onSelect={(range) => {
+                                setFormData(prev => ({
+                                  ...prev,
+                                  departureDate: range?.from ? range.from.toISOString().split('T')[0] : '',
+                                  returnDate: range?.to ? range.to.toISOString().split('T')[0] : '',
+                                }));
+                                setErrors(prev => ({ ...prev, departureDate: undefined, returnDate: undefined }));
+                              }}
+                              numberOfMonths={1}
+                              disabled={{ before: new Date() }}
+                              className="rdp-compact"
+                            />
+                            <div className="flex gap-2 mt-2">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setFormData(prev => ({ ...prev, departureDate: '', returnDate: '' }));
+                                }}
+                                className="flex-1 text-xs text-slate-400 hover:text-slate-600 py-1.5"
+                              >
+                                Limpiar
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setShowCalendar(false)}
+                                className="flex-1 text-xs font-semibold bg-brand-turquoise text-white rounded-lg py-1.5 hover:bg-brand-turquoise/90 transition-colors"
+                              >
+                                {formData.departureDate && formData.returnDate ? 'Listo ✓' : 'Cerrar'}
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Backdrop to close */}
+                        {showCalendar && (
+                          <div className="fixed inset-0 z-40" onClick={() => setShowCalendar(false)} />
+                        )}
                       </div>
 
-                      {/* Return Date */}
-                      <div className="flex flex-col gap-1.5">
-                        <label htmlFor="returnDate" className="font-display font-bold text-[11px] text-slate-500 uppercase tracking-wide">
-                          Fecha de regreso *
-                        </label>
-                        <input
-                          type="date"
-                          id="returnDate"
-                          name="returnDate"
-                          value={formData.returnDate}
-                          onChange={handleInputChange}
-                          className={`font-sans text-sm px-3.5 py-2.5 rounded-lg border bg-slate-50 focus:bg-white focus:outline-none transition-colors ${
-                            errors.returnDate ? 'border-red-500 ring-1 ring-red-200' : 'border-slate-200 focus:border-brand-turquoise'
-                          }`}
-                        />
-                        {errors.returnDate && <span className="text-[10px] text-red-500 font-sans">{errors.returnDate}</span>}
-                      </div>
+                      {/* Error messages */}
+                      {errors.departureDate && <span className="text-[10px] text-red-500 font-sans">{errors.departureDate}</span>}
+                      {!errors.departureDate && errors.returnDate && <span className="text-[10px] text-red-500 font-sans">{errors.returnDate}</span>}
 
-                      {/* ¿Fechas flexibles? */}
-                      <div className="flex flex-col gap-1.5">
-                        <span className="font-display font-bold text-[11px] text-slate-500 uppercase tracking-wide">
-                          ¿Fechas flexibles?
-                        </span>
-                        <div className="grid grid-cols-2 gap-2 h-[42px]">
+                      {/* Flexible dates toggle */}
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="font-display font-bold text-[10px] text-slate-400 uppercase tracking-wide">¿Fechas flexibles?</span>
+                        <div className="flex gap-1">
                           {['Sí', 'No'].map((val) => {
                             const isSelected = formData.flexibleDates === val;
                             return (
@@ -484,7 +560,7 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
                                 type="button"
                                 key={val}
                                 onClick={() => handleSelectPill('flexibleDates', val)}
-                                className={`rounded-lg font-sans text-xs font-semibold border transition-all flex items-center justify-center ${
+                                className={`rounded-md font-sans text-[11px] font-semibold border transition-all px-3 py-1 ${
                                   isSelected 
                                     ? 'bg-brand-turquoise/10 border-brand-turquoise text-brand-navy' 
                                     : 'bg-slate-50 border-slate-200 hover:bg-slate-100 text-slate-600'
@@ -509,7 +585,7 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
                     </div>
 
                     {/* Numeric Counters for Travelers */}
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {/* Adults */}
                       <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/60 flex items-center justify-between">
                         <div className="flex flex-col">
@@ -541,7 +617,7 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
                       <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/60 flex items-center justify-between">
                         <div className="flex flex-col">
                           <span className="font-display font-bold text-xs text-brand-navy">Niños</span>
-                          <span className="text-[10px] text-slate-400 font-sans font-medium">De 2 a 12 años</span>
+                          <span className="text-[10px] text-slate-400 font-sans font-medium">De 1 a 17 años</span>
                         </div>
                         <div className="flex items-center gap-2.5">
                           <button
@@ -564,71 +640,36 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
                         </div>
                       </div>
 
-                      {/* Babies */}
-                      <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/60 flex items-center justify-between">
-                        <div className="flex flex-col">
-                          <span className="font-display font-bold text-xs text-brand-navy">Bebés</span>
-                          <span className="text-[10px] text-slate-400 font-sans font-medium">Menores de 2 años</span>
-                        </div>
-                        <div className="flex items-center gap-2.5">
-                          <button
-                            type="button"
-                            onClick={() => handleCounterChange('babiesCount', 'dec')}
-                            className="w-7 h-7 rounded-full bg-white border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:scale-90 transition-all shadow-sm"
-                          >
-                            <Minus className="w-3.5 h-3.5 stroke-[3]" />
-                          </button>
-                          <span className="font-display font-extrabold text-sm text-brand-navy w-4 text-center">
-                            {formData.babiesCount}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => handleCounterChange('babiesCount', 'inc')}
-                            className="w-7 h-7 rounded-full bg-white border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:scale-90 transition-all shadow-sm"
-                          >
-                            <Plus className="w-3.5 h-3.5 stroke-[3]" />
-                          </button>
-                        </div>
-                      </div>
                     </div>
 
                     {/* Habitaciones */}
-                    <div className="mt-4 pt-4 border-t border-slate-200/50">
-                      <span className="font-display font-bold text-[11px] text-slate-500 uppercase tracking-wide block mb-3">
-                        Cantidad de Habitaciones
-                      </span>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="flex flex-col gap-3">
+                      <label className="font-display font-bold text-[11px] text-slate-500 uppercase tracking-wide">
+                        Habitaciones
+                      </label>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/60 flex items-center justify-between">
-                          <div className="flex flex-col">
-                            <span className="font-display font-bold text-xs text-brand-navy">Sencilla</span>
-                            <span className="text-[10px] text-slate-400 font-sans font-medium">1 persona</span>
-                          </div>
+                          <div className="flex flex-col"><span className="font-display font-bold text-xs text-brand-navy">Sencilla</span></div>
                           <div className="flex items-center gap-2.5">
-                            <button type="button" onClick={() => handleCounterChange('habitacionesSencilla', 'dec')} className="w-7 h-7 rounded-full bg-white border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:scale-90 transition-all shadow-sm"><Minus className="w-3.5 h-3.5 stroke-[3]" /></button>
-                            <span className="font-display font-extrabold text-sm text-brand-navy w-4 text-center">{formData.habitacionesSencilla}</span>
-                            <button type="button" onClick={() => handleCounterChange('habitacionesSencilla', 'inc')} className="w-7 h-7 rounded-full bg-white border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:scale-90 transition-all shadow-sm"><Plus className="w-3.5 h-3.5 stroke-[3]" /></button>
+                            <button type="button" onClick={() => handleCounterChange('roomsSingle', 'dec')} className="w-7 h-7 rounded-full bg-white border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:scale-90 transition-all shadow-sm"><Minus className="w-3.5 h-3.5 stroke-[3]" /></button>
+                            <span className="font-display font-extrabold text-sm text-brand-navy w-4 text-center">{formData.roomsSingle}</span>
+                            <button type="button" onClick={() => handleCounterChange('roomsSingle', 'inc')} className="w-7 h-7 rounded-full bg-white border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:scale-90 transition-all shadow-sm"><Plus className="w-3.5 h-3.5 stroke-[3]" /></button>
                           </div>
                         </div>
                         <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/60 flex items-center justify-between">
-                          <div className="flex flex-col">
-                            <span className="font-display font-bold text-xs text-brand-navy">Doble</span>
-                            <span className="text-[10px] text-slate-400 font-sans font-medium">2 personas</span>
-                          </div>
+                          <div className="flex flex-col"><span className="font-display font-bold text-xs text-brand-navy">Doble</span></div>
                           <div className="flex items-center gap-2.5">
-                            <button type="button" onClick={() => handleCounterChange('habitacionesDoble', 'dec')} className="w-7 h-7 rounded-full bg-white border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:scale-90 transition-all shadow-sm"><Minus className="w-3.5 h-3.5 stroke-[3]" /></button>
-                            <span className="font-display font-extrabold text-sm text-brand-navy w-4 text-center">{formData.habitacionesDoble}</span>
-                            <button type="button" onClick={() => handleCounterChange('habitacionesDoble', 'inc')} className="w-7 h-7 rounded-full bg-white border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:scale-90 transition-all shadow-sm"><Plus className="w-3.5 h-3.5 stroke-[3]" /></button>
+                            <button type="button" onClick={() => handleCounterChange('roomsDouble', 'dec')} className="w-7 h-7 rounded-full bg-white border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:scale-90 transition-all shadow-sm"><Minus className="w-3.5 h-3.5 stroke-[3]" /></button>
+                            <span className="font-display font-extrabold text-sm text-brand-navy w-4 text-center">{formData.roomsDouble}</span>
+                            <button type="button" onClick={() => handleCounterChange('roomsDouble', 'inc')} className="w-7 h-7 rounded-full bg-white border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:scale-90 transition-all shadow-sm"><Plus className="w-3.5 h-3.5 stroke-[3]" /></button>
                           </div>
                         </div>
                         <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/60 flex items-center justify-between">
-                          <div className="flex flex-col">
-                            <span className="font-display font-bold text-xs text-brand-navy">Triple</span>
-                            <span className="text-[10px] text-slate-400 font-sans font-medium">3 personas</span>
-                          </div>
+                          <div className="flex flex-col"><span className="font-display font-bold text-xs text-brand-navy">Triple</span></div>
                           <div className="flex items-center gap-2.5">
-                            <button type="button" onClick={() => handleCounterChange('habitacionesTriple', 'dec')} className="w-7 h-7 rounded-full bg-white border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:scale-90 transition-all shadow-sm"><Minus className="w-3.5 h-3.5 stroke-[3]" /></button>
-                            <span className="font-display font-extrabold text-sm text-brand-navy w-4 text-center">{formData.habitacionesTriple}</span>
-                            <button type="button" onClick={() => handleCounterChange('habitacionesTriple', 'inc')} className="w-7 h-7 rounded-full bg-white border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:scale-90 transition-all shadow-sm"><Plus className="w-3.5 h-3.5 stroke-[3]" /></button>
+                            <button type="button" onClick={() => handleCounterChange('roomsTriple', 'dec')} className="w-7 h-7 rounded-full bg-white border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:scale-90 transition-all shadow-sm"><Minus className="w-3.5 h-3.5 stroke-[3]" /></button>
+                            <span className="font-display font-extrabold text-sm text-brand-navy w-4 text-center">{formData.roomsTriple}</span>
+                            <button type="button" onClick={() => handleCounterChange('roomsTriple', 'inc')} className="w-7 h-7 rounded-full bg-white border border-slate-300 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:scale-90 transition-all shadow-sm"><Plus className="w-3.5 h-3.5 stroke-[3]" /></button>
                           </div>
                         </div>
                       </div>
@@ -699,10 +740,10 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
                         </div>
                       </div>
 
-                      {/* Hotel Category */}
+                      {/* Alojamiento preferido */}
                       <div className="flex flex-col gap-1.5">
                         <label htmlFor="hotelCategory" className="font-display font-bold text-[11px] text-slate-500 uppercase tracking-wide">
-                          Alojamiento preferido (Hotel)
+                          Categoría del hotel
                         </label>
                         <div className="relative">
                           <select
@@ -824,7 +865,7 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full bg-brand-orange hover:bg-brand-orange/95 text-white font-bold py-4 rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+                      className="w-full bg-[#0D9387] hover:bg-[#0b7d72] text-white font-bold py-4 rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
                     >
                       {isSubmitting ? (
                         <>
@@ -867,8 +908,17 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-3xl shadow-2xl p-10 flex flex-col items-center text-center max-w-md mx-4"
+              className="bg-white rounded-3xl shadow-2xl p-10 flex flex-col items-center text-center max-w-md mx-4 relative"
             >
+              {/* X button to close */}
+              <button
+                onClick={() => setIsSuccess(false)}
+                className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
+                aria-label="Cerrar"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+
               <div className="w-16 h-16 rounded-full bg-brand-turquoise/10 text-brand-turquoise flex items-center justify-center mb-6">
                 <CheckCircle2 className="w-12 h-12" />
               </div>
@@ -877,38 +927,9 @@ export default function QuoteForm({ preselectedDestination, onClearPreselected }
                 ¡Gracias por tu solicitud!
               </h3>
               
-              <p className="text-slate-600 font-sans text-sm leading-relaxed mb-8">
+              <p className="text-slate-600 font-sans text-sm leading-relaxed">
                 Hemos recibido tu información. Un asesor de Karabú Viajes y Visas preparará una cotización personalizada y te contactará por WhatsApp o correo electrónico en menos de 24 horas.
               </p>
-
-              <button
-                onClick={() => {
-                  setIsSuccess(false);
-                  setFormData({
-                    fullName: '',
-                    email: '',
-                    phone: '',
-                    country: '',
-                    city: '',
-                    preferredHotel: '',
-                    departureDate: '',
-                    returnDate: '',
-                    flexibleDates: 'No',
-                    adultsCount: 2,
-                    childrenCount: 0,
-                    babiesCount: 0,
-                    budgetRange: 'US$1,000–2,000',
-                    additionalServices: [],
-                    preferredContact: 'ambos',
-                    travelType: 'Vacaciones',
-                    hotelCategory: '4 estrellas',
-                    comments: ''
-                  });
-                }}
-                className="bg-brand-navy hover:bg-brand-navy/90 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition-all transform hover:scale-[1.03] active:scale-[0.97]"
-              >
-                Enviar otra cotización
-              </button>
             </motion.div>
           </motion.div>
         )}

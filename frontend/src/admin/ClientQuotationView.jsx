@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import api, { formatApiError } from "../lib/api";
 import StatusBadge from "./StatusBadge";
 import { formatDate, formatCurrency } from "../lib/format";
+import { formatPhoneWithCode } from "../utils/phone";
 import { toast } from "sonner";
 import { 
   Loader2, Calendar, Users, DollarSign, CheckCircle2, 
@@ -268,7 +269,7 @@ export default function ClientQuotationView() {
                 <InfoRow icon={<Mail className="w-3.5 h-3.5" />} label="Email" value={formData.email} />
               )}
               {formData.phone && (
-                <InfoRow icon={<Phone className="w-3.5 h-3.5" />} label="Teléfono" value={formData.phone} />
+                <InfoRow icon={<Phone className="w-3.5 h-3.5" />} label="Teléfono" value={formatPhoneWithCode(formData.phone)} />
               )}
               {formData.adultsCount !== undefined && (
                 <InfoRow icon={<Users className="w-3.5 h-3.5" />} label="Viajeros" 

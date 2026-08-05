@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { MapPin } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface DestinationsProps {
   onSelectDestination: (destinationName: string) => void;
@@ -62,7 +63,7 @@ export default function Destinations({ onSelectDestination }: DestinationsProps)
   ];
 
   return (
-    <section id="destinos" className="py-20 bg-white relative scroll-mt-20">
+    <section id="destinos" className="py-14 lg:py-20 bg-white relative scroll-mt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header Block matching the design with Hand-drawn paper plane sketch */}
@@ -82,12 +83,12 @@ export default function Destinations({ onSelectDestination }: DestinationsProps)
             </svg>
           </div>
 
-          <button
-            onClick={() => onSelectDestination('Todos')}
+          <Link
+            to="/destinos"
             className="self-start sm:self-center border border-slate-300 hover:border-brand-turquoise text-slate-600 hover:text-brand-turquoise font-bold px-6 py-2.5 rounded-full text-xs sm:text-sm transition-all duration-300 shadow-sm hover:shadow active:scale-[0.98]"
           >
             Ver todos los destinos
-          </button>
+          </Link>
         </div>
 
         {/* Bento Grid Layout */}
@@ -100,7 +101,7 @@ export default function Destinations({ onSelectDestination }: DestinationsProps)
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
             onClick={() => onSelectDestination(tallDestination.name)}
-            className="lg:col-span-3 group relative overflow-hidden rounded-3xl cursor-pointer shadow-lg hover:shadow-xl transition-all duration-500 flex flex-col justify-end min-h-[360px] lg:min-h-full h-full transform hover:-translate-y-1"
+            className="lg:col-span-3 group relative overflow-hidden rounded-3xl cursor-pointer shadow-lg hover:shadow-xl transition-all duration-500 flex flex-col justify-end min-h-[220px] lg:min-h-full h-full transform hover:-translate-y-1"
           >
             {/* Background Zoom Image */}
             <div className="absolute inset-0 z-0">
@@ -126,9 +127,12 @@ export default function Destinations({ onSelectDestination }: DestinationsProps)
 
               {/* Action row */}
               <div className="flex items-center justify-between mt-2">
-                <span className="bg-white hover:bg-slate-50 text-brand-navy font-extrabold text-xs sm:text-sm px-6 py-3 rounded-full shadow-md transition-colors">
+                <Link
+                  to="/destinos"
+                  className="bg-white hover:bg-slate-50 text-brand-navy font-extrabold text-xs sm:text-sm px-6 py-3 rounded-full shadow-md transition-colors inline-block"
+                >
                   Ver destinos
-                </span>
+                </Link>
                 
                 <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white border border-white/25">
                   <MapPin className="w-5 h-5" />
@@ -141,7 +145,7 @@ export default function Destinations({ onSelectDestination }: DestinationsProps)
           <div className="lg:col-span-9 flex flex-col gap-6">
             
             {/* Top Row: 4 smaller cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 lg:gap-6">
               {topDestinations.map((dest, idx) => (
                 <motion.div
                   key={dest.id}
@@ -150,7 +154,7 @@ export default function Destinations({ onSelectDestination }: DestinationsProps)
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: idx * 0.08 }}
                   onClick={() => onSelectDestination(dest.name)}
-                  className="group relative overflow-hidden rounded-2xl cursor-pointer h-[180px] sm:h-[190px] xl:h-[200px] shadow-sm hover:shadow-lg transition-all duration-500 transform hover:-translate-y-1"
+                  className="group relative overflow-hidden rounded-2xl cursor-pointer h-[130px] sm:h-[150px] xl:h-[200px] shadow-sm hover:shadow-lg transition-all duration-500 transform hover:-translate-y-1"
                 >
                   <div className="absolute inset-0 z-0">
                     <img
@@ -175,7 +179,7 @@ export default function Destinations({ onSelectDestination }: DestinationsProps)
             </div>
 
             {/* Bottom Row: 3 slightly wider cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div className="grid grid-cols-3 gap-3 lg:gap-6">
               {bottomDestinations.map((dest, idx) => (
                 <motion.div
                   key={dest.id}
@@ -184,7 +188,7 @@ export default function Destinations({ onSelectDestination }: DestinationsProps)
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: idx * 0.1 }}
                   onClick={() => onSelectDestination(dest.name)}
-                  className="group relative overflow-hidden rounded-2xl cursor-pointer h-[180px] sm:h-[190px] xl:h-[200px] shadow-sm hover:shadow-lg transition-all duration-500 transform hover:-translate-y-1"
+                  className="group relative overflow-hidden rounded-2xl cursor-pointer h-[130px] sm:h-[150px] xl:h-[200px] shadow-sm hover:shadow-lg transition-all duration-500 transform hover:-translate-y-1"
                 >
                   <div className="absolute inset-0 z-0">
                     <img

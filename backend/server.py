@@ -19,7 +19,23 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from database import Base, engine, get_db, init_db, AsyncSessionLocal
-from models import User, Client, Quotation, Reservation, Payment, Destination, Package, Setting, Pais, Ciudad, Lugar, Notification
+from models import User, Client, Quotation, Reservation, Payment, Destination, Package, Setting, Pais, Ciudad, Lugar, Notification, Upload
+import re
+
+# -------------------- Sanitizer --------------------
+_HTML_TAG = re.compile(r"<[^>]*>", re.IGNORECASE)
+_SCRIPT_TAG = re.compile(r"<\s*script[^>]*>.*?<\s*/\s*script[^>]*>", re.IGNORECASE | re.DOTALL)
+_IFRAME_TAG = re.compile(r"<\s*iframe[^>]*>.*?<\s*/\s*iframe[^>]*>", re.IGNORECASE | re.DOTALL)
+_STYLE_TAG = re.compile(r"<\s*style[^>]*>.*?<\s*/\s*style[^>]*>", re.IGNORECASE | re.DOTALL)
+
+def sanitize_html(text: str) -> str:
+    """Strip HTML tags and dangerous elements from text to prevent XSS."""
+    if not text or not isinstance(text, str):
+        return text or ""
+    text = _SCRIPT_TAG.sub("", text)
+    text = _IFRAME_TAG.sub("", text)
+    text = _STYLE_TAG.sub("", text)
+    return _HTML_TAG.sub("", text).strip()
 
 # -------------------- Setup --------------------
 app = FastAPI(title="Karabu Viajes API")
@@ -32,6 +48,49 @@ SERPAPI_KEY = os.environ.get("SERPAPI_KEY", "")
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("karabu")
+
+
+# -------------------- Rate Limiter --------------------
+from collections import defaultdict
+import time as _time
+
+class RateLimiter:
+    """Simple in-memory IP-based rate limiter."""
+    def __init__(self):
+        self._hits = defaultdict(list)  # ip → [timestamps]
+        self._cleanup_every = 300  # clean old entries every 5 min
+        self._last_cleanup = _time.time()
+
+    def _cleanup(self):
+        now = _time.time()
+        if now - self._last_cleanup < self._cleanup_every:
+            return
+        self._last_cleanup = now
+        cutoff = now - 120  # keep last 2 min of history
+        for ip in list(self._hits.keys()):
+            self._hits[ip] = [t for t in self._hits[ip] if t > cutoff]
+            if not self._hits[ip]:
+                del self._hits[ip]
+
+    def check(self, ip: str, max_requests: int, window_seconds: int) -> bool:
+        """Returns True if under limit, False if rate limited."""
+        self._cleanup()
+        now = _time.time()
+        cutoff = now - window_seconds
+        self._hits[ip] = [t for t in self._hits[ip] if t > cutoff]
+        self._hits[ip].append(now)
+        return len(self._hits[ip]) <= max_requests
+
+rate_limiter = RateLimiter()
+
+
+def rate_limit(requests: int, per_seconds: int):
+    """Dependency: rate-limit by client IP."""
+    async def _check(request: Request):
+        ip = request.client.host if request.client else "127.0.0.1"
+        if not rate_limiter.check(ip, requests, per_seconds):
+            raise HTTPException(status_code=429, detail="Demasiadas solicitudes. Espera un momento.")
+    return _check
 
 
 # -------------------- Auth utils --------------------
@@ -108,6 +167,47 @@ async def create_notification_all(db: AsyncSession, type_: str, title: str, mess
     for u in users:
         await create_notification(db, u.id, type_, title, message, link)
 
+async def get_destination_image(db: AsyncSession, destination_name: str) -> str:
+    """Look up hero image from destinations table matching destination name."""
+    if not destination_name:
+        return ""
+    # Try exact match on name
+    result = await db.execute(
+        select(Destination).where(Destination.name.ilike(destination_name), Destination.status == "activo")
+    )
+    d = result.scalar_one_or_none()
+    if d and d.image_url:
+        return d.image_url
+    # Try partial match (destination name or country contains query or vice versa)
+    result = await db.execute(
+        select(Destination).where(
+            or_(
+                Destination.name.ilike(f"%{destination_name}%"),
+                Destination.country.ilike(f"%{destination_name}%"),
+            ),
+            Destination.status == "activo",
+        )
+    )
+    d = result.scalar_one_or_none()
+    if d and d.image_url:
+        return d.image_url
+    # If destination_name is "Country, City", try matching just the city
+    parts = [p.strip() for p in destination_name.split(",") if p.strip()]
+    if len(parts) > 1:
+        result = await db.execute(
+            select(Destination).where(
+                or_(
+                    Destination.name.ilike(f"%{parts[1]}%"),
+                    Destination.name.ilike(f"%{parts[0]}%"),
+                ),
+                Destination.status == "activo",
+            )
+        )
+        d = result.scalar_one_or_none()
+        if d and d.image_url:
+            return d.image_url
+    return ""
+
 def require_admin(user: dict):
     if user.get("role") not in ("super_admin", "admin"):
         raise HTTPException(status_code=403, detail="No tienes permiso")
@@ -138,6 +238,11 @@ class QuotationIn(BaseModel):
     currency: str = "USD"
     notes: Optional[str] = ""
     assigned_hotel: Optional[str] = ""
+    room_type: Optional[str] = ""
+    services: Optional[list] = []
+    deposit_percent: Optional[float] = 0
+    hero_image: Optional[str] = ""
+    tax_percent: Optional[float] = 0
     booking_price: Optional[float] = None
     expedia_price: Optional[float] = None
     status: str = "borrador"
@@ -162,11 +267,11 @@ class LeadIn(BaseModel):
     additionalServices: list = []
     travelType: str = ""
     hotelCategory: str = ""
+    roomsSingle: int = 1
+    roomsDouble: int = 0
+    roomsTriple: int = 0
     preferredContact: str = "ambos"
     comments: str = ""
-    habitacionesSencilla: int = 0
-    habitacionesDoble: int = 0
-    habitacionesTriple: int = 0
 
 class PassengerIn(BaseModel):
     name: str
@@ -254,7 +359,7 @@ class SettingsIn(BaseModel):
 
 # -------------------- Auth Endpoints --------------------
 @api.post("/auth/login")
-async def login(body: LoginIn, response: Response, db: AsyncSession = Depends(get_db)):
+async def login(body: LoginIn, response: Response, db: AsyncSession = Depends(get_db), _rl=Depends(rate_limit(10, 60))):
     email = body.email.lower()
     result = await db.execute(select(User).where(User.email == email))
     user = result.scalar_one_or_none()
@@ -266,7 +371,7 @@ async def login(body: LoginIn, response: Response, db: AsyncSession = Depends(ge
     user.last_login = datetime.now(timezone.utc)
     response.set_cookie(
         key="access_token", value=token, httponly=True,
-        secure=False, samesite="lax", max_age=43200, path="/",
+        secure=True, samesite="strict", max_age=43200, path="/",
     )
     return {
         "user": {"id": user.id, "username": user.username, "email": user.email, "name": user.name, "role": user.role, "phone": user.phone, "avatar_url": user.avatar_url, "department": user.department},
@@ -275,8 +380,40 @@ async def login(body: LoginIn, response: Response, db: AsyncSession = Depends(ge
 
 @api.post("/auth/logout")
 async def logout(response: Response, _user=Depends(get_current_user)):
-    response.delete_cookie("access_token", path="/")
+    response.delete_cookie("access_token", path="/", secure=True, samesite="strict")
     return {"ok": True}
+
+
+class ProfileUpdate(BaseModel):
+    name: Optional[str] = None
+    phone: Optional[str] = None
+    avatar_url: Optional[str] = None
+    current_password: Optional[str] = None
+    new_password: Optional[str] = None
+
+
+@api.put("/profile")
+async def update_profile(body: ProfileUpdate, db: AsyncSession = Depends(get_db), u=Depends(get_current_user)):
+    result = await db.execute(select(User).where(User.id == u["id"]))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+    if body.new_password:
+        if not body.current_password or not verify_password(body.current_password, user.password_hash):
+            raise HTTPException(status_code=400, detail="Contraseña actual incorrecta")
+        user.password_hash = hash_password(body.new_password)
+
+    if body.name is not None:
+        user.name = sanitize_html(body.name)
+    if body.phone is not None:
+        user.phone = body.phone
+    if body.avatar_url is not None:
+        user.avatar_url = body.avatar_url
+
+    await db.flush()
+    return user.to_dict()
+
 
 @api.get("/auth/me")
 async def me(user=Depends(get_optional_user)):
@@ -407,33 +544,34 @@ async def get_quotation(qid: str, db: AsyncSession = Depends(get_db)):
     client = client_r.scalar_one_or_none()
     broker_r = await db.execute(select(User).where(User.id == q.created_by))
     broker = broker_r.scalar_one_or_none()
-    # Format rooms summary from form_data
-    form_data = doc.get("form_data") or {}
-    rooms_parts = []
-    if form_data.get("habitacionesSencilla"):
-        rooms_parts.append(f"{form_data['habitacionesSencilla']} Sencilla")
-    if form_data.get("habitacionesDoble"):
-        rooms_parts.append(f"{form_data['habitacionesDoble']} Doble")
-    if form_data.get("habitacionesTriple"):
-        rooms_parts.append(f"{form_data['habitacionesTriple']} Triple")
-    rooms_summary = ", ".join(rooms_parts) if rooms_parts else ""
-
     return {
         "quotation": doc,
         "client": client.to_dict() if client else None,
         "broker": {
+            **(broker.to_dict() if broker else {}),
             "name": broker.name if broker else "Asesor Karabu",
             "email": broker.email if broker else "",
             "phone": broker.phone if broker else "",
             "avatar_url": broker.avatar_url if broker else "",
             "role": broker.role if broker else "advisor",
-            "agency_name": broker.department if broker else "Karabu Viajes",
-        },
-        "rooms_summary": rooms_summary,
+            "department": broker.department if broker else "",
+            "agency_name": "Karabu Viajes",
+        }
     }
 
 @api.post("/quotations")
 async def create_quotation(body: QuotationIn, db: AsyncSession = Depends(get_db), u=Depends(get_current_user)):
+    # Sanitize text inputs
+    body.notes = sanitize_html(body.notes or "")
+    body.destination = sanitize_html(body.destination)
+    body.assigned_hotel = sanitize_html(body.assigned_hotel or "")
+    body.room_type = sanitize_html(body.room_type or "")
+
+    # Auto-populate hero_image from destination if empty
+    hero = body.hero_image or ""
+    if not hero:
+        hero = await get_destination_image(db, body.destination)
+
     q = Quotation(
         id=new_id(), client_id=body.client_id, destination=body.destination,
         travel_date=body.travel_date or "", return_date=body.return_date or "",
@@ -441,6 +579,14 @@ async def create_quotation(body: QuotationIn, db: AsyncSession = Depends(get_db)
         notes=body.notes or "", status=body.status,
         sent_via=body.sent_via or "", sent_at=body.sent_at or "",
         created_by=u["id"],
+        assigned_hotel=body.assigned_hotel or "",
+        room_type=body.room_type or "",
+        services=body.services or [],
+        deposit_percent=body.deposit_percent or 0,
+        hero_image=hero,
+        tax_percent=body.tax_percent if body.tax_percent is not None else 0,
+        booking_price=body.booking_price,
+        expedia_price=body.expedia_price,
     )
     db.add(q)
     await db.flush()
@@ -453,7 +599,12 @@ async def update_quotation(qid: str, body: QuotationIn, db: AsyncSession = Depen
     if not q:
         raise HTTPException(status_code=404, detail="Cotización no encontrada")
     for k, v in body.model_dump().items():
+        if isinstance(v, str):
+            v = sanitize_html(v)
         setattr(q, k, v)
+    # Auto-populate hero_image from destination if still empty after update
+    if not q.hero_image:
+        q.hero_image = await get_destination_image(db, q.destination)
     return q.to_dict()
 
 
@@ -464,10 +615,10 @@ class ClientStatusUpdate(BaseModel):
 
 
 @api.patch("/quotations/{qid}/status")
-async def client_update_status(qid: str, body: ClientStatusUpdate, db: AsyncSession = Depends(get_db)):
+async def client_update_status(qid: str, body: ClientStatusUpdate, db: AsyncSession = Depends(get_db), _rl=Depends(rate_limit(10, 60))):
     """Public: client accepts or rejects their quotation."""
-    if body.status not in ("aceptada", "rechazada"):
-        raise HTTPException(status_code=400, detail="Estado inválido. Usa 'aceptada' o 'rechazada'")
+    if body.status not in ("aceptada", "rechazada", "cambios_solicitados"):
+        raise HTTPException(status_code=400, detail="Estado invalido")
     result = await db.execute(select(Quotation).where(Quotation.id == qid))
     q = result.scalar_one_or_none()
     if not q:
@@ -477,38 +628,68 @@ async def client_update_status(qid: str, body: ClientStatusUpdate, db: AsyncSess
     is_regret = old_status == "aceptada" and body.status == "rechazada"
 
     q.status = body.status
-    if body.notes is not None:
-        q.notes = (q.notes or "") + "\n" + body.notes
+    # Save client notes in dedicated field, sanitized
+    if body.notes is not None and body.notes.strip():
+        q.client_notes = sanitize_html(body.notes.strip())
 
     # Get client name for notification
     client_r = await db.execute(select(Client).where(Client.id == q.client_id))
     client = client_r.scalar_one_or_none()
     client_name = f"{client.first_name} {client.last_name}" if client else "Cliente"
 
-    # Notify the advisor who created the quotation
-    if q.created_by:
-        if body.status == "aceptada":
-            await create_notification(
-                db, q.created_by, "accepted",
-                title=f"{client_name} aceptó la propuesta",
-                message=f"Cotización para {q.destination} fue aceptada",
-                link=f"/admin/cotizaciones/{q.id}",
+    # Notify ALL active users (admins + advisors) about client actions
+    if body.status == "aceptada":
+        await create_notification_all(
+            db, "accepted",
+            title=f"{client_name} aceptó la propuesta",
+            message=f"Cotización para {q.destination} fue aceptada",
+            link=f"/admin/cotizaciones/{q.id}",
+        )
+
+        # Auto-convert to reservation (solo si no existe ya una)
+        existing_res = await db.execute(
+            select(Reservation).where(Reservation.quotation_id == q.id)
+        )
+        if not existing_res.scalar_one_or_none():
+            reservation = Reservation(
+                id=new_id(), client_id=q.client_id, quotation_id=q.id,
+                destination=q.destination,
+                departure_date=q.travel_date or now_iso(),
+                return_date=q.return_date or now_iso(),
+                travelers=q.travelers, services="", notes=q.notes or "",
+                total_amount=q.amount, currency=q.currency,
+                status="pendiente", created_by=q.created_by,
             )
-        elif is_regret:
-            await create_notification(
-                db, q.created_by, "regret",
-                title=f"{client_name} cambió de opinión",
-                message=f"Había aceptado {q.destination} y ahora solicita cambios",
-                link=f"/admin/cotizaciones/{q.id}",
+            db.add(reservation)
+            await create_notification_all(
+                db, "new_reservation",
+                title=f"Nueva reserva: {client_name}",
+                message=f"Reserva automática para {q.destination} por ${q.amount:,.2f}",
+                link=f"/admin/reservas/{reservation.id}",
             )
-        elif body.status == "rechazada":
-            notes_preview = (body.notes or "")[:100]
-            await create_notification(
-                db, q.created_by, "rejected",
-                title=f"{client_name} solicita cambios",
-                message=f"Rechazó {q.destination}" + (f": {notes_preview}" if notes_preview else ""),
-                link=f"/admin/cotizaciones/{q.id}",
-            )
+    elif body.status == "cambios_solicitados":
+        notes_preview = (body.notes or "")[:100]
+        await create_notification_all(
+            db, "changes_requested",
+            title=f"{client_name} solicita cambios",
+            message=f"Cotización para {q.destination}" + (f": {notes_preview}" if notes_preview else ""),
+            link=f"/admin/cotizaciones/{q.id}",
+        )
+    elif is_regret:
+        await create_notification_all(
+            db, "regret",
+            title=f"{client_name} cambió de opinión",
+            message=f"Había aceptado {q.destination} y ahora solicita cambios",
+            link=f"/admin/cotizaciones/{q.id}",
+        )
+    elif body.status == "rechazada":
+        notes_preview = (body.notes or "")[:100]
+        await create_notification_all(
+            db, "rejected",
+            title=f"{client_name} rechazó la propuesta",
+            message=f"Rechazó {q.destination}" + (f": {notes_preview}" if notes_preview else ""),
+            link=f"/admin/cotizaciones/{q.id}",
+        )
 
     return q.to_dict()
 
@@ -554,9 +735,27 @@ async def delete_quotation(qid: str, db: AsyncSession = Depends(get_db), _u=Depe
 
 
 # -------------------- Public Leads (no auth) --------------------
+def _build_room_summary(single: int, double: int, triple: int) -> str:
+    """Build a human-readable room summary, e.g. '1 Sencilla, 2 Doble'."""
+    parts = []
+    if single > 0: parts.append(f"{single} Sencilla")
+    if double > 0: parts.append(f"{double} Doble")
+    if triple > 0: parts.append(f"{triple} Triple")
+    return ", ".join(parts) if parts else ""
+
 @api.post("/leads")
-async def create_lead(body: LeadIn, db: AsyncSession = Depends(get_db)):
+async def create_lead(body: LeadIn, db: AsyncSession = Depends(get_db), _rl=Depends(rate_limit(5, 60))):
     """Public endpoint: landing page form → creates client + quotation."""
+    # Sanitize all text inputs
+    body.fullName = sanitize_html(body.fullName)
+    body.comments = sanitize_html(body.comments)
+    body.preferredHotel = sanitize_html(body.preferredHotel)
+    body.country = sanitize_html(body.country)
+    body.city = sanitize_html(body.city)
+    body.hotelCategory = sanitize_html(body.hotelCategory)
+
+    # Sanitize room counts (ints, no sanitize needed)
+
     email = body.email.strip().lower()
 
     # Find or create client
@@ -594,19 +793,23 @@ async def create_lead(body: LeadIn, db: AsyncSession = Depends(get_db)):
         "additionalServices": body.additionalServices,
         "travelType": body.travelType,
         "hotelCategory": body.hotelCategory,
+        "roomsSingle": body.roomsSingle,
+        "roomsDouble": body.roomsDouble,
+        "roomsTriple": body.roomsTriple,
         "preferredContact": body.preferredContact,
         "comments": body.comments,
-        "habitacionesSencilla": body.habitacionesSencilla,
-        "habitacionesDoble": body.habitacionesDoble,
-        "habitacionesTriple": body.habitacionesTriple,
     }
 
     total_travelers = body.adultsCount + body.childrenCount + body.babiesCount
+    destination_str = f"{body.country}{', ' + body.city if body.city else ''}"
+
+    # Try to find hero image from destinations table
+    hero_image = await get_destination_image(db, destination_str)
 
     q = Quotation(
         id=new_id(),
         client_id=client.id,
-        destination=f"{body.country}{', ' + body.city if body.city else ''}",
+        destination=destination_str,
         travel_date=body.departureDate,
         return_date=body.returnDate,
         travelers=total_travelers,
@@ -614,6 +817,8 @@ async def create_lead(body: LeadIn, db: AsyncSession = Depends(get_db)):
         currency="USD",
         notes=body.comments or "",
         form_data=form_data,
+        room_type=_build_room_summary(body.roomsSingle, body.roomsDouble, body.roomsTriple),
+        hero_image=hero_image,
         status="borrador",
         sent_via=body.preferredContact,
         sent_at=now_iso(),
@@ -822,6 +1027,17 @@ async def create_payment(body: PaymentIn, db: AsyncSession = Depends(get_db), u=
         if total_paid >= res.total_amount and res.status in ("pendiente", "confirmada"):
             res.status = "pagada"
 
+    # Notify ALL active users about payment
+    client_r = await db.execute(select(Client).where(Client.id == res.client_id))
+    client = client_r.scalar_one_or_none()
+    client_name = f"{client.first_name} {client.last_name}" if client else "Cliente"
+    await create_notification_all(
+        db, "payment",
+        title=f"Pago recibido: {client_name}",
+        message=f"${body.amount:,.2f} {body.method} — {res.destination}",
+        link=f"/admin/reservas/{body.reservation_id}",
+    )
+
     return p.to_dict()
 
 @api.delete("/payments/{pid}")
@@ -839,7 +1055,6 @@ async def list_destinations(
     q: Optional[str] = None,
     status_f: Optional[str] = None,
     db: AsyncSession = Depends(get_db),
-    _u=Depends(get_current_user),
 ):
     stmt = select(Destination).order_by(Destination.created_at.desc()).limit(500)
     if q:
@@ -919,6 +1134,117 @@ async def delete_package(pid: str, db: AsyncSession = Depends(get_db), _u=Depend
     return {"ok": True}
 
 
+# -------------------- Dashboard --------------------
+@api.get("/dashboard")
+async def get_dashboard(db: AsyncSession = Depends(get_db), _u=Depends(get_current_user)):
+    """Real-time metrics for the admin dashboard."""
+    now = datetime.now(timezone.utc)
+    month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+
+    # Total quotations this month
+    q_total = await db.execute(
+        select(func.count(Quotation.id)).where(Quotation.created_at >= month_start)
+    )
+    total_quotations = q_total.scalar() or 0
+
+    # Pending (borrador + enviada)
+    q_pending = await db.execute(
+        select(func.count(Quotation.id)).where(
+            Quotation.created_at >= month_start,
+            Quotation.status.in_(["borrador", "enviada"])
+        )
+    )
+    pending = q_pending.scalar() or 0
+
+    # Accepted
+    q_accepted = await db.execute(
+        select(func.count(Quotation.id)).where(
+            Quotation.created_at >= month_start,
+            Quotation.status == "aceptada"
+        )
+    )
+    accepted = q_accepted.scalar() or 0
+
+    # Revenue: sum of accepted quotations amount
+    q_revenue = await db.execute(
+        select(func.coalesce(func.sum(Quotation.amount), 0)).where(
+            Quotation.status == "aceptada"
+        )
+    )
+    revenue = float(q_revenue.scalar() or 0)
+
+    # Total clients
+    c_total = await db.execute(
+        select(func.count(Client.id)).where(Client.deleted_at.is_(None))
+    )
+    total_clients = c_total.scalar() or 0
+
+    # New leads today (created_by is None = from landing)
+    q_leads = await db.execute(
+        select(func.count(Quotation.id)).where(
+            Quotation.created_at >= today_start,
+            Quotation.created_by.is_(None)
+        )
+    )
+    new_leads = q_leads.scalar() or 0
+
+    # Conversion rate
+    conv_rate = round((accepted / total_quotations * 100) if total_quotations > 0 else 0, 1)
+
+    # Monthly series: cotizaciones por mes (últimos 6 meses) para el gráfico
+    monthly_series = []
+    for i in range(5, -1, -1):
+        bucket_start = now.replace(day=1) - timedelta(days=30 * i)
+        bucket_start = bucket_start.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        if i == 0:
+            bucket_end = now
+        else:
+            bucket_end = (bucket_start.replace(day=28) + timedelta(days=4)).replace(day=1)
+        label = bucket_start.strftime("%b")
+
+        total_r = await db.execute(
+            select(func.count(Quotation.id)).where(
+                Quotation.created_at >= bucket_start,
+                Quotation.created_at < bucket_end
+            )
+        )
+        accepted_r = await db.execute(
+            select(func.count(Quotation.id)).where(
+                Quotation.created_at >= bucket_start,
+                Quotation.created_at < bucket_end,
+                Quotation.status == "aceptada"
+            )
+        )
+        monthly_series.append({
+            "month": label,
+            "total": total_r.scalar() or 0,
+            "accepted": accepted_r.scalar() or 0,
+        })
+
+    # Recent activity: last 5 notifications
+    n_result = await db.execute(
+        select(Notification).order_by(Notification.created_at.desc()).limit(5)
+    )
+    recent = [
+        {"type": n.type, "title": n.title, "message": n.message,
+         "link": n.link, "created_at": n.created_at.isoformat() if n.created_at else None}
+        for n in n_result.scalars().all()
+    ]
+
+    return {
+        "total_quotations": total_quotations,
+        "pending": pending,
+        "accepted": accepted,
+        "revenue": revenue,
+        "total_clients": total_clients,
+        "new_leads": new_leads,
+        "conversion_rate": conv_rate,
+        "monthly_series": monthly_series,
+        "recent_activity": recent,
+    }
+
+
 # -------------------- Users --------------------
 @api.get("/users")
 async def list_users(
@@ -945,6 +1271,11 @@ async def create_user(body: UserIn, db: AsyncSession = Depends(get_db), u=Depend
     require_admin(u)
     if not body.password:
         raise HTTPException(status_code=400, detail="La contraseña es requerida")
+    # Enforce single super_admin
+    if body.role == "super_admin":
+        existing_sa = await db.execute(select(User).where(User.role == "super_admin"))
+        if existing_sa.scalar_one_or_none():
+            raise HTTPException(status_code=400, detail="Solo puede existir un Super Administrador. Usa 'admin' como rol.")
     existing = await db.execute(select(User).where(User.email == body.email.lower()))
     if existing.scalar_one_or_none():
         raise HTTPException(status_code=400, detail="Ya existe un usuario con ese correo")
@@ -969,6 +1300,11 @@ async def update_user(uid: str, body: UserIn, db: AsyncSession = Depends(get_db)
     require_admin(u)
     if uid == u["id"] and body.status == "inactivo":
         raise HTTPException(status_code=400, detail="No puedes desactivar tu propio usuario")
+    # Enforce single super_admin on role change
+    if body.role == "super_admin":
+        existing_sa = await db.execute(select(User).where(User.role == "super_admin", User.id != uid))
+        if existing_sa.scalar_one_or_none():
+            raise HTTPException(status_code=400, detail="Solo puede existir un Super Administrador. Usa 'admin' como rol.")
     result = await db.execute(select(User).where(User.id == uid))
     user = result.scalar_one_or_none()
     if not user:
@@ -1528,6 +1864,28 @@ async def geo_lugares(slug: str = "punta_cana", db: AsyncSession = Depends(get_d
 async def startup():
     await init_db()
 
+    # Migración: agregar columnas nuevas si no existen
+    async with engine.begin() as conn:
+        await conn.run_sync(lambda sync_conn: sync_conn.execute(
+            __import__('sqlalchemy').text("ALTER TABLE quotations ADD COLUMN IF NOT EXISTS room_type VARCHAR DEFAULT ''")
+        ))
+        await conn.run_sync(lambda sync_conn: sync_conn.execute(
+            __import__('sqlalchemy').text("ALTER TABLE quotations ADD COLUMN IF NOT EXISTS services JSONB DEFAULT '[]'")
+        ))
+        await conn.run_sync(lambda sync_conn: sync_conn.execute(
+            __import__('sqlalchemy').text("ALTER TABLE quotations ADD COLUMN IF NOT EXISTS deposit_percent FLOAT DEFAULT 0")
+        ))
+        await conn.run_sync(lambda sync_conn: sync_conn.execute(
+            __import__('sqlalchemy').text("ALTER TABLE quotations ADD COLUMN IF NOT EXISTS hero_image VARCHAR DEFAULT ''")
+        ))
+        await conn.run_sync(lambda sync_conn: sync_conn.execute(
+            __import__('sqlalchemy').text("ALTER TABLE quotations ADD COLUMN IF NOT EXISTS tax_percent FLOAT DEFAULT 18")
+        ))
+        await conn.run_sync(lambda sync_conn: sync_conn.execute(
+            __import__('sqlalchemy').text("ALTER TABLE quotations ADD COLUMN IF NOT EXISTS client_notes TEXT DEFAULT ''")
+        ))
+        logger.info("Migration: room_type and services columns ensured")
+
     async with AsyncSessionLocal() as session:
         # Seed admin user — only from env vars, no defaults
         admin_email = os.environ.get("ADMIN_EMAIL")
@@ -1556,11 +1914,79 @@ async def shutdown():
     await engine.dispose()
 
 
+# -------------------- File Upload --------------------
+import base64
+from fastapi import UploadFile, File as FileParam
+from fastapi.responses import Response as FastAPIResponse
+
+ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg", ".bmp"}
+MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10 MB
+
+@api.post("/upload")
+async def upload_file(file: UploadFile = FileParam(...), u=Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    """Upload an image file. Stores in DB (persists across Render deploys). Returns public URL."""
+    ext = Path(file.filename or "image.png").suffix.lower()
+    if ext not in ALLOWED_EXTENSIONS:
+        raise HTTPException(status_code=400, detail=f"Formato no permitido. Usa: {', '.join(ALLOWED_EXTENSIONS)}")
+
+    contents = await file.read()
+    if len(contents) > MAX_UPLOAD_SIZE:
+        raise HTTPException(status_code=400, detail="La imagen no debe superar 10 MB")
+
+    mime_map = {".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png",
+                ".gif": "image/gif", ".webp": "image/webp", ".svg": "image/svg+xml", ".bmp": "image/bmp"}
+    mime_type = mime_map.get(ext, "application/octet-stream")
+    b64 = base64.b64encode(contents).decode("ascii")
+
+    fid = new_id()
+    db_upload = Upload(id=fid, filename=file.filename or "image.png", mime_type=mime_type, data=b64, created_by=u["id"])
+    db.add(db_upload)
+    await db.flush()
+
+    url = f"/api/files/{fid}"
+    logger.info(f"Uploaded to DB: {url} by user {u['email']}")
+    return {"url": url, "filename": file.filename, "id": fid}
+
+
+@api.get("/files/{fid}")
+async def serve_file(fid: str, db: AsyncSession = Depends(get_db)):
+    """Serve an uploaded file from the database."""
+    result = await db.execute(select(Upload).where(Upload.id == fid))
+    upload = result.scalar_one_or_none()
+    if not upload:
+        raise HTTPException(status_code=404, detail="Archivo no encontrado")
+    decoded = base64.b64decode(upload.data)
+    return FastAPIResponse(content=decoded, media_type=upload.mime_type)
+
 app.include_router(api)
+
+# -------------------- Security Headers Middleware --------------------
+from starlette.middleware.base import BaseHTTPMiddleware
+
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'self'; "
+            "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://*.render.com; "
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+            "font-src 'self' https://fonts.gstatic.com; "
+            "img-src 'self' data: https:; "
+            "connect-src 'self' https://*.render.com https://*.onrender.com; "
+            "frame-ancestors 'none'"
+        )
+        return response
+
+app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=os.environ.get("CORS_ORIGINS", "*").split(","),
+    allow_origins=os.environ.get("CORS_ORIGINS", "https://karabu.onrender.com").split(","),
     allow_methods=["*"],
     allow_headers=["*"],
 )

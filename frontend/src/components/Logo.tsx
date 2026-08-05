@@ -16,21 +16,21 @@ export default function Logo({ light = false, className = '', showText = true }:
       <img
         src={light ? "/colibri-light.svg" : "/colibri.svg"}
         alt="Karabu"
-        className="w-[80px] h-[80px] flex-shrink-0"
+        className="w-[88px] h-[88px] flex-shrink-0"
       />
 
       {/* 2. Texto debajo */}
       {showText && (
-        <div className="flex flex-col items-start">
+        <div className="flex flex-col items-start mt-1.5">
           {/* KΛRΛBU */}
-          <span className={`font-display text-base font-black tracking-[0.14em] leading-none uppercase ${textColor}`}>
+          <span className={`font-display text-lg font-black tracking-[0.14em] leading-none uppercase ${textColor}`}>
             K<span className="font-sans font-extrabold">Λ</span>R<span className="font-sans font-extrabold">Λ</span>BU
           </span>
           {/* — VISAS Y VIAJES — */}
           <div className={`flex items-center gap-1 mt-0.5 ${subtitleColor}`}>
             <div className="h-[1px] w-1.5 bg-current opacity-70"></div>
-            <span className="font-sans text-[7px] font-bold tracking-[0.15em] uppercase whitespace-nowrap leading-none">
-              Visas y Viajes
+            <span className="font-sans text-[9px] font-bold tracking-[0.15em] uppercase whitespace-nowrap leading-none">
+              Viajes y Visas
             </span>
             <div className="h-[1px] w-1.5 bg-current opacity-70"></div>
           </div>

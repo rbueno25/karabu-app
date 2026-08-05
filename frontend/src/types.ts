@@ -1,5 +1,5 @@
 /**
- * Types for Karabu Visas y Viajes Application
+ * Types for Karabu Viajes y Visas Application
  */
 
 export interface Destination {
@@ -69,6 +69,9 @@ export interface ContactFormInput {
   preferredContact: string; // 'email' | 'whatsapp' | 'ambos'
   travelType: string;
   hotelCategory: string;
+  roomsSingle: number;
+  roomsDouble: number;
+  roomsTriple: number;
   comments: string;
   habitacionesSencilla: number;
   habitacionesDoble: number;

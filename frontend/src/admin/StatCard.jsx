@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 const COLORS = {
-  blue: "bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400",
+  blue: "bg-[#0D9387]/10 dark:bg-[#0D9387]/20 text-[#0D9387] dark:text-teal-400",
   green: "bg-green-50 dark:bg-green-950 text-green-600 dark:text-green-400",
   amber: "bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400",
   purple: "bg-purple-50 dark:bg-purple-950 text-purple-600 dark:text-purple-400",
@@ -14,7 +14,7 @@ export default function StatCard({ title, value, icon: Icon, hint, testId, color
   const card = (
     <div
       data-testid={testId}
-      className={`bg-white dark:bg-[#0F2444] rounded-[16px] border border-gray-200 dark:border-[#1A3356] p-6 shadow-[0_1px_3px_0_rgba(0,0,0,0.04)] ${
+      className={`bg-white dark:bg-zinc-900 rounded-[16px] border border-gray-200 dark:border-zinc-800 p-6 shadow-[0_1px_3px_0_rgba(0,0,0,0.04)] ${
         to ? "hover:border-brand-turquoise/40 hover:shadow-md transition-all cursor-pointer group" : ""
       }`}
     >

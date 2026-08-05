@@ -1,5 +1,7 @@
 import React from "react";
 import { NavLink, useNavigate } from "react-router-dom";
+import Logo from "../components/Logo";
+import { useTheme } from "./ThemeContext";
 import {
   LayoutDashboard,
   Users,
@@ -27,6 +29,7 @@ const items = [
 
 export default function Sidebar() {
   const { logout } = useAuth();
+  const { dark } = useTheme();
   const nav = useNavigate();
 
   const handleLogout = async () => {
@@ -37,16 +40,10 @@ export default function Sidebar() {
   return (
     <aside
       data-testid="sidebar"
-      className="fixed inset-y-0 left-0 z-40 w-64 border-r border-gray-200 dark:border-[#1A3356] bg-white dark:bg-[#0A1628] flex flex-col"
+      className="fixed inset-y-0 left-0 z-40 w-64 border-r border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 flex flex-col"
     >
-      <div className="h-16 flex items-center gap-2 px-6 border-b border-gray-200 dark:border-[#1A3356]">
-        <div className="h-8 w-8 rounded-[10px] bg-blue-600 text-white flex items-center justify-center">
-          <Plane className="h-4 w-4" />
-        </div>
-        <div className="leading-tight">
-          <div className="text-sm font-semibold tracking-tight text-gray-900 dark:text-gray-100">Karabu</div>
-          <div className="text-[11px] text-gray-500 dark:text-gray-400">Viajes</div>
-        </div>
+      <div className="h-16 flex items-center gap-2 px-4 border-b border-gray-200 dark:border-zinc-800">
+        <Logo light={dark} showText={true} className="scale-[0.85] origin-left" />
       </div>
 
       <nav className="flex-1 overflow-y-auto p-3 space-y-0.5">
@@ -60,7 +57,7 @@ export default function Sidebar() {
               [
                 "flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium transition-colors",
                                 isActive
-                                  ? "bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-400"
+                                  ? "bg-[#0D9387]/10 dark:bg-[#0D9387]/20 text-[#0D9387] dark:text-teal-400"
                                   : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#132D52] dark:hover:text-gray-100",
               ].join(" ")
             }
@@ -71,7 +68,7 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      <div className="p-3 border-t border-gray-200 dark:border-[#1A3356]">
+      <div className="p-3 border-t border-gray-200 dark:border-zinc-800">
               <button
                 onClick={handleLogout}
                 data-testid="sidebar-logout-btn"

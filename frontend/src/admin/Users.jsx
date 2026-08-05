@@ -1,19 +1,23 @@
 import React, { useEffect, useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import api, { formatApiError } from "../lib/api";
 import PageHeader from "./PageHeader";
 import StatusBadge from "./StatusBadge";
 import EmptyState from "./EmptyState";
 import { Plus, Search, Loader2, Pencil, Trash2, UserCog, X, ShieldCheck, Eye, EyeOff } from "lucide-react";
+import ImageUpload from "./ImageUpload";
 import { toast } from "sonner";
 import { formatDate } from "../lib/format";
 import { useAuth } from "./AuthContext";
+import { handlePhoneInput } from "../utils/phone";
 
 const empty = { username: "", name: "", email: "", role: "advisor", status: "activo", phone: "", avatar_url: "", department: "", notes: "", password: "" };
-const inputCls = "w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#132D52] text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none";
+const inputCls = "w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-[#0D9387] focus:ring-2 focus:ring-[#0D9387]/20 outline-none";
 const ROLE_LABELS = { super_admin: "Super Administrador", admin: "Administrador", advisor: "Asesor" };
 
 export default function Users() {
   const { user: current } = useAuth();
+  const nav = useNavigate();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
@@ -52,7 +56,7 @@ export default function Users() {
   const paginated = useMemo(() => items.slice((page - 1) * perPage, page * perPage), [items, page]);
   const totalPages = Math.max(1, Math.ceil(items.length / perPage));
 
-  const openCreate = () => { setEditingId(null); setForm(empty); setShowPassword(false); setModalOpen(true); };
+  const openCreate = () => { nav("/admin/usuarios/nuevo"); };
   const openEdit = (u) => {
     setEditingId(u.id);
     setForm({
@@ -95,7 +99,7 @@ export default function Users() {
     return (
       <div data-testid="users-page">
         <PageHeader title="Usuarios" description="Administra los usuarios del sistema." />
-        <div className="bg-white dark:bg-[#0F2444] rounded-[16px] border border-gray-200 dark:border-[#1A3356] p-16 flex flex-col items-center text-center">
+        <div className="bg-white dark:bg-zinc-900 rounded-[16px] border border-gray-200 dark:border-zinc-800 p-16 flex flex-col items-center text-center">
           <div className="h-12 w-12 rounded-full bg-yellow-50 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 flex items-center justify-center mb-4">
             <ShieldCheck className="h-5 w-5" />
           </div>
@@ -112,25 +116,25 @@ export default function Users() {
         title="Usuarios"
         description="Administra los usuarios del sistema."
         action={
-          <button onClick={openCreate} data-testid="users-new-btn" className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] px-4 py-2 text-sm font-medium transition-colors shadow-sm">
+          <button onClick={openCreate} data-testid="users-new-btn" className="inline-flex items-center gap-2 bg-[#0D9387] hover:bg-[#0b7d72] text-white rounded-[10px] px-4 py-2 text-sm font-medium transition-colors shadow-sm">
             <Plus className="h-4 w-4" /> Nuevo usuario
           </button>
         }
       />
 
-      <div className="bg-white dark:bg-[#0F2444] rounded-[16px] border border-gray-200 dark:border-[#1A3356] shadow-[0_1px_3px_0_rgba(0,0,0,0.04)] overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-[#1A3356] flex items-center gap-3 flex-wrap">
+      <div className="bg-white dark:bg-zinc-900 rounded-[16px] border border-gray-200 dark:border-zinc-800 shadow-[0_1px_3px_0_rgba(0,0,0,0.04)] overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-200 dark:border-zinc-800 flex items-center gap-3 flex-wrap">
           <div className="relative flex-1 min-w-[240px]">
             <Search className="h-4 w-4 text-gray-400 dark:text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input data-testid="users-search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar por nombre, correo o usuario…" className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 dark:border-[#1A3356] bg-white dark:bg-[#0F2444] text-gray-900 dark:text-gray-100 rounded-[10px] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none" />
+            <input data-testid="users-search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar por nombre, correo o usuario…" className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100 rounded-[10px] focus:border-[#0D9387] focus:ring-2 focus:ring-[#0D9387]/20 outline-none" />
           </div>
-          <select data-testid="users-role-filter" value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)} className="text-sm border border-gray-200 dark:border-[#1A3356] rounded-[10px] px-3 py-2 outline-none bg-white dark:bg-[#0F2444] text-gray-900 dark:text-gray-100">
+          <select data-testid="users-role-filter" value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)} className="text-sm border border-gray-200 dark:border-zinc-800 rounded-[10px] px-3 py-2 outline-none bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100">
             <option value="">Todos los roles</option>
             <option value="super_admin">Super Administrador</option>
             <option value="admin">Administrador</option>
             <option value="advisor">Asesor</option>
           </select>
-          <select data-testid="users-status-filter" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="text-sm border border-gray-200 dark:border-[#1A3356] rounded-[10px] px-3 py-2 outline-none bg-white dark:bg-[#0F2444] text-gray-900 dark:text-gray-100">
+          <select data-testid="users-status-filter" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="text-sm border border-gray-200 dark:border-zinc-800 rounded-[10px] px-3 py-2 outline-none bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100">
             <option value="">Todos los estados</option>
             <option value="activo">Activo</option>
             <option value="inactivo">Inactivo</option>
@@ -144,7 +148,7 @@ export default function Users() {
         ) : (
           <>
             <table className="w-full text-sm" data-testid="users-table">
-              <thead className="bg-gray-50 dark:bg-[#132D52] border-b border-gray-200 dark:border-[#1A3356]">
+              <thead className="bg-gray-50 dark:bg-zinc-800 border-b border-gray-200 dark:border-zinc-800">
                 <tr>
                   <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Usuario</th>
                   <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Correo</th>
@@ -156,10 +160,10 @@ export default function Users() {
               </thead>
               <tbody>
                 {paginated.map((u) => (
-                  <tr key={u.id} className="border-b border-gray-100 dark:border-[#1A3356] last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800">
+                  <tr key={u.id} className="border-b border-gray-100 dark:border-zinc-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td className="px-6 py-3">
                       <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-medium">
+                        <div className="h-8 w-8 rounded-full bg-[#0D9387] text-white flex items-center justify-center text-xs font-medium">
                           {u.name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()}
                         </div>
                         <div>
@@ -170,7 +174,7 @@ export default function Users() {
                     </td>
                     <td className="px-6 py-3 text-gray-700 dark:text-gray-300">{u.email}</td>
                     <td className="px-6 py-3">
-                      <span className="inline-flex items-center rounded-full border border-gray-200 dark:border-[#1A3356] bg-gray-50 dark:bg-[#132D52] px-2.5 py-0.5 text-xs font-medium text-gray-700 dark:text-gray-300">
+                      <span className="inline-flex items-center rounded-full border border-gray-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-800 px-2.5 py-0.5 text-xs font-medium text-gray-700 dark:text-gray-300">
                         {ROLE_LABELS[u.role] || u.role}
                       </span>
                     </td>
@@ -186,12 +190,12 @@ export default function Users() {
                 ))}
               </tbody>
             </table>
-            <div className="px-6 py-3 border-t border-gray-200 dark:border-[#1A3356] flex items-center justify-between text-sm text-gray-500 dark:text-gray-300">
+            <div className="px-6 py-3 border-t border-gray-200 dark:border-zinc-800 flex items-center justify-between text-sm text-gray-500 dark:text-gray-300">
               <div>Mostrando {paginated.length} de {items.length}</div>
               <div className="flex items-center gap-2">
-                <button disabled={page === 1} onClick={() => setPage((p) => Math.max(1, p - 1))} className="px-3 py-1 border border-gray-200 dark:border-[#1A3356] rounded-[8px] disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-800">Anterior</button>
+                <button disabled={page === 1} onClick={() => setPage((p) => Math.max(1, p - 1))} className="px-3 py-1 border border-gray-200 dark:border-zinc-800 rounded-[8px] disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-800">Anterior</button>
                 <span className="text-gray-700 dark:text-gray-300">Página {page} / {totalPages}</span>
-                <button disabled={page === totalPages} onClick={() => setPage((p) => Math.min(totalPages, p + 1))} className="px-3 py-1 border border-gray-200 dark:border-[#1A3356] rounded-[8px] disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-800">Siguiente</button>
+                <button disabled={page === totalPages} onClick={() => setPage((p) => Math.min(totalPages, p + 1))} className="px-3 py-1 border border-gray-200 dark:border-zinc-800 rounded-[8px] disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-800">Siguiente</button>
               </div>
             </div>
           </>
@@ -200,7 +204,7 @@ export default function Users() {
 
       {modalOpen && (
         <div data-testid="user-modal" className="fixed inset-0 z-50 flex items-start justify-center bg-gray-900/50 backdrop-blur-sm p-4 overflow-y-auto">
-          <form onSubmit={save} className="mt-16 bg-white dark:bg-[#0F2444] rounded-[16px] shadow-xl border border-gray-200 dark:border-[#1A3356] w-full max-w-lg p-6">
+          <form onSubmit={save} className="mt-16 bg-white dark:bg-zinc-900 rounded-[16px] shadow-xl border border-gray-200 dark:border-zinc-800 w-full max-w-lg p-6">
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{editingId ? "Editar usuario" : "Nuevo usuario"}</h3>
               <button type="button" onClick={() => setModalOpen(false)} className="h-8 w-8 rounded-[8px] hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center"><X className="h-4 w-4 text-gray-500 dark:text-gray-300" /></button>
@@ -208,7 +212,7 @@ export default function Users() {
 
             <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
               {/* Grupo 1: Requeridos */}
-              <div className="border-b border-gray-100 dark:border-[#1A3356] pb-3 mb-1">
+              <div className="border-b border-gray-100 dark:border-zinc-800 pb-3 mb-1">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-400">Datos Principales y Acceso</span>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -247,11 +251,19 @@ export default function Users() {
               </Field>
 
               {/* Grupo 2: Opcionales */}
-              <div className="border-b border-gray-100 dark:border-[#1A3356] pb-3 mb-1 pt-2">
+              <div className="border-b border-gray-100 dark:border-zinc-800 pb-3 mb-1 pt-2">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-400">Información Complementaria (Opcional)</span>
               </div>
+              <Field label="Foto de perfil">
+                <ImageUpload
+                  value={form.avatar_url}
+                  onChange={(url) => setForm({ ...form, avatar_url: url })}
+                  label="Cargar imagen"
+                  previewSize="sm"
+                />
+              </Field>
               <Field label="Teléfono / WhatsApp">
-                <input data-testid="user-phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="+57 300 123 4567" className={inputCls} />
+                <input data-testid="user-phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: handlePhoneInput(e.target.value) })} placeholder="809-555-1234" className={inputCls} />
               </Field>
               <Field label="Departamento / Sucursal">
                 <input data-testid="user-department" value={form.department} onChange={(e) => setForm({ ...form, department: e.target.value })} placeholder="Ej. Ventas, Soporte, Sucursal Norte" className={inputCls} />
@@ -262,8 +274,8 @@ export default function Users() {
             </div>
 
             <div className="mt-6 flex items-center justify-end gap-2">
-              <button type="button" onClick={() => setModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-[#1A3356] rounded-[10px] hover:bg-gray-50 dark:hover:bg-gray-800">Cancelar</button>
-              <button type="submit" disabled={saving} data-testid="user-save-btn" className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] px-4 py-2 text-sm font-medium disabled:opacity-60">
+              <button type="button" onClick={() => setModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-zinc-800 rounded-[10px] hover:bg-gray-50 dark:hover:bg-gray-800">Cancelar</button>
+              <button type="submit" disabled={saving} data-testid="user-save-btn" className="inline-flex items-center gap-2 bg-[#0D9387] hover:bg-[#0b7d72] text-white rounded-[10px] px-4 py-2 text-sm font-medium disabled:opacity-60">
                 {saving && <Loader2 className="h-4 w-4 animate-spin" />} Guardar
               </button>
             </div>

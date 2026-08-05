@@ -7,6 +7,7 @@ import EmptyState from "./EmptyState";
 import { Plus, Search, Loader2, Pencil, Trash2, Users as UsersIcon, X } from "lucide-react";
 import { toast } from "sonner";
 import { formatDate } from "../lib/format";
+import { handlePhoneInput, formatPhoneWithCode } from "../utils/phone";
 
 const empty = {
   first_name: "",
@@ -127,15 +128,15 @@ export default function Clients() {
           <button
             onClick={openCreate}
             data-testid="clients-new-btn"
-            className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] px-4 py-2 text-sm font-medium transition-colors shadow-sm"
+            className="inline-flex items-center gap-2 bg-[#0D9387] hover:bg-[#0b7d72] text-white rounded-[10px] px-4 py-2 text-sm font-medium transition-colors shadow-sm"
           >
             <Plus className="h-4 w-4" /> Nuevo cliente
           </button>
         }
       />
 
-      <div className="bg-white dark:bg-[#0F2444] rounded-[16px] border border-gray-200 dark:border-[#1A3356] shadow-[0_1px_3px_0_rgba(0,0,0,0.04)] overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-[#1A3356] flex items-center gap-3 flex-wrap">
+      <div className="bg-white dark:bg-zinc-900 rounded-[16px] border border-gray-200 dark:border-zinc-800 shadow-[0_1px_3px_0_rgba(0,0,0,0.04)] overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-200 dark:border-zinc-800 flex items-center gap-3 flex-wrap">
           <div className="relative flex-1 min-w-[240px]">
             <Search className="h-4 w-4 text-gray-400 dark:text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
@@ -143,14 +144,14 @@ export default function Clients() {
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Buscar por nombre, correo o teléfono…"
-              className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 dark:border-[#1A3356] bg-white dark:bg-[#0F2444] text-gray-900 dark:text-gray-100 rounded-[10px] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none"
+              className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100 rounded-[10px] focus:border-[#0D9387] focus:ring-2 focus:ring-[#0D9387]/20 outline-none"
             />
           </div>
           <select
             data-testid="clients-status-filter"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="text-sm border border-gray-200 dark:border-[#1A3356] rounded-[10px] px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none bg-white dark:bg-[#0F2444] text-gray-900 dark:text-gray-100"
+            className="text-sm border border-gray-200 dark:border-zinc-800 rounded-[10px] px-3 py-2 focus:border-[#0D9387] focus:ring-2 focus:ring-[#0D9387]/20 outline-none bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100"
           >
             <option value="">Todos los estados</option>
             <option value="activo">Activo</option>
@@ -170,7 +171,7 @@ export default function Clients() {
             action={
               <button
                 onClick={openCreate}
-                className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] px-4 py-2 text-sm font-medium"
+                className="inline-flex items-center gap-2 bg-[#0D9387] hover:bg-[#0b7d72] text-white rounded-[10px] px-4 py-2 text-sm font-medium"
               >
                 <Plus className="h-4 w-4" /> Nuevo cliente
               </button>
@@ -179,7 +180,7 @@ export default function Clients() {
         ) : (
           <>
             <table className="w-full text-sm" data-testid="clients-table">
-              <thead className="bg-gray-50 dark:bg-[#132D52] border-b border-gray-200 dark:border-[#1A3356]">
+              <thead className="bg-gray-50 dark:bg-zinc-800 border-b border-gray-200 dark:border-zinc-800">
                 <tr>
                   <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Nombre</th>
                   <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Correo</th>
@@ -191,18 +192,18 @@ export default function Clients() {
               </thead>
               <tbody>
                 {paginated.map((c) => (
-                  <tr key={c.id} className="border-b border-gray-100 dark:border-[#1A3356] last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800">
+                  <tr key={c.id} className="border-b border-gray-100 dark:border-zinc-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td className="px-6 py-3">
                       <Link
                         to={`/admin/clientes/${c.id}`}
                         data-testid={`client-link-${c.id}`}
-                        className="text-blue-600 hover:text-blue-800 font-medium hover:underline transition-colors"
+                        className="text-[#0D9387] hover:text-[#0b7d72] font-medium hover:underline transition-colors"
                       >
                         {c.first_name} {c.last_name}
                       </Link>
                     </td>
                     <td className="px-6 py-3 text-gray-700 dark:text-gray-300">{c.email}</td>
-                    <td className="px-6 py-3 text-gray-700 dark:text-gray-300">{c.phone}</td>
+                    <td className="px-6 py-3 text-gray-700 dark:text-gray-300">{formatPhoneWithCode(c.phone)}</td>
                     <td className="px-6 py-3 text-gray-600 dark:text-gray-300">{formatDate(c.created_at)}</td>
                     <td className="px-6 py-3"><StatusBadge value={c.status} /></td>
                     <td className="px-6 py-3 text-right">
@@ -230,13 +231,13 @@ export default function Clients() {
               </tbody>
             </table>
 
-            <div className="px-6 py-3 border-t border-gray-200 dark:border-[#1A3356] flex items-center justify-between text-sm text-gray-500 dark:text-gray-300">
+            <div className="px-6 py-3 border-t border-gray-200 dark:border-zinc-800 flex items-center justify-between text-sm text-gray-500 dark:text-gray-300">
               <div>Mostrando {paginated.length} de {items.length}</div>
               <div className="flex items-center gap-2">
                 <button
                   disabled={page === 1}
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  className="px-3 py-1 border border-gray-200 dark:border-[#1A3356] rounded-[8px] disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-800"
+                  className="px-3 py-1 border border-gray-200 dark:border-zinc-800 rounded-[8px] disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-800"
                 >
                   Anterior
                 </button>
@@ -244,7 +245,7 @@ export default function Clients() {
                 <button
                   disabled={page === totalPages}
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                  className="px-3 py-1 border border-gray-200 dark:border-[#1A3356] rounded-[8px] disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-800"
+                  className="px-3 py-1 border border-gray-200 dark:border-zinc-800 rounded-[8px] disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-800"
                 >
                   Siguiente
                 </button>
@@ -258,7 +259,7 @@ export default function Clients() {
         <div data-testid="client-modal" className="fixed inset-0 z-50 flex items-start justify-center bg-gray-900/50 backdrop-blur-sm p-4 overflow-y-auto">
           <form
             onSubmit={save}
-            className="mt-16 bg-white dark:bg-[#0F2444] rounded-[16px] shadow-xl border border-gray-200 dark:border-[#1A3356] w-full max-w-lg p-6"
+            className="mt-16 bg-white dark:bg-zinc-900 rounded-[16px] shadow-xl border border-gray-200 dark:border-zinc-800 w-full max-w-lg p-6"
           >
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{editingId ? "Editar cliente" : "Nuevo cliente"}</h3>
@@ -281,7 +282,7 @@ export default function Clients() {
               </Field>
               <div className="grid grid-cols-2 gap-4">
                 <Field label="Teléfono" required>
-                  <input data-testid="client-phone" required value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className={inputCls} />
+                  <input data-testid="client-phone" required value={form.phone} onChange={(e) => setForm({ ...form, phone: handlePhoneInput(e.target.value) })} className={inputCls} />
                 </Field>
                 <Field label="Documento">
                   <input value={form.document_id} onChange={(e) => setForm({ ...form, document_id: e.target.value })} className={inputCls} />
@@ -302,14 +303,14 @@ export default function Clients() {
             </div>
 
             <div className="mt-6 flex items-center justify-end gap-2">
-              <button type="button" onClick={() => setModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-[#1A3356] rounded-[10px] hover:bg-gray-50 dark:hover:bg-gray-800">
+              <button type="button" onClick={() => setModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-zinc-800 rounded-[10px] hover:bg-gray-50 dark:hover:bg-gray-800">
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={saving}
                 data-testid="client-save-btn"
-                className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] px-4 py-2 text-sm font-medium disabled:opacity-60"
+                className="inline-flex items-center gap-2 bg-[#0D9387] hover:bg-[#0b7d72] text-white rounded-[10px] px-4 py-2 text-sm font-medium disabled:opacity-60"
               >
                 {saving && <Loader2 className="h-4 w-4 animate-spin" />} Guardar
               </button>
@@ -322,7 +323,7 @@ export default function Clients() {
 }
 
 const inputCls =
-  "w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#132D52] text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-shadow";
+  "w-full rounded-[10px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-[#0D9387] focus:ring-2 focus:ring-[#0D9387]/20 outline-none transition-shadow";
 
 function Field({ label, required, children }) {
   return (
