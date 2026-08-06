@@ -145,6 +145,15 @@ export default function ClientQuotationView() {
   const status = q.status || 'enviada';
   const broker = data?.broker || {};
 
+  // Rooms summary from form_data
+  const sencilla = q.form_data?.habitacionesSencilla ?? 0;
+  const doble = q.form_data?.habitacionesDoble ?? 0;
+  const triple = q.form_data?.habitacionesTriple ?? 0;
+  const totalRooms = sencilla + doble + triple;
+  const roomsSummary = totalRooms > 0
+    ? `${totalRooms} hab.${sencilla > 0 ? ` (${sencilla} sen.)` : ''}${doble > 0 ? ` (${doble} dob.)` : ''}${triple > 0 ? ` (${triple} trip.)` : ''}`
+    : '';
+
   const customServices = Array.isArray(q.services) && q.services.length > 0 ? q.services : null;
   const hasServices = customServices && customServices.length > 0;
   const sumActiveServices = hasServices ? customServices.reduce((acc, s) => acc + (Number(s.price) || 0), 0) : 0;
@@ -210,11 +219,11 @@ export default function ClientQuotationView() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-3 sm:gap-4 mb-4">
               <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
                 <div className="p-2 rounded-lg bg-[#0D9387]/20 border border-[#0D9387]/30"><Calendar className="w-5 h-5 text-teal-300" /></div>
-                <div><span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block">Fechas</span><div className="font-bold text-xs text-white">{travelDate} — {returnDate}</div></div>
+                <div><span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block">Fechas</span><div className="font-bold text-xs text-white">{travelDate} — {returnDate}</div>{nights > 0 && <div className="text-[10px] text-teal-300 mt-0.5">{nights} {nights === 1 ? 'noche' : 'noches'}</div>}</div>
               </div>
               <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
                 <div className="p-2 rounded-lg bg-[#0D9387]/20 border border-[#0D9387]/30"><Building2 className="w-5 h-5 text-teal-300" /></div>
-                <div><span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block">Hospedaje</span><div className="font-bold text-xs text-white line-clamp-1">{hotelName}</div>{roomType && <div className="text-[11px] text-slate-300 line-clamp-1">{roomType}</div>}</div>
+                <div><span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block">Hospedaje</span><div className="font-bold text-xs text-white line-clamp-1">{hotelName}</div>{roomType && <div className="text-[11px] text-slate-300 line-clamp-1">{roomType}</div>}{roomsSummary && <div className="text-[10px] text-teal-300 mt-0.5">{roomsSummary}</div>}</div>
               </div>
               <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
                 <div className="p-2 rounded-lg bg-[#0D9387]/20 border border-[#0D9387]/30"><Users className="w-5 h-5 text-teal-300" /></div>
