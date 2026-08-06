@@ -1980,6 +1980,15 @@ async def serve_file(fid: str, db: AsyncSession = Depends(get_db)):
 
 app.include_router(api)
 
+# -------------------- HTTPS Redirect Middleware --------------------
+class HTTPSRedirectMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        # Only redirect in production (when not localhost)
+        if request.url.scheme == "http" and "localhost" not in str(request.url.hostname or ""):
+            url = request.url.replace(scheme="https")
+            return FastAPIResponse(status_code=301, headers={"Location": str(url)})
+        return await call_next(request)
+
 # -------------------- Security Headers Middleware --------------------
 from starlette.middleware.base import BaseHTTPMiddleware
 
@@ -1991,6 +2000,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; "
             "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://*.render.com; "
@@ -2002,6 +2012,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         )
         return response
 
+app.add_middleware(HTTPSRedirectMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(
     CORSMiddleware,
