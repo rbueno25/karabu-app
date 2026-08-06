@@ -145,14 +145,14 @@ export default function ClientQuotationView() {
   const status = q.status || 'enviada';
   const broker = data?.broker || {};
 
-  // Rooms summary from form_data
+  // Rooms summary from form_data or room_type fallback
   const sencilla = q.form_data?.habitacionesSencilla ?? 0;
   const doble = q.form_data?.habitacionesDoble ?? 0;
   const triple = q.form_data?.habitacionesTriple ?? 0;
   const totalRooms = sencilla + doble + triple;
   const roomsSummary = totalRooms > 0
     ? `${totalRooms} hab.${sencilla > 0 ? ` (${sencilla} sen.)` : ''}${doble > 0 ? ` (${doble} dob.)` : ''}${triple > 0 ? ` (${triple} trip.)` : ''}`
-    : '';
+    : (q.room_type ? `Hab. ${q.room_type}` : '');
 
   const customServices = Array.isArray(q.services) && q.services.length > 0 ? q.services : null;
   const hasServices = customServices && customServices.length > 0;
