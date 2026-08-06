@@ -574,7 +574,7 @@ async def get_quotation(qid: str, db: AsyncSession = Depends(get_db), u=Depends(
             "avatar_url": broker.avatar_url if broker else "",
             "role": broker.role if broker else "advisor",
             "department": broker.department if broker else "",
-            "agency_name": broker.department or "Karabu Viajes",
+            "agency_name": (broker.department if broker and broker.department else "Karabu Viajes"),
         },
         "rooms_summary": rooms_summary,
     }
