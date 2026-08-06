@@ -268,7 +268,9 @@ export default function ClientQuotationView() {
                  <><Check className="w-5 h-5 stroke-[3]" />ACEPTAR PROPUESTA</>}
               </button>
               <button type="button" onClick={() => { setShowChangeForm(!showChangeForm); setInlineFeedback(null); }} disabled={isSubmitting}
-                className="w-full sm:w-1/2 border-2 border-[#FF6B35] text-[#FF6B35] hover:bg-[#FF6B35]/20 active:scale-[0.98] font-bold py-3 px-6 rounded-xl transition duration-200 flex items-center justify-center gap-2 text-sm sm:text-base backdrop-blur-md">
+                className="w-full sm:w-1/2 bg-[#FF6B35] hover:bg-[#e05a28] active:scale-[0.98] font-bold py-3 px-6 rounded-xl transition duration-200 flex items-center justify-center gap-2 text-sm sm:text-base text-white shadow-lg shadow-[#FF6B35]/25">
+
+
                 <RotateCcw className="w-5 h-5" />SOLICITAR CAMBIOS
               </button>
                 </>
