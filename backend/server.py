@@ -1980,17 +1980,16 @@ async def serve_file(fid: str, db: AsyncSession = Depends(get_db)):
 
 app.include_router(api)
 
-# -------------------- HTTPS Redirect Middleware --------------------
+# -------------------- Security Middleware --------------------
+from starlette.middleware.base import BaseHTTPMiddleware
+
+# HTTPS → HTTPS redirect (production only)
 class HTTPSRedirectMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        # Only redirect in production (when not localhost)
         if request.url.scheme == "http" and "localhost" not in str(request.url.hostname or ""):
             url = request.url.replace(scheme="https")
             return FastAPIResponse(status_code=301, headers={"Location": str(url)})
         return await call_next(request)
-
-# -------------------- Security Headers Middleware --------------------
-from starlette.middleware.base import BaseHTTPMiddleware
 
 # NOTE: Security headers are also applied via public/_headers for the static site
 
