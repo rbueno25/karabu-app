@@ -267,7 +267,13 @@ export default function QuotationSheet() {
               <div className="p-4 rounded-2xl bg-gray-50 dark:bg-zinc-800/50 border border-gray-100 dark:border-zinc-800">
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider text-[#0F2A4A] bg-[#0F2A4A]/10 dark:text-teal-300 dark:bg-blue-950/50 mb-3"><User className="w-3 h-3" /> Asesor</span>
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#0F2A4A] text-white font-bold flex items-center justify-center text-sm shrink-0">{broker.name ? broker.name.split(' ').map(n=>n[0]).join('').slice(0,2) : 'K'}</div>
+                  {broker.avatar_url ? (
+                    <div className="w-10 h-10 rounded-xl overflow-hidden border-2 border-[#0D9387] shrink-0">
+                      <img src={broker.avatar_url} alt={broker.name} className="w-full h-full object-cover" />
+                    </div>
+                  ) : (
+                    <div className="w-10 h-10 rounded-xl bg-[#0F2A4A] text-white font-bold flex items-center justify-center text-sm shrink-0">{broker.name ? broker.name.split(' ').map(n=>n[0]).join('').slice(0,2) : 'K'}</div>
+                  )}
                   <div className="min-w-0 flex-1 space-y-1">
                     <h4 className="font-bold text-sm text-gray-900 dark:text-gray-100 truncate">{broker.name || 'Asesor Karabu'}</h4>
                     <a href={`mailto:${broker.email}`} className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-[#0D9387] transition-colors truncate"><Mail className="h-3 w-3 shrink-0" />{broker.email || 'asesor@karabu.com'}</a>
