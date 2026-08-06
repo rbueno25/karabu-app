@@ -1992,6 +1992,8 @@ class HTTPSRedirectMiddleware(BaseHTTPMiddleware):
 # -------------------- Security Headers Middleware --------------------
 from starlette.middleware.base import BaseHTTPMiddleware
 
+# NOTE: Security headers are also applied via public/_headers for the static site
+
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         response = await call_next(request)
