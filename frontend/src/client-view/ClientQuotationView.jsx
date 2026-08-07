@@ -455,7 +455,56 @@ export default function ClientQuotationView() {
         </div>
       </section>
 
-      {/* ═══════ SECTION 3 — ASESOR ═══════ */}
+      {/* ═══════ SECTION 3 — BOTONES DE ACCIÓN ═══════ */}
+      <section className="w-full bg-slate-50 dark:bg-[#070F1E] py-8 sm:py-10 px-4 sm:px-6 border-t border-slate-200 dark:border-slate-800">
+        <div className="max-w-2xl mx-auto space-y-4">
+          {inlineFeedback && (
+            <div className={`p-4 rounded-xl border text-sm font-medium flex items-center gap-2 ${
+              inlineFeedback.type === 'success' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300' :
+              inlineFeedback.type === 'info' ? 'bg-[#FF6B35]/10 border-[#FF6B35]/30 text-orange-700 dark:text-orange-300' :
+              'bg-red-500/10 border-red-500/30 text-red-700 dark:text-red-300'
+            }`}><CheckCircle2 className="w-4 h-4 shrink-0" /><span>{inlineFeedback.message}</span></div>
+          )}
+
+          {showChangeForm && (
+            <form onSubmit={handleSubmitChanges} className="bg-white dark:bg-[#0F2A4A]/60 border border-[#FF6B35]/30 rounded-xl p-4 space-y-3">
+              <div className="flex items-center gap-2 text-sm font-semibold text-[#FF6B35]"><MessageSquare className="w-4 h-4" />¿Qué cambios necesitas?</div>
+              <textarea rows={3} required placeholder="Ej: cambiar fecha, upgrade de habitación..." value={changeNotes} onChange={(e) => setChangeNotes(e.target.value)} className="w-full text-sm p-3 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-[#FF6B35] outline-none" />
+              <div className="flex justify-end gap-2">
+                <button type="button" onClick={() => setShowChangeForm(false)} className="px-4 py-2 rounded-lg text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white transition">Cancelar</button>
+                <button type="submit" disabled={isSubmitting || !changeNotes.trim()} className="px-5 py-2 rounded-lg text-sm font-semibold text-white bg-[#FF6B35] hover:bg-[#e05a28] transition flex items-center gap-2 disabled:opacity-50">{isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Send className="w-4 h-4" />Enviar</>}</button>
+              </div>
+            </form>
+          )}
+
+          {status === 'aceptada' ? (
+            <div className="p-5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300 text-center">
+              <CheckCircle2 className="w-8 h-8 mx-auto mb-2 text-emerald-500" />
+              <p className="font-bold text-base">¡Propuesta Aceptada!</p>
+              <p className="text-sm mt-1">Tu asesor se pondrá en contacto para coordinar los detalles.</p>
+            </div>
+          ) : status === 'cambios_solicitados' || status === 'rechazada' ? (
+            <div className="p-5 rounded-xl bg-[#FF6B35]/10 border border-[#FF6B35]/30 text-orange-700 dark:text-orange-300 text-center">
+              <RotateCcw className="w-8 h-8 mx-auto mb-2 text-[#FF6B35]" />
+              <p className="font-bold text-base">Cambios Solicitados</p>
+              <p className="text-sm mt-1">Tu asesor está revisando tus comentarios y ajustará la propuesta.</p>
+            </div>
+          ) : (
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button type="button" onClick={handleDirectAccept} disabled={isSubmitting}
+                className="flex-1 font-semibold py-3.5 px-6 rounded-xl shadow-lg transition duration-200 flex items-center justify-center gap-2 text-base bg-[#0D9387] hover:bg-[#0b7d72] active:scale-[0.98] text-white">
+                {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Check className="w-5 h-5 stroke-[3]" />ACEPTAR PROPUESTA</>}
+              </button>
+              <button type="button" onClick={() => { setShowChangeForm(!showChangeForm); setInlineFeedback(null); }} disabled={isSubmitting}
+                className="flex-1 font-semibold py-3.5 px-6 rounded-xl shadow-lg transition duration-200 flex items-center justify-center gap-2 text-base bg-[#FF6B35] hover:bg-[#e05a28] active:scale-[0.98] text-white shadow-[#FF6B35]/25">
+                <RotateCcw className="w-5 h-5" />SOLICITAR CAMBIOS
+              </button>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ═══════ SECTION 4 — ASESOR ═══════ */}
       {broker.name && (
         <section className="relative w-full py-10 sm:py-14 border-t border-slate-200 dark:border-slate-800 overflow-hidden" style={{ background: 'linear-gradient(135deg, #0F2A4A 0%, #0D9387 100%)' }}>
           {/* Animated vector background */}
@@ -554,55 +603,6 @@ export default function ClientQuotationView() {
           </div>
         </section>
       )}
-
-      {/* ═══════ SECTION 4 — BOTONES DE ACCIÓN ═══════ */}
-      <section className="w-full bg-slate-50 dark:bg-[#070F1E] py-8 sm:py-10 px-4 sm:px-6 border-t border-slate-200 dark:border-slate-800">
-        <div className="max-w-2xl mx-auto space-y-4">
-          {inlineFeedback && (
-            <div className={`p-4 rounded-xl border text-sm font-medium flex items-center gap-2 ${
-              inlineFeedback.type === 'success' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300' :
-              inlineFeedback.type === 'info' ? 'bg-[#FF6B35]/10 border-[#FF6B35]/30 text-orange-700 dark:text-orange-300' :
-              'bg-red-500/10 border-red-500/30 text-red-700 dark:text-red-300'
-            }`}><CheckCircle2 className="w-4 h-4 shrink-0" /><span>{inlineFeedback.message}</span></div>
-          )}
-
-          {showChangeForm && (
-            <form onSubmit={handleSubmitChanges} className="bg-white dark:bg-[#0F2A4A]/60 border border-[#FF6B35]/30 rounded-xl p-4 space-y-3">
-              <div className="flex items-center gap-2 text-sm font-semibold text-[#FF6B35]"><MessageSquare className="w-4 h-4" />¿Qué cambios necesitas?</div>
-              <textarea rows={3} required placeholder="Ej: cambiar fecha, upgrade de habitación..." value={changeNotes} onChange={(e) => setChangeNotes(e.target.value)} className="w-full text-sm p-3 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-[#FF6B35] outline-none" />
-              <div className="flex justify-end gap-2">
-                <button type="button" onClick={() => setShowChangeForm(false)} className="px-4 py-2 rounded-lg text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white transition">Cancelar</button>
-                <button type="submit" disabled={isSubmitting || !changeNotes.trim()} className="px-5 py-2 rounded-lg text-sm font-semibold text-white bg-[#FF6B35] hover:bg-[#e05a28] transition flex items-center gap-2 disabled:opacity-50">{isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Send className="w-4 h-4" />Enviar</>}</button>
-              </div>
-            </form>
-          )}
-
-          {status === 'aceptada' ? (
-            <div className="p-5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300 text-center">
-              <CheckCircle2 className="w-8 h-8 mx-auto mb-2 text-emerald-500" />
-              <p className="font-bold text-base">¡Propuesta Aceptada!</p>
-              <p className="text-sm mt-1">Tu asesor se pondrá en contacto para coordinar los detalles.</p>
-            </div>
-          ) : status === 'cambios_solicitados' || status === 'rechazada' ? (
-            <div className="p-5 rounded-xl bg-[#FF6B35]/10 border border-[#FF6B35]/30 text-orange-700 dark:text-orange-300 text-center">
-              <RotateCcw className="w-8 h-8 mx-auto mb-2 text-[#FF6B35]" />
-              <p className="font-bold text-base">Cambios Solicitados</p>
-              <p className="text-sm mt-1">Tu asesor está revisando tus comentarios y ajustará la propuesta.</p>
-            </div>
-          ) : (
-            <div className="flex flex-col sm:flex-row gap-3">
-              <button type="button" onClick={handleDirectAccept} disabled={isSubmitting}
-                className="flex-1 font-semibold py-3.5 px-6 rounded-xl shadow-lg transition duration-200 flex items-center justify-center gap-2 text-base bg-[#0D9387] hover:bg-[#0b7d72] active:scale-[0.98] text-white">
-                {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Check className="w-5 h-5 stroke-[3]" />ACEPTAR PROPUESTA</>}
-              </button>
-              <button type="button" onClick={() => { setShowChangeForm(!showChangeForm); setInlineFeedback(null); }} disabled={isSubmitting}
-                className="flex-1 font-semibold py-3.5 px-6 rounded-xl shadow-lg transition duration-200 flex items-center justify-center gap-2 text-base bg-[#FF6B35] hover:bg-[#e05a28] active:scale-[0.98] text-white shadow-[#FF6B35]/25">
-                <RotateCcw className="w-5 h-5" />SOLICITAR CAMBIOS
-              </button>
-            </div>
-          )}
-        </div>
-      </section>
 
       {/* ═══════ FOOTER ═══════ */}
       <footer className="w-full border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-[#070F1E] py-6 px-4 text-center transition-colors">
