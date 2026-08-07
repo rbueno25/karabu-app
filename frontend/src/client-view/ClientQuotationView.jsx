@@ -482,8 +482,11 @@ export default function ClientQuotationView() {
                   </div>
                 </div>
                 <h3 className="text-xl font-bold text-[#0F2A4A] dark:text-white">{broker.name}</h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">{broker.role === 'super_admin' ? 'Administrador' : broker.role === 'admin' ? 'Asesor' : 'Especialista de Viajes'}{broker.department ? ` · ${broker.department}` : ''}</p>
-                {broker.phone && <p className="text-sm text-slate-600 dark:text-slate-300 mt-1 font-mono">{broker.phone}</p>}
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5 flex items-center justify-center gap-1.5">
+                  <Award className="w-3.5 h-3.5 text-amber-500" />
+                  {broker.role === 'super_admin' ? 'Administrador' : broker.role === 'admin' ? 'Asesor' : 'Especialista de Viajes'}{broker.department ? ` · ${broker.department}` : ''}
+                </p>
+                {broker.phone && <p className="text-sm text-slate-600 dark:text-slate-300 mt-1 font-mono flex items-center justify-center gap-1.5"><Phone className="w-3.5 h-3.5 text-[#0D9387]" />{broker.phone}</p>}
               </div>
 
               {/* Contact buttons */}
