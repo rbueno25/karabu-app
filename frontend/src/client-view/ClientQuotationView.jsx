@@ -29,6 +29,10 @@ export default function ClientQuotationView() {
   const [inlineFeedback, setInlineFeedback] = useState(null);
   const [copiedLink, setCopiedLink] = useState(false);
 
+  // Gallery carousel state
+  const [carouselIdx, setCarouselIdx] = useState(0);
+  const carouselRef = useRef(null);
+
   useEffect(() => {
     if (darkMode) document.documentElement.classList.add('dark');
     else document.documentElement.classList.remove('dark');
@@ -147,8 +151,6 @@ export default function ClientQuotationView() {
   const galleryImages = (q.gallery_images && q.gallery_images.length > 0)
     ? q.gallery_images
     : (q.hero_image ? [q.hero_image] : []);
-  const [carouselIdx, setCarouselIdx] = useState(0);
-  const carouselRef = useRef(null);
 
   const scrollCarousel = (dir) => {
     if (!carouselRef.current || galleryImages.length <= 1) return;
