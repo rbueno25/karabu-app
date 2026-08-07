@@ -215,6 +215,49 @@ export default function ClientQuotationView() {
             <span>Ver detalles</span><ArrowDown className="w-3.5 h-3.5 animate-bounce text-[#0D9387]" />
           </button>
         </div>
+
+        {/* Botones de acción en el hero */}
+        <div className="relative z-20 w-full max-w-2xl mx-auto px-4 pb-6">
+          {status === 'aceptada' ? (
+            <div className="p-3 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-200 text-center text-sm font-medium flex items-center justify-center gap-2">
+              <CheckCircle2 className="w-4 h-4" /> PROPUESTA ACEPTADA — Tu asesor te contactará
+            </div>
+          ) : status === 'cambios_solicitados' || status === 'rechazada' ? (
+            <div className="p-3 rounded-xl bg-[#FF6B35]/20 border border-[#FF6B35]/30 text-orange-200 text-center text-sm font-medium flex items-center justify-center gap-2">
+              <RotateCcw className="w-4 h-4" /> CAMBIOS SOLICITADOS — Tu asesor ajustará la propuesta
+            </div>
+          ) : (
+            <div className="flex flex-col sm:flex-row gap-2.5">
+              <button type="button" onClick={handleDirectAccept} disabled={isSubmitting}
+                className="flex-1 font-semibold py-3 px-6 rounded-xl shadow-lg transition duration-200 flex items-center justify-center gap-2 text-sm bg-[#0D9387] hover:bg-[#0b7d72] active:scale-[0.98] text-white">
+                {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Check className="w-4 h-4 stroke-[3]" />ACEPTAR PROPUESTA</>}
+              </button>
+              <button type="button" onClick={() => { setShowChangeForm(!showChangeForm); setInlineFeedback(null); }} disabled={isSubmitting}
+                className="flex-1 font-semibold py-3 px-6 rounded-xl shadow-lg transition duration-200 flex items-center justify-center gap-2 text-sm bg-[#FF6B35] hover:bg-[#e05a28] active:scale-[0.98] text-white">
+                <RotateCcw className="w-4 h-4" />SOLICITAR CAMBIOS
+              </button>
+            </div>
+          )}
+
+          {inlineFeedback && (
+            <div className={`mt-3 p-3 rounded-xl border text-xs font-medium flex items-center gap-2 ${
+              inlineFeedback.type === 'success' ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-200' :
+              inlineFeedback.type === 'info' ? 'bg-[#FF6B35]/20 border-[#FF6B35]/30 text-orange-200' :
+              'bg-red-500/20 border-red-500/30 text-red-200'
+            }`}><CheckCircle2 className="w-3.5 h-3.5 shrink-0" /><span>{inlineFeedback.message}</span></div>
+          )}
+
+          {showChangeForm && (
+            <form onSubmit={handleSubmitChanges} className="mt-3 bg-black/40 backdrop-blur-md p-3.5 rounded-xl border border-[#FF6B35]/30 text-left space-y-2">
+              <div className="flex items-center gap-2 text-xs font-medium text-orange-200"><MessageSquare className="w-3.5 h-3.5 text-[#FF6B35]" />Ajustes requeridos:</div>
+              <textarea rows={2} required placeholder="Ej: cambiar fecha, upgrade de habitación..." value={changeNotes} onChange={(e) => setChangeNotes(e.target.value)} className="w-full text-xs p-2.5 rounded-lg border border-white/20 bg-black/60 text-white placeholder-slate-400 focus:ring-2 focus:ring-[#FF6B35] outline-none" />
+              <div className="flex items-center justify-end gap-2">
+                <button type="button" onClick={() => setShowChangeForm(false)} className="px-3 py-1 rounded-lg text-xs text-slate-300 hover:text-white">Cancelar</button>
+                <button type="submit" disabled={isSubmitting || !changeNotes.trim()} className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white bg-[#FF6B35] hover:bg-[#e05a28] transition flex items-center gap-1 disabled:opacity-50">{isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <><Send className="w-3.5 h-3.5" />Enviar</>}</button>
+              </div>
+            </form>
+          )}
+        </div>
       </section>
 
       {/* ═══════ SECTION 2 — CONTENIDO ═══════ */}
