@@ -43,6 +43,7 @@ export default function QuotationSheet() {
     amount: 0, currency: "USD", notes: "", client_notes: "", assigned_hotel: "",
     room_type: "", services: [], booking_price: "", expedia_price: "",
     deposit_percent: 0, hero_image: "", tax_percent: 0,
+    gallery_images: [],
     status: "borrador", sent_via: "", sent_at: ""
   });
 
@@ -74,6 +75,7 @@ export default function QuotationSheet() {
         services: Array.isArray(q.services) ? q.services : [],
         deposit_percent: q.deposit_percent ?? 0,
         hero_image: q.hero_image || "",
+        gallery_images: Array.isArray(q.gallery_images) ? q.gallery_images : [],
         tax_percent: q.tax_percent ?? 0,
         booking_price: q.booking_price || "", expedia_price: q.expedia_price || "",
         status: q.status || "borrador",
@@ -334,6 +336,18 @@ export default function QuotationSheet() {
                   <p className="text-[11px] text-gray-400 mt-1">Vacío = se usará una imagen del destino automáticamente</p>
                 </Field>
               </div>
+              <div className="mt-3">
+                <Field label="Galería de imágenes (carrusel)">
+                  <textarea
+                    value={(form.gallery_images || []).join('\n')}
+                    onChange={(e) => setForm({ ...form, gallery_images: e.target.value.split('\n').filter(u => u.trim()) })}
+                    rows={3}
+                    placeholder="Una URL por línea..."
+                    className={inputCls}
+                  />
+                  <p className="text-[11px] text-gray-400 mt-1">Pega URLs de imágenes, una por línea. Se mostrarán en carrusel en el entregable.</p>
+                </Field>
+              </div>
             </Section>
 
             <hr className="border-gray-100 dark:border-zinc-800" />
@@ -457,6 +471,17 @@ export default function QuotationSheet() {
                 {quotation.form_data.hotelCategory && <Row label="Categoría hotel" value={quotation.form_data.hotelCategory} />}
                 {quotation.form_data.roomType && <Row label="Tipo habitación" value={quotation.form_data.roomType} />}
                 {quotation.form_data.preferredHotel && <Row label="Hotel preferido" value={quotation.form_data.preferredHotel} />}
+                {/* Habitaciones */}
+                {(quotation.form_data.habitacionesSencilla > 0 || quotation.form_data.habitacionesDoble > 0 || quotation.form_data.habitacionesTriple > 0) && (
+                  <div className="pt-2 border-t border-gray-100 dark:border-zinc-800">
+                    <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider block mb-1.5">Habitaciones</span>
+                    <div className="flex gap-2 flex-wrap">
+                      {quotation.form_data.habitacionesSencilla > 0 && <span className="px-2 py-1 bg-[#0D9387]/10 text-[#0D9387] rounded-lg text-xs font-semibold">{quotation.form_data.habitacionesSencilla} Sencilla</span>}
+                      {quotation.form_data.habitacionesDoble > 0 && <span className="px-2 py-1 bg-[#0D9387]/10 text-[#0D9387] rounded-lg text-xs font-semibold">{quotation.form_data.habitacionesDoble} Doble</span>}
+                      {quotation.form_data.habitacionesTriple > 0 && <span className="px-2 py-1 bg-[#0D9387]/10 text-[#0D9387] rounded-lg text-xs font-semibold">{quotation.form_data.habitacionesTriple} Triple</span>}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}

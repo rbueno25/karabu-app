@@ -242,12 +242,14 @@ class QuotationIn(BaseModel):
     services: Optional[list] = []
     deposit_percent: Optional[float] = 0
     hero_image: Optional[str] = ""
+    gallery_images: Optional[list] = []
     tax_percent: Optional[float] = 0
     booking_price: Optional[float] = None
     expedia_price: Optional[float] = None
     status: str = "borrador"
     sent_via: Optional[str] = ""
     sent_at: Optional[str] = ""
+    form_data: Optional[dict] = None  # raw form submission data
 
 class LeadIn(BaseModel):
     """Public landing page form submission — no auth required."""
@@ -619,6 +621,8 @@ async def update_quotation(qid: str, body: QuotationIn, db: AsyncSession = Depen
     if not q:
         raise HTTPException(status_code=404, detail="Cotización no encontrada")
     for k, v in body.model_dump().items():
+        if v is None:
+            continue
         if isinstance(v, str):
             v = sanitize_html(v)
         setattr(q, k, v)

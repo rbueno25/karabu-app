@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Logo from '../components/Logo';
 import { getQuotation, updateQuotationStatus } from './api-adapter';
 import {
@@ -6,7 +6,8 @@ import {
   CheckCircle2, Calendar, Building2, Users, CreditCard,
   DollarSign, Sun, Moon, ArrowDown, RotateCcw, Check, Plane,
   Car, Share2, MapPin, Sparkles, MessageSquare, Send, Award,
-  Phone, Mail, Bed, Clock
+  Phone, Mail, Bed, Clock, ChevronLeft, ChevronRight, Star,
+  Globe, Headphones, BadgeCheck
 } from 'lucide-react';
 
 export default function ClientQuotationView() {
@@ -142,6 +143,21 @@ export default function ClientQuotationView() {
   const expediaPrice = q.expedia_price || Math.round(totalWithTax * 1.12);
   const heroBgImage = q.hero_image || q.gallery_images?.[0] || `https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&q=80&w=1920`;
 
+  // Gallery carousel
+  const galleryImages = (q.gallery_images && q.gallery_images.length > 0)
+    ? q.gallery_images
+    : (q.hero_image ? [q.hero_image] : []);
+  const [carouselIdx, setCarouselIdx] = useState(0);
+  const carouselRef = useRef(null);
+
+  const scrollCarousel = (dir) => {
+    if (!carouselRef.current || galleryImages.length <= 1) return;
+    const newIdx = (carouselIdx + dir + galleryImages.length) % galleryImages.length;
+    setCarouselIdx(newIdx);
+    const card = carouselRef.current.children[newIdx];
+    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  };
+
   return (
     <div className="min-h-screen bg-white dark:bg-[#070F1E] text-slate-800 dark:text-slate-200 transition-colors duration-300 font-sans">
       {/* ═══════ NAVBAR — compacto, mismo estilo que landing ═══════ */}
@@ -260,6 +276,72 @@ export default function ClientQuotationView() {
         </div>
       </section>
 
+      {/* ═══════ GALLERY CAROUSEL ═══════ */}
+      {galleryImages.length > 1 && (
+        <section className="w-full bg-white dark:bg-[#0F2A4A] py-6 px-4 sm:px-6 border-b border-slate-200 dark:border-slate-800">
+          <div className="max-w-5xl mx-auto relative">
+            <div className="flex items-center gap-2 mb-3">
+              <Sparkles className="w-4 h-4 text-[#0D9387]" />
+              <span className="text-xs font-semibold uppercase tracking-wider text-[#0D9387]">Galería del destino</span>
+            </div>
+            <div className="relative group">
+              <div
+                ref={carouselRef}
+                className="flex gap-3 overflow-x-auto scrollbar-hide snap-x snap-mandatory scroll-smooth pb-2"
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              >
+                {galleryImages.map((img, i) => (
+                  <div
+                    key={i}
+                    className={`flex-shrink-0 w-[280px] sm:w-[340px] h-[200px] rounded-2xl overflow-hidden snap-center border-2 transition-all duration-300 ${
+                      i === carouselIdx ? 'border-[#0D9387] shadow-lg shadow-[#0D9387]/20' : 'border-transparent'
+                    }`}
+                  >
+                    <img
+                      src={img}
+                      alt={`${destination} — imagen ${i + 1}`}
+                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                      onError={(e) => { e.target.src = heroBgImage; }}
+                    />
+                  </div>
+                ))}
+              </div>
+              <button
+                onClick={() => scrollCarousel(-1)}
+                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 w-10 h-10 rounded-full bg-white dark:bg-[#0F2A4A] border border-slate-200 dark:border-slate-700 shadow-lg flex items-center justify-center text-slate-700 dark:text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[#0D9387] hover:text-white hover:border-[#0D9387] z-10"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => scrollCarousel(1)}
+                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 w-10 h-10 rounded-full bg-white dark:bg-[#0F2A4A] border border-slate-200 dark:border-slate-700 shadow-lg flex items-center justify-center text-slate-700 dark:text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[#0D9387] hover:text-white hover:border-[#0D9387] z-10"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+            {/* Dots indicator */}
+            {galleryImages.length > 1 && (
+              <div className="flex justify-center gap-1.5 mt-3">
+                {galleryImages.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => {
+                      setCarouselIdx(i);
+                      if (carouselRef.current?.children[i]) {
+                        carouselRef.current.children[i].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                      }
+                    }}
+                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                      i === carouselIdx ? 'bg-[#0D9387] w-6' : 'bg-slate-300 dark:bg-slate-600 hover:bg-slate-400'
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
       {/* ═══════ SECTION 2 — CONTENIDO ═══════ */}
       <section id="contenido" className="w-full py-12 sm:py-16 px-4 sm:px-6 lg:px-8 bg-slate-50 dark:bg-[#070F1E] transition-colors">
         <div className="max-w-4xl mx-auto space-y-8">
@@ -303,19 +385,20 @@ export default function ClientQuotationView() {
             </p>
 
             {/* P/P/N formula */}
-            <div className="mt-4 p-4 rounded-xl bg-[#0D9387]/5 dark:bg-[#0D9387]/10 border border-[#0D9387]/15">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                <div className="text-sm text-slate-600 dark:text-slate-300">
-                  <span className="font-semibold text-[#0F2A4A] dark:text-white">${totalWithTax.toLocaleString()}</span>
-                  <span className="mx-1.5 text-slate-400">÷</span>
-                  <span>{nights} noches</span>
-                  <span className="mx-1.5 text-slate-400">÷</span>
-                  <span>{travelers} pers.</span>
-                  <span className="mx-1.5 text-slate-400">=</span>
+            <div className="mt-4 p-5 rounded-xl bg-[#0D9387]/5 dark:bg-[#0D9387]/10 border border-[#0D9387]/15">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="text-sm sm:text-base text-slate-600 dark:text-slate-300 flex-1">
+                  <span className="font-semibold text-[#0F2A4A] dark:text-white text-lg">${totalWithTax.toLocaleString()}</span>
+                  <span className="mx-2 text-slate-400">÷</span>
+                  <span className="font-medium">{nights} {nights === 1 ? 'noche' : 'noches'}</span>
+                  <span className="mx-2 text-slate-400">÷</span>
+                  <span className="font-medium">{travelers} {travelers === 1 ? 'persona' : 'pers.'}</span>
+                  <span className="mx-2 text-slate-400">=</span>
                 </div>
-                <div className="bg-[#0D9387] text-white px-4 py-2 rounded-xl text-center">
-                  <span className="text-[10px] uppercase tracking-wider block opacity-80">P/P/N</span>
-                  <span className="text-xl font-bold">${perNightPerPerson.toLocaleString()} USD</span>
+                <div className="bg-[#0D9387] text-white px-6 py-3 rounded-xl text-center shadow-md min-w-[150px]">
+                  <span className="text-[10px] uppercase tracking-wider block opacity-80">Precio por noche</span>
+                  <span className="text-2xl font-bold">${perNightPerPerson.toLocaleString()}</span>
+                  <span className="text-xs opacity-80 block">USD / persona</span>
                 </div>
               </div>
             </div>
@@ -345,7 +428,7 @@ export default function ClientQuotationView() {
                 )}
               </div>
               <div className="mt-5 pt-4 border-t-2 border-slate-200 dark:border-slate-700 flex items-center justify-between bg-[#0D9387]/10 p-4 rounded-xl">
-                <span className="text-base font-bold text-[#0F2A4A] dark:text-white">Total</span>
+                <span className="text-base font-bold text-[#0F2A4A] dark:text-white">Total a pagar</span>
                 <span className="text-2xl font-bold text-[#0D9387]">${totalWithTax.toLocaleString()} USD</span>
               </div>
             </div>
@@ -355,7 +438,7 @@ export default function ClientQuotationView() {
           {!hasServices && (
             <div className="bg-white dark:bg-[#0F2A4A]/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm">
               <div className="flex items-center justify-between bg-[#0D9387]/10 p-4 rounded-xl border border-[#0D9387]/30">
-                <span className="text-base font-bold text-[#0F2A4A] dark:text-white">Total</span>
+                <span className="text-base font-bold text-[#0F2A4A] dark:text-white">Total a pagar</span>
                 <span className="text-2xl font-bold text-[#0D9387]">${totalWithTax.toLocaleString()} USD</span>
               </div>
             </div>
@@ -417,6 +500,26 @@ export default function ClientQuotationView() {
                     Correo
                   </a>
                 )}
+              </div>
+
+              {/* Advisor badges */}
+              <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700 grid grid-cols-2 gap-2">
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white dark:bg-slate-800/50 text-xs text-slate-600 dark:text-slate-300">
+                  <BadgeCheck className="w-3.5 h-3.5 text-[#0D9387] shrink-0" />
+                  <span>Asesor verificado</span>
+                </div>
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white dark:bg-slate-800/50 text-xs text-slate-600 dark:text-slate-300">
+                  <Star className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                  <span>Especialista</span>
+                </div>
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white dark:bg-slate-800/50 text-xs text-slate-600 dark:text-slate-300">
+                  <Globe className="w-3.5 h-3.5 text-sky-500 shrink-0" />
+                  <span>Agencia oficial</span>
+                </div>
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white dark:bg-slate-800/50 text-xs text-slate-600 dark:text-slate-300">
+                  <Headphones className="w-3.5 h-3.5 text-purple-500 shrink-0" />
+                  <span>Soporte 24/7</span>
+                </div>
               </div>
             </div>
           </div>

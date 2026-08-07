@@ -106,6 +106,7 @@ class Quotation(Base):
     services = Column(JSON, default=list)  # desglose por servicio [{name, price}, ...]
     deposit_percent = Column(Float, default=0)  # % de anticipo/seña a pagar
     hero_image = Column(String, default="")  # imagen personalizada del hero
+    gallery_images = Column(JSON, default=list)  # carrusel de imágenes del destino
     tax_percent = Column(Float, default=0)  # comisión extra sobre el total (solo interno)
     booking_price = Column(Float, nullable=True)  # comparison: Booking.com price
     expedia_price = Column(Float, nullable=True)  # comparison: Expedia price
@@ -132,6 +133,7 @@ class Quotation(Base):
             "services": self.services or [],
             "deposit_percent": self.deposit_percent,
             "hero_image": self.hero_image,
+            "gallery_images": self.gallery_images or [],
             "tax_percent": self.tax_percent,
             "booking_price": self.booking_price, "expedia_price": self.expedia_price,
             "form_data": self.form_data or {},
