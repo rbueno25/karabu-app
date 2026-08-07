@@ -457,44 +457,38 @@ export default function ClientQuotationView() {
 
       {/* ═══════ SECTION 3 — ASESOR ═══════ */}
       {broker.name && (
-        <section className="w-full bg-white dark:bg-[#0F2A4A] py-10 sm:py-14 border-t border-slate-200 dark:border-slate-800">
-          <div className="max-w-2xl mx-auto px-4 sm:px-6">
+        <section className="relative w-full py-10 sm:py-14 border-t border-slate-200 dark:border-slate-800 overflow-hidden" style={{ background: 'linear-gradient(135deg, #0F2A4A 0%, #0D9387 100%)' }}>
+          {/* Animated vector background */}
+          <svg className="absolute inset-0 w-full h-full opacity-[0.06] pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="advisorGrid" width="40" height="40" patternUnits="userSpaceOnUse">
+                <circle cx="20" cy="20" r="1.5" fill="white" />
+              </pattern>
+              <pattern id="advisorDots" width="60" height="60" patternUnits="userSpaceOnUse">
+                <circle cx="30" cy="30" r="3" fill="white" opacity="0.6" />
+                <circle cx="0" cy="0" r="2" fill="white" opacity="0.3" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#advisorGrid)" />
+            <rect width="100%" height="100%" fill="url(#advisorDots)" style={{ animation: 'pulse 4s ease-in-out infinite' }} />
+            <path d="M0 80 Q180 50 360 80 T720 80" stroke="white" strokeWidth="0.5" fill="none" opacity="0.2">
+              <animateTransform attributeName="transform" type="translate" values="0,0;50,-8;0,0" dur="10s" repeatCount="indefinite" />
+            </path>
+            <path d="M0 280 Q200 240 400 280 T800 280" stroke="white" strokeWidth="0.5" fill="none" opacity="0.15">
+              <animateTransform attributeName="transform" type="translate" values="0,0;-40,5;0,0" dur="8s" repeatCount="indefinite" />
+            </path>
+          </svg>
+          {/* Gradient orbs */}
+          <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full opacity-15 pointer-events-none" style={{ background: 'radial-gradient(circle, #72D8E9 0%, transparent 70%)' }} />
+          <div className="absolute -bottom-24 -left-24 w-80 h-80 rounded-full opacity-10 pointer-events-none" style={{ background: 'radial-gradient(circle, #FF6B35 0%, transparent 70%)' }} />
+
+          <div className="relative z-10 max-w-2xl mx-auto px-4 sm:px-6">
             <div className="text-center mb-6">
-              <span className="text-xs font-semibold uppercase tracking-wider text-[#0D9387]">Tu asesor</span>
-              <h2 className="text-xl font-bold text-[#0F2A4A] dark:text-white mt-1">¿Tienes dudas? Contáctanos</h2>
+              <span className="text-xs font-semibold uppercase tracking-wider text-teal-300">Tu asesor</span>
+              <h2 className="text-xl font-bold text-white mt-1">¿Tienes dudas? Contáctanos</h2>
             </div>
 
-            <div className="relative rounded-2xl p-6 sm:p-8 overflow-hidden" style={{ background: 'linear-gradient(135deg, #0F2A4A 0%, #0D9387 100%)' }}>
-              {/* Animated vector background */}
-              <svg className="absolute inset-0 w-full h-full opacity-[0.08] pointer-events-none" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                  <pattern id="vecGrid" width="40" height="40" patternUnits="userSpaceOnUse">
-                    <circle cx="20" cy="20" r="1.5" fill="white" />
-                  </pattern>
-                  <pattern id="vecDots" width="60" height="60" patternUnits="userSpaceOnUse">
-                    <circle cx="30" cy="30" r="3" fill="white" opacity="0.6" />
-                    <circle cx="0" cy="0" r="2" fill="white" opacity="0.3" />
-                  </pattern>
-                </defs>
-                <rect width="100%" height="100%" fill="url(#vecGrid)" />
-                <rect width="100%" height="100%" fill="url(#vecDots)" className="animate-pulse" style={{ animationDuration: '4s' }} />
-                {/* Wavy lines */}
-                <path d="M0 120 Q150 80 300 120 T600 120 T900 120" stroke="white" strokeWidth="0.5" fill="none" opacity="0.3">
-                  <animateTransform attributeName="transform" type="translate" values="0,0;40,-5;0,0" dur="8s" repeatCount="indefinite" />
-                </path>
-                <path d="M0 200 Q200 170 400 200 T800 200" stroke="white" strokeWidth="0.5" fill="none" opacity="0.2">
-                  <animateTransform attributeName="transform" type="translate" values="0,0;-30,3;0,0" dur="6s" repeatCount="indefinite" />
-                </path>
-                <path d="M0 300 Q180 260 360 300 T720 300" stroke="white" strokeWidth="0.5" fill="none" opacity="0.25">
-                  <animateTransform attributeName="transform" type="translate" values="0,0;20,-4;0,0" dur="10s" repeatCount="indefinite" />
-                </path>
-              </svg>
-              {/* Animated gradient orb */}
-              <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full opacity-20 pointer-events-none" style={{ background: 'radial-gradient(circle, #72D8E9 0%, transparent 70%)', animation: 'pulse 4s ease-in-out infinite' }} />
-              <div className="absolute -bottom-16 -left-16 w-48 h-48 rounded-full opacity-15 pointer-events-none" style={{ background: 'radial-gradient(circle, #FF6B35 0%, transparent 70%)', animation: 'pulse 5s ease-in-out infinite' }} />
-
-              {/* Content */}
-              <div className="relative z-10">
+            <div className="bg-white dark:bg-[#0F2A4A]/90 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 sm:p-8 shadow-xl">
               {/* Avatar + info */}
               <div className="flex flex-col items-center text-center mb-6">
                 <div className="relative mb-4">
@@ -511,12 +505,12 @@ export default function ClientQuotationView() {
                     <ShieldCheck className="w-4 h-4" />
                   </div>
                 </div>
-                <h3 className="text-xl font-bold text-white">{broker.name}</h3>
-                <p className="text-sm text-white/70 mt-0.5 flex items-center justify-center gap-1.5">
+                <h3 className="text-xl font-bold text-[#0F2A4A] dark:text-white">{broker.name}</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5 flex items-center justify-center gap-1.5">
                   <Award className="w-3.5 h-3.5 text-amber-500" />
                   {broker.role === 'super_admin' ? 'Administrador' : broker.role === 'admin' ? 'Asesor' : 'Especialista de Viajes'}{broker.department ? ` · ${broker.department}` : ''}
                 </p>
-                {broker.phone && <p className="text-sm text-white/80 mt-1 font-mono flex items-center justify-center gap-1.5"><Phone className="w-3.5 h-3.5 text-teal-300" />{broker.phone}</p>}
+                {broker.phone && <p className="text-sm text-slate-600 dark:text-slate-300 mt-1 font-mono flex items-center justify-center gap-1.5"><Phone className="w-3.5 h-3.5 text-[#0D9387]" />{broker.phone}</p>}
               </div>
 
               {/* Contact buttons */}
@@ -530,33 +524,32 @@ export default function ClientQuotationView() {
                 )}
                 {broker.email && (
                   <a href={`mailto:${broker.email}`}
-                    className="flex items-center justify-center gap-2.5 px-4 py-3 rounded-xl text-sm font-semibold text-white bg-white/15 hover:bg-white/25 border border-white/20 transition-colors shadow-sm">
-                    <Mail className="w-5 h-5 text-teal-300" />
+                    className="flex items-center justify-center gap-2.5 px-4 py-3 rounded-xl text-sm font-semibold text-[#0F2A4A] dark:text-white bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-600 hover:border-[#0D9387] dark:hover:border-[#0D9387] transition-colors shadow-sm">
+                    <Mail className="w-5 h-5 text-[#0D9387]" />
                     Correo
                   </a>
                 )}
               </div>
 
               {/* Advisor badges */}
-              <div className="mt-4 pt-4 border-t border-white/15 grid grid-cols-2 gap-2">
-                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/10 text-xs text-white/80">
-                  <BadgeCheck className="w-3.5 h-3.5 text-teal-300 shrink-0" />
+              <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700 grid grid-cols-2 gap-2">
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800/50 text-xs text-slate-600 dark:text-slate-300">
+                  <BadgeCheck className="w-3.5 h-3.5 text-[#0D9387] shrink-0" />
                   <span>Asesor verificado</span>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/10 text-xs text-white/80">
-                  <Star className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800/50 text-xs text-slate-600 dark:text-slate-300">
+                  <Star className="w-3.5 h-3.5 text-amber-500 shrink-0" />
                   <span>Especialista</span>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/10 text-xs text-white/80">
-                  <Globe className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800/50 text-xs text-slate-600 dark:text-slate-300">
+                  <Globe className="w-3.5 h-3.5 text-sky-500 shrink-0" />
                   <span>Agencia oficial</span>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/10 text-xs text-white/80">
-                  <Headphones className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800/50 text-xs text-slate-600 dark:text-slate-300">
+                  <Headphones className="w-3.5 h-3.5 text-purple-500 shrink-0" />
                   <span>Soporte 24/7</span>
                 </div>
               </div>
-              </div>{/* end relative z-10 */}
             </div>
           </div>
         </section>
