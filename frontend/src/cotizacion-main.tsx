@@ -6,6 +6,7 @@ import HeroCotizar from './components/HeroCotizar';
 import Steps from './components/Steps';
 import QuoteForm from './components/QuoteForm';
 import CTA from './components/CTA';
+import FAQ from './components/FAQ';
 import Footer from './components/Footer';
 
 function CotizacionApp() {
@@ -24,6 +25,7 @@ function CotizacionApp() {
           <QuoteForm preselectedDestination="" onClearPreselected={() => {}} />
         </div>
         <CTA onContactClick={() => scrollTo('cotizacion')} />
+        <FAQ />
       </main>
       <Footer onNavigate={scrollTo} onSelectDestination={() => scrollTo('cotizacion')} />
     </div>

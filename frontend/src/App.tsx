@@ -15,6 +15,7 @@ import Steps from './components/Steps';
 import QuoteForm from './components/QuoteForm';
 import Testimonials from './components/Testimonials';
 import CTA from './components/CTA';
+import FAQ from './components/FAQ';
 import Footer from './components/Footer';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import TermsConditions from './components/TermsConditions';
@@ -119,6 +120,7 @@ function LandingPage() {
         <QuoteForm preselectedDestination={preselectedDestination} onClearPreselected={() => setPreselectedDestination('')} />
         <Testimonials />
         <CTA onContactClick={() => handleNavigate('cotizacion')} />
+        <FAQ />
       </main>
       <Footer onNavigate={handleNavigate} onSelectDestination={handleSelectDestination} />
     </div>
