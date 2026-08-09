@@ -35,8 +35,8 @@ export default function HeroCotizar({ onComenzar }: HeroCotizarProps) {
           </h1>
 
           <p className="text-lg sm:text-xl text-slate-300 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Llena el formulario y recibe una cotización personalizada en menos de 24 horas.
-            Sin compromiso, sin costo.
+            Solicita tu cotización de forma sencilla, compara opciones claras y recibe acompañamiento humano<br />
+            hasta completar tu viaje o proceso de visa.
           </p>
 
           <button
