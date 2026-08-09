@@ -231,8 +231,16 @@ export default function ClientQuotationView() {
         {/* Botones de acción en el hero */}
         <div className="relative z-20 w-full max-w-2xl mx-auto px-4 pb-3">
           {status === 'aceptada' ? (
-            <div className="p-3 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-200 text-center text-sm font-medium flex items-center justify-center gap-2">
-              <CheckCircle2 className="w-4 h-4" /> PROPUESTA ACEPTADA — Tu asesor te contactará
+            <div className="space-y-3">
+              <div className="p-3 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-200 text-center text-sm font-medium flex items-center justify-center gap-2">
+                <CheckCircle2 className="w-4 h-4" /> PROPUESTA ACEPTADA
+              </div>
+              <a href="#pago"
+                className="flex items-center justify-center gap-3 w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-[#0D9387] to-emerald-500 text-white font-bold text-base shadow-xl shadow-[#0D9387]/30 transition-all hover:scale-[1.02] active:scale-[0.98] animate-pulse hover:animate-none cursor-pointer"
+                onClick={(e) => { e.preventDefault(); document.getElementById('pago')?.scrollIntoView({ behavior: 'smooth' }); }}>
+                <DollarSign className="w-5 h-5" />
+                PAGAR AHORA POR TRANSFERENCIA
+              </a>
             </div>
           ) : status === 'cambios_solicitados' || status === 'rechazada' ? (
             <div className="p-3 rounded-xl bg-[#FF6B35]/20 border border-[#FF6B35]/30 text-orange-200 text-center text-sm font-medium flex items-center justify-center gap-2">
@@ -272,11 +280,63 @@ export default function ClientQuotationView() {
         </div>
 
         <div className="relative z-20 pb-6 text-center">
-          <button onClick={() => document.getElementById('contenido')?.scrollIntoView({ behavior: 'smooth' })} className="inline-flex items-center gap-2 text-xs text-slate-300 hover:text-white transition bg-black/50 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/15">
-            <span>Ver detalles</span><ArrowDown className="w-3.5 h-3.5 animate-bounce text-[#0D9387]" />
+          <button onClick={() => document.getElementById(status === 'aceptada' ? 'pago' : 'contenido')?.scrollIntoView({ behavior: 'smooth' })} className="inline-flex items-center gap-2 text-xs text-slate-300 hover:text-white transition bg-black/50 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/15">
+            <span>{status === 'aceptada' ? 'Pagar ahora' : 'Ver detalles'}</span><ArrowDown className="w-3.5 h-3.5 animate-bounce text-[#0D9387]" />
           </button>
         </div>
       </section>
+
+      {/* ═══════ PAYMENT SECTION — visible solo si aceptada, PRIMERO arriba ═══════ */}
+      {status === 'aceptada' && (
+        <section id="pago" className="w-full bg-white dark:bg-[#070F1E] py-10 sm:py-14 px-4 sm:px-6 border-b-4 border-[#0D9387]">
+          <div className="max-w-2xl mx-auto">
+            <div className="text-center mb-6">
+              <span className="text-xs font-semibold uppercase tracking-wider text-[#0D9387] bg-[#0D9387]/10 px-4 py-1.5 rounded-full">Paso 1 — Realiza tu pago</span>
+              <h2 className="text-2xl font-bold text-[#0F2A4A] dark:text-white mt-3">Transfiere a tu cuenta Karabu</h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Deposita o transfiere el monto total y envíanos el comprobante</p>
+            </div>
+
+            <div className="bg-white dark:bg-[#0F2A4A]/40 border-2 border-[#0D9387]/20 rounded-3xl p-6 sm:p-8 shadow-lg">
+              {/* Bank header with BHD logo */}
+              <div className="flex items-center gap-4 mb-6 pb-6 border-b border-slate-200 dark:border-slate-700">
+                <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center shrink-0 border border-slate-200 overflow-hidden p-2">
+                  <img src="/bhd-logo.jpg" alt="Banco BHD" className="w-full h-full object-contain" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-[#0F2A4A] dark:text-white">Banco BHD</h3>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">Cuenta de ahorros · Pesos Dominicanos (RD$)</p>
+                </div>
+              </div>
+
+              {/* Account details */}
+              <div className="space-y-3 mb-6">
+                {[
+                  { label: 'Titular', value: 'RINALDI BUENO' },
+                  { label: 'Cédula', value: '402-0293128-9' },
+                  { label: 'Número de cuenta', value: '40030140010', mono: true },
+                  { label: 'Cuenta estándar (IBAN)', value: 'DO75BCBH00000000040030140010', mono: true },
+                  { label: 'Correo', value: 'rsbueno25@gmail.com' },
+                ].map((item, i) => (
+                  <div key={i} className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 p-3 rounded-xl bg-slate-50 dark:bg-[#070F1E]/60 border border-slate-200/80 dark:border-slate-800">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{item.label}</span>
+                    <span className={`text-sm font-bold text-[#0F2A4A] dark:text-white ${item.mono ? 'font-mono text-xs sm:text-sm break-all' : ''}`}>{item.value}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Total reminder */}
+              <div className="p-5 rounded-2xl bg-[#0D9387]/10 border border-[#0D9387]/30 text-center">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Total a transferir</p>
+                <p className="text-3xl font-bold text-[#0D9387]">${totalWithTax.toLocaleString()} <span className="text-base">USD</span></p>
+                <p className="text-[10px] text-slate-400 mt-2 flex items-center justify-center gap-1">
+                  <ShieldCheck className="w-3 h-3 text-[#0D9387]" />
+                  Al enviar el comprobante, tu asesor validará el pago y confirmará tu reserva
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ═══════ GALLERY CAROUSEL ═══════ */}
       {galleryImages.length > 1 && (
@@ -503,58 +563,6 @@ export default function ClientQuotationView() {
           )}
         </div>
       </section>
-
-      {/* ═══════ SECTION 3.5 — PAGO (solo si aceptada) ═══════ */}
-      {status === 'aceptada' && (
-        <section className="w-full bg-slate-50 dark:bg-[#070F1E] py-10 sm:py-14 px-4 sm:px-6 border-t border-slate-200 dark:border-slate-800">
-          <div className="max-w-2xl mx-auto">
-            <div className="text-center mb-6">
-              <span className="text-xs font-semibold uppercase tracking-wider text-[#0D9387]">Forma de pago</span>
-              <h2 className="text-xl font-bold text-[#0F2A4A] dark:text-white mt-1">Realiza tu pago por transferencia</h2>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Deposita o transfiere a la siguiente cuenta y envíanos el comprobante</p>
-            </div>
-
-            <div className="bg-white dark:bg-[#0F2A4A]/40 border-2 border-[#0D9387]/20 rounded-3xl p-6 sm:p-8 shadow-lg">
-              {/* Bank header */}
-              <div className="flex items-center gap-4 mb-6 pb-6 border-b border-slate-200 dark:border-slate-700">
-                <div className="w-14 h-14 rounded-2xl bg-[#0D9387]/10 flex items-center justify-center text-[#0D9387] shrink-0">
-                  <Building2 className="w-7 h-7" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-[#0F2A4A] dark:text-white">Banco BHD</h3>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">Cuenta de ahorros · RD$</p>
-                </div>
-              </div>
-
-              {/* Account details */}
-              <div className="space-y-4 mb-6">
-                {[
-                  { label: 'Titular', value: 'RINALDI BUENO' },
-                  { label: 'Cédula', value: '402-0293128-9' },
-                  { label: 'Número de cuenta', value: '40030140010', mono: true },
-                  { label: 'Cuenta estándar (IBAN)', value: 'DO75BCBH00000000040030140010', mono: true },
-                  { label: 'Correo', value: 'rsbueno25@gmail.com' },
-                ].map((item, i) => (
-                  <div key={i} className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 p-3 rounded-xl bg-slate-50 dark:bg-[#070F1E]/60 border border-slate-200/80 dark:border-slate-800">
-                    <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{item.label}</span>
-                    <span className={`text-sm font-bold text-[#0F2A4A] dark:text-white ${item.mono ? 'font-mono text-xs sm:text-sm break-all' : ''}`}>{item.value}</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Total reminder */}
-              <div className="p-5 rounded-2xl bg-[#0D9387]/10 border border-[#0D9387]/30 text-center">
-                <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Total a transferir</p>
-                <p className="text-3xl font-bold text-[#0D9387]">${totalWithTax.toLocaleString()} <span className="text-base">USD</span></p>
-                <p className="text-[10px] text-slate-400 mt-2 flex items-center justify-center gap-1">
-                  <ShieldCheck className="w-3 h-3 text-[#0D9387]" />
-                  Al enviar el comprobante, tu asesor validará el pago y confirmará tu reserva
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* ═══════ SECTION 4 — ASESOR ═══════ */}
       {broker.name && (
