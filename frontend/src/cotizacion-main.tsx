@@ -21,11 +21,11 @@ function CotizacionApp() {
       <main>
         <HeroCotizar onComenzar={() => scrollTo('cotizacion')} />
         <Steps />
+        <FAQ />
         <div id="cotizacion">
           <QuoteForm preselectedDestination="" onClearPreselected={() => {}} />
         </div>
         <CTA onContactClick={() => scrollTo('cotizacion')} />
-        <FAQ />
       </main>
       <Footer onNavigate={scrollTo} onSelectDestination={() => scrollTo('cotizacion')} />
     </div>

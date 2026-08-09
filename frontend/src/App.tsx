@@ -117,10 +117,10 @@ function LandingPage() {
         <Services />
         <WhyChooseUs />
         <Steps />
+        <FAQ />
         <QuoteForm preselectedDestination={preselectedDestination} onClearPreselected={() => setPreselectedDestination('')} />
         <Testimonials />
         <CTA onContactClick={() => handleNavigate('cotizacion')} />
-        <FAQ />
       </main>
       <Footer onNavigate={handleNavigate} onSelectDestination={handleSelectDestination} />
     </div>
