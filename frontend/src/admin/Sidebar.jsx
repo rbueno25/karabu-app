@@ -13,6 +13,7 @@ import {
   Settings,
   LogOut,
   Plane,
+  FolderOpen,
 } from "lucide-react";
 import { useAuth } from "./AuthContext";
 
@@ -21,6 +22,7 @@ const items = [
   { to: "/admin/clientes", label: "Clientes", icon: Users, testId: "sidebar-link-clientes" },
   { to: "/admin/cotizaciones", label: "Cotizaciones", icon: FileText, testId: "sidebar-link-cotizaciones" },
   { to: "/admin/reservas", label: "Reservas", icon: CalendarCheck, testId: "sidebar-link-reservas" },
+  { to: "/admin/expedientes", label: "Expedientes", icon: FolderOpen, testId: "sidebar-link-expedientes" },
   { to: "/admin/pagos", label: "Pagos", icon: CreditCard, testId: "sidebar-link-pagos" },
   { to: "/admin/destinos", label: "Destinos", icon: MapPin, testId: "sidebar-link-destinos" },
   { to: "/admin/usuarios", label: "Usuarios", icon: UserCog, testId: "sidebar-link-usuarios" },

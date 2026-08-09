@@ -44,6 +44,8 @@ const AdminDestinations = lazy(() => import('./admin/Destinations'));
 const UsersPage = lazy(() => import('./admin/Users'));
 const UserCreate = lazy(() => import('./admin/UserCreate'));
 const Settings = lazy(() => import('./admin/Settings'));
+const Dossiers = lazy(() => import('./admin/Dossiers'));
+const DossierDetail = lazy(() => import('./admin/DossierDetail'));
 const InvoiceView = lazy(() => import('./admin/InvoiceView'));
 
 function AdminLoader() {
@@ -161,6 +163,8 @@ export default function App() {
             <Route path="usuarios/nuevo" element={<Suspense fallback={<AdminLoader />}><UserCreate /></Suspense>} />
             <Route path="usuarios" element={<Suspense fallback={<AdminLoader />}><UsersPage /></Suspense>} />
             <Route path="configuracion" element={<Suspense fallback={<AdminLoader />}><Settings /></Suspense>} />
+            <Route path="expedientes" element={<Suspense fallback={<AdminLoader />}><Dossiers /></Suspense>} />
+            <Route path="expedientes/:id" element={<Suspense fallback={<AdminLoader />}><DossierDetail /></Suspense>} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
           {/* Public client quotation view — no auth required */}

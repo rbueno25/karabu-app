@@ -819,7 +819,30 @@ async def list_dossiers(db: AsyncSession = Depends(get_db), _u=Depends(get_curre
     result = await db.execute(
         select(Dossier).order_by(Dossier.created_at.desc()).limit(200)
     )
-    return [d.to_dict() for d in result.scalars().all()]
+    dossiers = result.scalars().all()
+    enriched = []
+    for d in dossiers:
+        # Get client name
+        client_name = ""
+        if d.client_id:
+            c_result = await db.execute(select(Client).where(Client.id == d.client_id))
+            client = c_result.scalar_one_or_none()
+            if client:
+                client_name = f"{client.first_name} {client.last_name}".strip()
+        # Count quotations and reservations
+        q_count = await db.execute(
+            select(func.count(Quotation.id)).where(Quotation.dossier_id == d.id)
+        )
+        r_count = await db.execute(
+            select(func.count(Reservation.id)).where(Reservation.dossier_id == d.id)
+        )
+        enriched.append({
+            **d.to_dict(),
+            "client_name": client_name or f"Cliente {d.client_id[:8]}" if d.client_id else "",
+            "quotation_count": q_count.scalar() or 0,
+            "reservation_count": r_count.scalar() or 0,
+        })
+    return enriched
 
 
 @api.get("/dossiers/{did}")
@@ -834,8 +857,16 @@ async def get_dossier(did: str, db: AsyncSession = Depends(get_db), _u=Depends(g
     r_result = await db.execute(
         select(Reservation).where(Reservation.dossier_id == did).order_by(Reservation.created_at.desc())
     )
+    # Get client name
+    client_name = ""
+    if d.client_id:
+        c_result = await db.execute(select(Client).where(Client.id == d.client_id))
+        client = c_result.scalar_one_or_none()
+        if client:
+            client_name = f"{client.first_name} {client.last_name}".strip()
     return {
         **d.to_dict(),
+        "client_name": client_name or f"Cliente {d.client_id[:8]}" if d.client_id else "",
         "quotations": [q.to_dict() for q in q_result.scalars().all()],
         "reservations": [r.to_dict() for r in r_result.scalars().all()],
     }
