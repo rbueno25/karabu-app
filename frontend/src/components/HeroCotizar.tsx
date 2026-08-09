@@ -34,7 +34,7 @@ export default function HeroCotizar({ onComenzar }: HeroCotizarProps) {
             <span className="text-[#0D9387]">viaje con confianza</span>
           </h1>
 
-          <p className="text-lg sm:text-xl text-slate-300 max-w-2xl mx-auto mb-10 leading-relaxed">
+          <p className="text-lg sm:text-xl text-slate-300 max-w-2xl mx-auto mb-10 leading-relaxed text-justify">
             Solicita tu cotización de forma sencilla, compara opciones claras y recibe acompañamiento humano<br />
             hasta completar tu viaje o proceso de visa.
           </p>
