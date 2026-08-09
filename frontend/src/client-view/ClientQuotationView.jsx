@@ -504,6 +504,58 @@ export default function ClientQuotationView() {
         </div>
       </section>
 
+      {/* ═══════ SECTION 3.5 — PAGO (solo si aceptada) ═══════ */}
+      {status === 'aceptada' && (
+        <section className="w-full bg-slate-50 dark:bg-[#070F1E] py-10 sm:py-14 px-4 sm:px-6 border-t border-slate-200 dark:border-slate-800">
+          <div className="max-w-2xl mx-auto">
+            <div className="text-center mb-6">
+              <span className="text-xs font-semibold uppercase tracking-wider text-[#0D9387]">Forma de pago</span>
+              <h2 className="text-xl font-bold text-[#0F2A4A] dark:text-white mt-1">Realiza tu pago por transferencia</h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Deposita o transfiere a la siguiente cuenta y envíanos el comprobante</p>
+            </div>
+
+            <div className="bg-white dark:bg-[#0F2A4A]/40 border-2 border-[#0D9387]/20 rounded-3xl p-6 sm:p-8 shadow-lg">
+              {/* Bank header */}
+              <div className="flex items-center gap-4 mb-6 pb-6 border-b border-slate-200 dark:border-slate-700">
+                <div className="w-14 h-14 rounded-2xl bg-[#0D9387]/10 flex items-center justify-center text-[#0D9387] shrink-0">
+                  <Building2 className="w-7 h-7" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-[#0F2A4A] dark:text-white">Banco BHD</h3>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">Cuenta de ahorros · RD$</p>
+                </div>
+              </div>
+
+              {/* Account details */}
+              <div className="space-y-4 mb-6">
+                {[
+                  { label: 'Titular', value: 'RINALDI BUENO' },
+                  { label: 'Cédula', value: '402-0293128-9' },
+                  { label: 'Número de cuenta', value: '40030140010', mono: true },
+                  { label: 'Cuenta estándar (IBAN)', value: 'DO75BCBH00000000040030140010', mono: true },
+                  { label: 'Correo', value: 'rsbueno25@gmail.com' },
+                ].map((item, i) => (
+                  <div key={i} className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 p-3 rounded-xl bg-slate-50 dark:bg-[#070F1E]/60 border border-slate-200/80 dark:border-slate-800">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{item.label}</span>
+                    <span className={`text-sm font-bold text-[#0F2A4A] dark:text-white ${item.mono ? 'font-mono text-xs sm:text-sm break-all' : ''}`}>{item.value}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Total reminder */}
+              <div className="p-5 rounded-2xl bg-[#0D9387]/10 border border-[#0D9387]/30 text-center">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Total a transferir</p>
+                <p className="text-3xl font-bold text-[#0D9387]">${totalWithTax.toLocaleString()} <span className="text-base">USD</span></p>
+                <p className="text-[10px] text-slate-400 mt-2 flex items-center justify-center gap-1">
+                  <ShieldCheck className="w-3 h-3 text-[#0D9387]" />
+                  Al enviar el comprobante, tu asesor validará el pago y confirmará tu reserva
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* ═══════ SECTION 4 — ASESOR ═══════ */}
       {broker.name && (
         <section className="relative w-full py-10 sm:py-14 border-t border-slate-200 dark:border-slate-800 overflow-hidden" style={{ background: 'linear-gradient(135deg, #0F2A4A 0%, #0D9387 100%)' }}>

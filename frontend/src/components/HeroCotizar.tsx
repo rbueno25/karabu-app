@@ -30,8 +30,8 @@ export default function HeroCotizar({ onComenzar }: HeroCotizarProps) {
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-tight mb-4">
-            Tu próximo viaje<br />
-            <span className="text-[#0D9387]">empieza aquí</span>
+            Cotiza tu próximo<br />
+            <span className="text-[#0D9387]">viaje con confianza</span>
           </h1>
 
           <p className="text-lg sm:text-xl text-slate-300 max-w-2xl mx-auto mb-10 leading-relaxed">

@@ -106,8 +106,8 @@ export default function Hero({ onExploreDestinations, onContact }: HeroProps) {
               transition={{ duration: 0.6, delay: 0.1 }}
               className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white lg:text-brand-navy tracking-tight leading-tight"
             >
-              Cotiza tu próximo<br />
-              viaje <span className="text-brand-turquoise">con confianza</span>
+              Cotiza el viaje de<br />
+              tus sueños <span className="text-brand-turquoise">con Karabu</span>
             </motion.h1>
 
             {/* Description */}
