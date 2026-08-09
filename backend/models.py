@@ -107,6 +107,8 @@ class Quotation(Base):
     deposit_percent = Column(Float, default=0)  # % de anticipo/seña a pagar
     hero_image = Column(String, default="")  # imagen personalizada del hero
     gallery_images = Column(JSON, default=list)  # carrusel de imágenes del destino
+    dossier_id = Column(String, ForeignKey("dossiers.id"), nullable=True, index=True)
+    code = Column(String, nullable=True, index=True)  # COT-2026-00001
     tax_percent = Column(Float, default=0)  # comisión extra sobre el total (solo interno)
     booking_price = Column(Float, nullable=True)  # comparison: Booking.com price
     expedia_price = Column(Float, nullable=True)  # comparison: Expedia price
@@ -119,6 +121,7 @@ class Quotation(Base):
     updated_at = Column(DateTime(timezone=True), nullable=False, default=utcnow, onupdate=utcnow)
 
     client = relationship("Client", back_populates="quotations")
+    dossier = relationship("Dossier", back_populates="quotations")
 
     def to_dict(self):
         return {
@@ -134,6 +137,8 @@ class Quotation(Base):
             "deposit_percent": self.deposit_percent,
             "hero_image": self.hero_image,
             "gallery_images": self.gallery_images or [],
+            "dossier_id": self.dossier_id,
+            "code": self.code or "",
             "tax_percent": self.tax_percent,
             "booking_price": self.booking_price, "expedia_price": self.expedia_price,
             "form_data": self.form_data or {},
@@ -161,11 +166,14 @@ class Reservation(Base):
     status = Column(String, nullable=False, default="pendiente")  # pendiente, confirmada, pagada, en_viaje, finalizada, cancelada
     passengers = Column(JSON, default=list)
     documents = Column(JSON, default=list)
+    dossier_id = Column(String, ForeignKey("dossiers.id"), nullable=True, index=True)
+    code = Column(String, nullable=True, index=True)  # RES-2026-00001
     created_by = Column(String, ForeignKey("users.id"), nullable=True)
     created_at = Column(DateTime(timezone=True), nullable=False, default=utcnow)
     updated_at = Column(DateTime(timezone=True), nullable=False, default=utcnow, onupdate=utcnow)
 
     client = relationship("Client", back_populates="reservations")
+    dossier = relationship("Dossier", back_populates="reservations")
     payments = relationship("Payment", back_populates="reservation", lazy="selectin")
 
     def to_dict(self):
@@ -177,6 +185,8 @@ class Reservation(Base):
             "total_amount": self.total_amount, "currency": self.currency,
             "status": self.status, "passengers": self.passengers or [],
             "documents": self.documents or [],
+            "dossier_id": self.dossier_id,
+            "code": self.code or "",
             "created_by": self.created_by,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
@@ -359,6 +369,31 @@ class Lugar(Base):
             "id_ciudad": self.id_ciudad,
             "categoria": self.categoria,
             "rating": self.rating,
+        }
+
+
+class Dossier(Base):
+    __tablename__ = "dossiers"
+
+    id = Column(String, primary_key=True, default=new_id)
+    code = Column(String, unique=True, nullable=False, index=True)
+    client_id = Column(String, ForeignKey("clients.id"), nullable=False, index=True)
+    status = Column(String, nullable=False, default="abierto")
+    created_by = Column(String, ForeignKey("users.id"), nullable=True)
+    created_at = Column(DateTime(timezone=True), nullable=False, default=utcnow)
+    updated_at = Column(DateTime(timezone=True), nullable=False, default=utcnow, onupdate=utcnow)
+
+    client = relationship("Client")
+    quotations = relationship("Quotation", back_populates="dossier", lazy="selectin")
+    reservations = relationship("Reservation", back_populates="dossier", lazy="selectin")
+
+    def to_dict(self):
+        return {
+            "id": self.id, "code": self.code,
+            "client_id": self.client_id, "status": self.status,
+            "created_by": self.created_by,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
         }
 
 

@@ -19,7 +19,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from database import Base, engine, get_db, init_db, AsyncSessionLocal
-from models import User, Client, Quotation, Reservation, Payment, Destination, Package, Setting, Pais, Ciudad, Lugar, Notification, Upload
+from models import User, Client, Quotation, Reservation, Payment, Destination, Package, Setting, Pais, Ciudad, Lugar, Notification, Upload, Dossier
 import re
 
 # -------------------- Sanitizer --------------------
@@ -167,6 +167,24 @@ async def create_notification_all(db: AsyncSession, type_: str, title: str, mess
     for u in users:
         await create_notification(db, u.id, type_, title, message, link)
 
+async def _generate_code(db: AsyncSession, prefix: str) -> str:
+    """Generate sequential code: EXP-2026-00001, COT-2026-00001, etc."""
+    year = str(datetime.now(timezone.utc).year)
+    if prefix == "COT":
+        result = await db.execute(
+            text(f"SELECT COUNT(*) FROM quotations WHERE code LIKE 'COT-{year}-%'")
+        )
+    elif prefix == "RES":
+        result = await db.execute(
+            text(f"SELECT COUNT(*) FROM reservations WHERE code LIKE 'RES-{year}-%'")
+        )
+    else:  # EXP
+        result = await db.execute(
+            text(f"SELECT COUNT(*) FROM dossiers WHERE code LIKE 'EXP-{year}-%'")
+        )
+    count = (result.scalar() or 0) + 1
+    return f"{prefix}-{year}-{count:05d}"
+
 async def get_destination_image(db: AsyncSession, destination_name: str) -> str:
     """Look up hero image from destinations table matching destination name."""
     if not destination_name:
@@ -243,6 +261,8 @@ class QuotationIn(BaseModel):
     deposit_percent: Optional[float] = 0
     hero_image: Optional[str] = ""
     gallery_images: Optional[list] = []
+    dossier_id: Optional[str] = None
+    code: Optional[str] = ""
     tax_percent: Optional[float] = 0
     booking_price: Optional[float] = None
     expedia_price: Optional[float] = None
@@ -250,6 +270,10 @@ class QuotationIn(BaseModel):
     sent_via: Optional[str] = ""
     sent_at: Optional[str] = ""
     form_data: Optional[dict] = None  # raw form submission data
+
+class DossierIn(BaseModel):
+    client_id: str
+    status: str = "abierto"
 
 class LeadIn(BaseModel):
     """Public landing page form submission — no auth required."""
@@ -594,6 +618,22 @@ async def create_quotation(body: QuotationIn, db: AsyncSession = Depends(get_db)
     if not hero:
         hero = await get_destination_image(db, body.destination)
 
+    # Auto-create dossier if not provided
+    dossier_id = body.dossier_id
+    if not dossier_id:
+        dossier_code = await _generate_code(db, "EXP")
+        dossier = Dossier(
+            id=new_id(), code=dossier_code,
+            client_id=body.client_id, status="abierto",
+            created_by=u["id"],
+        )
+        db.add(dossier)
+        await db.flush()
+        dossier_id = dossier.id
+
+    # Generate quotation code
+    quote_code = body.code or await _generate_code(db, "COT")
+
     q = Quotation(
         id=new_id(), client_id=body.client_id, destination=body.destination,
         travel_date=body.travel_date or "", return_date=body.return_date or "",
@@ -606,6 +646,8 @@ async def create_quotation(body: QuotationIn, db: AsyncSession = Depends(get_db)
         services=body.services or [],
         deposit_percent=body.deposit_percent or 0,
         hero_image=hero,
+        dossier_id=dossier_id,
+        code=quote_code,
         tax_percent=body.tax_percent if body.tax_percent is not None else 0,
         booking_price=body.booking_price,
         expedia_price=body.expedia_price,
@@ -726,6 +768,10 @@ async def convert_quotation(qid: str, db: AsyncSession = Depends(get_db), u=Depe
         raise HTTPException(status_code=404, detail="Cotización no encontrada")
     if q.status != "aceptada":
         raise HTTPException(status_code=400, detail="Solo cotizaciones aceptadas pueden convertirse en reserva")
+
+    # Generate reservation code
+    res_code = await _generate_code(db, "RES")
+
     reservation = Reservation(
         id=new_id(), client_id=q.client_id, quotation_id=q.id,
         destination=q.destination,
@@ -733,10 +779,19 @@ async def convert_quotation(qid: str, db: AsyncSession = Depends(get_db), u=Depe
         return_date=q.return_date or now_iso(),
         travelers=q.travelers, services="", notes=q.notes or "",
         total_amount=q.amount, currency=q.currency,
+        dossier_id=q.dossier_id,
+        code=res_code,
         status="pendiente", created_by=u["id"],
     )
     db.add(reservation)
     await db.flush()
+
+    # Update dossier status to "reservado"
+    if q.dossier_id:
+        d_result = await db.execute(select(Dossier).where(Dossier.id == q.dossier_id))
+        dossier_obj = d_result.scalar_one_or_none()
+        if dossier_obj:
+            dossier_obj.status = "reservado"
 
     # Notify if converted by a different user than original creator
     if q.created_by and q.created_by != u["id"]:
@@ -756,6 +811,34 @@ async def delete_quotation(qid: str, db: AsyncSession = Depends(get_db), _u=Depe
     if q:
         await db.delete(q)
     return {"ok": True}
+
+
+# -------------------- Dossiers (Expedientes) --------------------
+@api.get("/dossiers")
+async def list_dossiers(db: AsyncSession = Depends(get_db), _u=Depends(get_current_user)):
+    result = await db.execute(
+        select(Dossier).order_by(Dossier.created_at.desc()).limit(200)
+    )
+    return [d.to_dict() for d in result.scalars().all()]
+
+
+@api.get("/dossiers/{did}")
+async def get_dossier(did: str, db: AsyncSession = Depends(get_db), _u=Depends(get_current_user)):
+    result = await db.execute(select(Dossier).where(Dossier.id == did))
+    d = result.scalar_one_or_none()
+    if not d:
+        raise HTTPException(status_code=404, detail="Expediente no encontrado")
+    q_result = await db.execute(
+        select(Quotation).where(Quotation.dossier_id == did).order_by(Quotation.created_at.desc())
+    )
+    r_result = await db.execute(
+        select(Reservation).where(Reservation.dossier_id == did).order_by(Reservation.created_at.desc())
+    )
+    return {
+        **d.to_dict(),
+        "quotations": [q.to_dict() for q in q_result.scalars().all()],
+        "reservations": [r.to_dict() for r in r_result.scalars().all()],
+    }
 
 
 # -------------------- Public Leads (no auth) --------------------
@@ -830,6 +913,19 @@ async def create_lead(body: LeadIn, db: AsyncSession = Depends(get_db), _rl=Depe
     # Try to find hero image from destinations table
     hero_image = await get_destination_image(db, destination_str)
 
+    # Auto-create dossier for the lead
+    dossier_code = await _generate_code(db, "EXP")
+    dossier = Dossier(
+        id=new_id(), code=dossier_code,
+        client_id=client.id, status="abierto",
+        created_by=None,
+    )
+    db.add(dossier)
+    await db.flush()
+
+    # Generate quotation code
+    quote_code = await _generate_code(db, "COT")
+
     q = Quotation(
         id=new_id(),
         client_id=client.id,
@@ -843,6 +939,8 @@ async def create_lead(body: LeadIn, db: AsyncSession = Depends(get_db), _rl=Depe
         form_data=form_data,
         room_type=_build_room_summary(body.roomsSingle, body.roomsDouble, body.roomsTriple),
         hero_image=hero_image,
+        dossier_id=dossier.id,
+        code=quote_code,
         status="borrador",
         sent_via=body.preferredContact,
         sent_at=now_iso(),
