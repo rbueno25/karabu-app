@@ -96,7 +96,7 @@ export default function Hero({ onExploreDestinations, onContact }: HeroProps) {
               className="flex items-center gap-2 self-center lg:self-start bg-brand-turquoise/20 lg:bg-brand-turquoise/10 text-brand-turquoise font-bold text-xs uppercase tracking-wider px-3.5 py-2 rounded-full"
             >
               <Sparkles className="w-3.5 h-3.5" />
-              <span>VIAJES · VISAS · CERTIFICADOS</span>
+              <span>VIAJES · PAQUETES · EXPERIENCIAS</span>
             </motion.div>
 
             {/* Main Headline */}
@@ -106,8 +106,8 @@ export default function Hero({ onExploreDestinations, onContact }: HeroProps) {
               transition={{ duration: 0.6, delay: 0.1 }}
               className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white lg:text-brand-navy tracking-tight leading-tight"
             >
-              Cotiza el viaje de<br />
-              tus sueños <span className="text-brand-turquoise">con Karabu</span>
+              Cotiza tu próximo<br />
+              viaje <span className="text-brand-turquoise">con confianza</span>
             </motion.h1>
 
             {/* Description */}
@@ -117,7 +117,7 @@ export default function Hero({ onExploreDestinations, onContact }: HeroProps) {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="text-white/80 lg:text-slate-600 text-base sm:text-lg max-w-xl mx-auto lg:mx-0 leading-relaxed font-sans"
             >
-              Completa el formulario y recibe una propuesta personalizada con acompañamiento en todo el proceso.
+              Solicita tu cotización de forma sencilla, compara opciones claras y recibe acompañamiento humano hasta completar tu viaje.
             </motion.p>
 
             {/* 3 Badges */}
@@ -129,8 +129,8 @@ export default function Hero({ onExploreDestinations, onContact }: HeroProps) {
             >
               {[
                 { icon: Users, title: 'Paquetes', sub: 'de viaje' },
-                { icon: Award, title: 'Asesoría', sub: 'de visas' },
-                { icon: Headphones, title: 'Certificados', sub: 'de viaje' },
+                { icon: Award, title: 'Aéreos', sub: 'y hoteles' },
+                { icon: Headphones, title: 'Soporte', sub: '24/7' },
               ].map((item, i) => (
                 <div key={i} className="flex items-center gap-2 lg:gap-3">
                   <div className="w-7 h-7 lg:w-9 lg:h-9 rounded-full bg-brand-turquoise/20 lg:bg-brand-turquoise/10 flex items-center justify-center text-brand-turquoise flex-shrink-0">
