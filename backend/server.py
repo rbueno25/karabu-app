@@ -2154,7 +2154,7 @@ app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=os.environ.get("CORS_ORIGINS", "https://karabu.onrender.com").split(","),
+    allow_origins=os.environ.get("CORS_ORIGINS", "https://karabuviajes.com,https://cotizacion.karabuviajes.com,https://karabu.onrender.com,https://cotizacion-pkvk.onrender.com").split(","),
     allow_methods=["*"],
     allow_headers=["*"],
 )
