@@ -191,6 +191,7 @@ export default function Reservations() {
               <thead className="bg-gray-50 dark:bg-zinc-800 border-b border-gray-200 dark:border-zinc-800">
                 <tr>
                   <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Cliente</th>
+                  <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Código</th>
                   <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Destino</th>
                   <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Salida</th>
                   <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Total</th>
@@ -203,6 +204,7 @@ export default function Reservations() {
                 {paginated.map((r) => (
                   <tr key={r.id} className="border-b border-gray-100 dark:border-zinc-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td className="px-6 py-3 text-gray-900 dark:text-gray-100 font-medium">{r.client_name}</td>
+                    <td className="px-6 py-3 text-gray-500 dark:text-gray-400 font-mono text-xs">{r.code || `#${r.id?.slice(0, 8)}`}</td>
                     <td className="px-6 py-3">
                       <Link
                         to={`/admin/reservas/${r.id}`}

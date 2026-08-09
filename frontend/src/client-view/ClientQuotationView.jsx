@@ -168,7 +168,7 @@ export default function ClientQuotationView() {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
               <Logo light={true} showText={true} className="scale-[0.85] origin-left" />
-              <span className="hidden sm:inline text-[11px] font-mono text-slate-300 bg-white/10 px-2.5 py-0.5 rounded-full">#{currentId}</span>
+              <span className="hidden sm:inline text-[11px] font-mono text-slate-300 bg-white/10 px-2.5 py-0.5 rounded-full">{data?.quotation?.code || `#${currentId.slice(0, 8)}`}</span>
             </div>
             <div className="flex items-center gap-2">
               <span className={`text-[11px] font-medium px-2.5 py-1 rounded-full border flex items-center gap-1.5 ${

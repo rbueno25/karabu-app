@@ -276,7 +276,7 @@ export default function ReservationDetail() {
             </h1>
             <StatusBadge value={reservation.status} />
           </div>
-          <p className="text-xs text-gray-500 dark:text-gray-300">ID Reserva: {reservation.id}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-300">ID Reserva: {reservation.code || reservation.id}</p>
         </div>
         <div className="flex items-center gap-2">
           <button

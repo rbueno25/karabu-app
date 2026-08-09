@@ -210,7 +210,7 @@ export default function QuotationSheet() {
         <Link to="/admin/cotizaciones" className="h-9 w-9 border border-gray-200 dark:border-zinc-700 rounded-xl bg-white dark:bg-zinc-900 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors" data-testid="quotation-back-btn"><ArrowLeft className="h-4 w-4" /></Link>
         <div className="flex-1">
           <div className="flex items-center gap-2.5"><h1 className="text-xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Cotización</h1><StatusBadge value={form.status} /></div>
-          <p className="text-xs text-gray-400 dark:text-gray-500 font-mono">#{quotation.id?.slice(0, 8)}</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 font-mono">{quotation.code || `#${quotation.id?.slice(0, 8)}`}</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <a href={clientLink} target="_blank" rel="noopener noreferrer" className="h-9 w-9 inline-flex items-center justify-center border border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 text-gray-400 dark:text-gray-500 rounded-xl transition-all" title="Ver entregable"><Eye className="h-4 w-4" /></a>
