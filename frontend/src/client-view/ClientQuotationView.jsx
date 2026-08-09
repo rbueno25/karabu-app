@@ -319,7 +319,7 @@ export default function ClientQuotationView() {
                 ].map((item, i) => (
                   <div key={i} className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 p-3 rounded-xl bg-slate-50 dark:bg-[#070F1E]/60 border border-slate-200/80 dark:border-slate-800">
                     <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{item.label}</span>
-                    <span className={`text-sm font-bold text-[#0F2A4A] dark:text-white ${item.mono ? 'font-mono text-xs sm:text-sm break-all' : ''}`}>{item.value}</span>
+                    <span className={`text-sm font-bold text-[#0F2A4A] dark:text-white ${item.mono ? 'font-mono tracking-wider [font-feature-settings:\"zero\"]' : ''}`}>{item.value}</span>
                   </div>
                 ))}
               </div>
