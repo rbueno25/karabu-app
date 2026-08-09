@@ -11,7 +11,7 @@ export default function HeroCotizar({ onComenzar }: HeroCotizarProps) {
     <section className="relative w-full min-h-[90vh] flex flex-col items-center justify-center overflow-hidden bg-[#0F2A4A]">
       {/* Background image */}
       <img
-        src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&q=80&w=1920"
+        src="https://images.unsplash.com/photo-1590073242678-70ee3fc28e8e?auto=format&fit=crop&q=80&w=1920"
         alt="Viaje"
         className="absolute inset-0 w-full h-full object-cover object-center"
       />
