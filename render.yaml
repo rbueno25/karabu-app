@@ -12,3 +12,14 @@ services:
       - type: rewrite
         source: /*
         destination: /index.html
+
+  - type: static_site
+    name: cotizacion
+    repo: https://github.com/rbueno25/karabu-app
+    branch: master
+    rootDir: frontend
+    buildCommand: npm install && npm run build && cp dist/cotizacion.html dist/index.html
+    envVars:
+      - key: VITE_API_URL
+        value: https://karabu-srv.onrender.com
+    publishDir: dist
