@@ -192,9 +192,17 @@ export default function ClientQuotationView() {
       </header>
 
       {/* ═══════ SECTION 1 — HERO ═══════ */}
-      <section className="relative w-full h-[85vh] max-h-[700px] flex flex-col justify-between overflow-hidden bg-[#0F2A4A]">
-        <img src={heroBgImage} alt={destination} className="absolute inset-0 w-full h-full object-cover object-center" />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0F2A4A]/40 via-transparent to-[#0F2A4A]/70 pointer-events-none" />
+      <section
+        className="relative w-full min-h-[85vh] flex flex-col justify-between overflow-hidden bg-[#0F2A4A]"
+        style={{
+          backgroundImage: `url(${heroBgImage})`,
+          backgroundSize: 'contain',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          backgroundColor: '#0F2A4A',
+        }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0F2A4A]/50 via-transparent to-[#0F2A4A]/60 pointer-events-none" />
 
         <div className="relative z-20 w-full max-w-5xl mx-auto px-4 sm:px-6 mt-auto mb-auto text-center sm:text-left pt-16">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/40 backdrop-blur-md border border-white/20 text-teal-300 text-xs font-medium mb-3">
