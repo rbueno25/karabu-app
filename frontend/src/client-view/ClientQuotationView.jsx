@@ -299,8 +299,8 @@ export default function ClientQuotationView() {
             <div className="bg-white dark:bg-[#0F2A4A]/40 border-2 border-[#0D9387]/20 rounded-3xl p-6 sm:p-8 shadow-lg">
               {/* Bank header with BHD logo */}
               <div className="flex items-center gap-4 mb-6 pb-6 border-b border-slate-200 dark:border-slate-700">
-                <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center shrink-0 border border-slate-200 overflow-hidden p-2">
-                  <img src="/bhd-logo.jpg" alt="Banco BHD" className="w-full h-full object-contain" />
+                <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center shrink-0 border border-slate-200 overflow-hidden">
+                  <img src="/bhd-logo.jpg" alt="Banco BHD" className="w-full h-full object-cover" />
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-[#0F2A4A] dark:text-white">Banco BHD</h3>
