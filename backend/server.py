@@ -665,6 +665,9 @@ async def update_quotation(qid: str, body: QuotationIn, db: AsyncSession = Depen
     for k, v in body.model_dump().items():
         if v is None:
             continue
+        # Protect auto-generated fields from being overwritten with empty values
+        if k in ("code", "dossier_id") and not v:
+            continue
         if isinstance(v, str):
             v = sanitize_html(v)
         setattr(q, k, v)
