@@ -25,6 +25,14 @@ export default function Dashboard() {
 
   useEffect(() => { load(); }, []);
 
+  // Polling cada 60s (solo con pestaña activa)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (document.visibilityState === 'visible') load();
+    }, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
   if (loading || !data) {
     return (
       <div className="flex items-center gap-2 text-gray-500 dark:text-gray-300 py-20 justify-center">

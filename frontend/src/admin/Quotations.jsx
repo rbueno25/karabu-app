@@ -67,6 +67,14 @@ export default function Quotations() {
     // eslint-disable-next-line
   }, [statusFilter]);
 
+  // Polling cada 60s (solo pestaña activa)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (document.visibilityState === 'visible') load();
+    }, 60000);
+    return () => clearInterval(interval);
+  }, [statusFilter]);
+
   // Client-side search + pagination + date filter
   const filtered = useMemo(() => {
     let result = items;
