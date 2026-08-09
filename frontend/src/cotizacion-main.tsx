@@ -20,7 +20,6 @@ function CotizacionApp() {
       <Header onNavigate={scrollTo} activeSection="" />
       <main>
         <HeroCotizar onComenzar={() => scrollTo('cotizacion')} />
-        <FAQ />
         <Steps />
         <div id="cotizacion">
           <QuoteForm preselectedDestination="" onClearPreselected={() => {}} />
