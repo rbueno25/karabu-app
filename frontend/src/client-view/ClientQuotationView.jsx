@@ -228,14 +228,8 @@ export default function ClientQuotationView() {
           </div>
         </div>
 
-        <div className="relative z-20 pb-3 text-center">
-          <button onClick={() => document.getElementById('contenido')?.scrollIntoView({ behavior: 'smooth' })} className="inline-flex items-center gap-2 text-xs text-slate-300 hover:text-white transition bg-black/50 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/15">
-            <span>Ver detalles</span><ArrowDown className="w-3.5 h-3.5 animate-bounce text-[#0D9387]" />
-          </button>
-        </div>
-
         {/* Botones de acción en el hero */}
-        <div className="relative z-20 w-full max-w-2xl mx-auto px-4 pb-6">
+        <div className="relative z-20 w-full max-w-2xl mx-auto px-4 pb-3">
           {status === 'aceptada' ? (
             <div className="p-3 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-200 text-center text-sm font-medium flex items-center justify-center gap-2">
               <CheckCircle2 className="w-4 h-4" /> PROPUESTA ACEPTADA — Tu asesor te contactará
@@ -275,6 +269,12 @@ export default function ClientQuotationView() {
               </div>
             </form>
           )}
+        </div>
+
+        <div className="relative z-20 pb-6 text-center">
+          <button onClick={() => document.getElementById('contenido')?.scrollIntoView({ behavior: 'smooth' })} className="inline-flex items-center gap-2 text-xs text-slate-300 hover:text-white transition bg-black/50 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/15">
+            <span>Ver detalles</span><ArrowDown className="w-3.5 h-3.5 animate-bounce text-[#0D9387]" />
+          </button>
         </div>
       </section>
 
