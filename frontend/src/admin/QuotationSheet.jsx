@@ -10,7 +10,7 @@ import {
   ArrowLeft, FileText, User, Mail, Phone, Calendar, 
   MapPin, DollarSign, Send, Save, Loader2, X, Clipboard, ExternalLink,
   Plus, Trash2, AlertTriangle, CheckCircle, Sparkles, Layers, Eye,
-  ChevronDown, ChevronRight
+  ChevronDown, ChevronRight, RotateCcw, XCircle
 } from "lucide-react";
 
 const inputCls = "w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 px-3 py-2.5 text-sm focus:border-[#0D9387] focus:ring-2 focus:ring-[#0D9387]/20 outline-none transition-all placeholder:text-gray-400";
@@ -226,7 +226,7 @@ export default function QuotationSheet() {
           <AlertTriangle className="h-6 w-6 text-amber-500 shrink-0 mt-0.5" />
           <div className="flex-1 min-w-0">
             <h3 className="text-sm font-bold text-amber-800 dark:text-amber-300 mb-1">
-              {form.status === 'cambios_solicitados' ? '🔄 El cliente solicita cambios' : '❌ El cliente rechazó la propuesta'}
+              {form.status === 'cambios_solicitados' ? <span className="inline-flex items-center gap-1"><RotateCcw className="w-4 h-4" />El cliente solicita cambios</span> : <span className="inline-flex items-center gap-1"><XCircle className="w-4 h-4" />El cliente rechazó la propuesta</span>}
             </h3>
             {(form.client_notes || form.notes) && (
               <p className="text-sm text-amber-900 dark:text-amber-200 leading-relaxed whitespace-pre-wrap">{form.client_notes || form.notes}</p>
