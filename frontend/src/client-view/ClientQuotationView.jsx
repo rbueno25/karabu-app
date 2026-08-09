@@ -196,7 +196,7 @@ export default function ClientQuotationView() {
         className="relative w-full min-h-[85vh] flex flex-col justify-between overflow-hidden bg-[#0F2A4A]"
         style={{
           backgroundImage: `url(${heroBgImage})`,
-          backgroundSize: 'contain',
+          backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
           backgroundColor: '#0F2A4A',

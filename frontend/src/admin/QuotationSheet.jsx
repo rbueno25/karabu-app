@@ -339,10 +339,10 @@ export default function QuotationSheet() {
               <div className="mt-3">
                 <Field label="Galería de imágenes (carrusel)">
                   <textarea
-                    value={Array.isArray(form.gallery_images) ? form.gallery_images.join("\n") : (form.gallery_images || '')}
-                    onChange={(e) => setForm({ ...form, gallery_images: e.target.value.split("\n").filter(u => u.trim()) })}
+                    value={Array.isArray(form.gallery_images) ? form.gallery_images.join('\n') : (form.gallery_images || '')}
+                    onChange={(e) => setForm({ ...form, gallery_images: e.target.value.split('\n').filter(u => u.trim()) })}
                     rows={4}
-                    placeholder={"https://images.unsplash.com/photo-...\nhttps://images.unsplash.com/photo-..."}
+                    placeholder={'https://images.unsplash.com/photo-...\nhttps://images.unsplash.com/photo-...'}
                     className={inputCls}
                   />
                   <p className="text-[11px] text-gray-400 mt-1">Pega URLs de imágenes, una por línea. Se mostrarán en carrusel en el entregable.</p>
