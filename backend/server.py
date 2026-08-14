@@ -492,6 +492,13 @@ async def create_client(body: ClientIn, db: AsyncSession = Depends(get_db), u=De
     )
     db.add(client)
     await db.flush()
+    nombre = f"{client.first_name} {client.last_name}".strip()
+    await _send_mail(
+        db, "",
+        f"Nuevo cliente: {nombre}",
+        f"<p>Se registró un nuevo cliente: <b>{nombre}</b>.</p>"
+        f"<p>Email: {client.email or '—'}<br>Teléfono: {client.phone or '—'}</p>",
+    )
     return client.to_dict()
 
 @api.get("/clients/{client_id}")
@@ -659,6 +666,15 @@ async def create_quotation(body: QuotationIn, db: AsyncSession = Depends(get_db)
     )
     db.add(q)
     await db.flush()
+    client_r = await db.execute(select(Client).where(Client.id == q.client_id))
+    client = client_r.scalar_one_or_none()
+    cname = f"{client.first_name} {client.last_name}".strip() if client else "Cliente"
+    await _send_mail(
+        db, "",
+        f"Nueva cotización: {cname} — {q.destination}",
+        f"<p>Nueva cotización creada para <b>{cname}</b>.</p>"
+        f"<p>Destino: <b>{q.destination}</b><br>Monto: ${q.amount:,.2f} {q.currency or ''}</p>",
+    )
     return q.to_dict()
 
 @api.put("/quotations/{qid}")
@@ -719,8 +735,8 @@ async def client_update_status(qid: str, body: ClientStatusUpdate, db: AsyncSess
             message=f"Cotización para {q.destination} fue aceptada",
             link=f"/admin/cotizaciones/{q.id}",
         )
-        await _send_mail(
-            db, "",
+        await _notify_staff(
+            db,
             f"{client_name} aceptó la propuesta — {q.destination}",
             f"<p><b>{client_name}</b> aceptó la cotización para <b>{q.destination}</b>.</p>"
             f"<p>Monto: ${q.amount:,.2f} {q.currency or ''}</p>",
@@ -754,6 +770,12 @@ async def client_update_status(qid: str, body: ClientStatusUpdate, db: AsyncSess
             title=f"{client_name} solicita cambios",
             message=f"Cotización para {q.destination}" + (f": {notes_preview}" if notes_preview else ""),
             link=f"/admin/cotizaciones/{q.id}",
+        )
+        await _notify_staff(
+            db,
+            f"{client_name} solicita cambios — {q.destination}",
+            f"<p><b>{client_name}</b> solicitó cambios en la cotización para <b>{q.destination}</b>.</p>"
+            + (f"<p>Comentarios: {notes_preview}</p>" if notes_preview else ""),
         )
     elif is_regret:
         await create_notification_all(
@@ -1601,6 +1623,15 @@ async def _send_mail(db, to, subject, html):
     except Exception as e:
         logger.warning(f"SMTP error: {e}")
         return False, str(e)
+
+
+STAFF_EMAILS = ["randolfbueno@karabuviajes.com", "soporte@karabuviajes.com"]
+
+
+async def _notify_staff(db, subject, html):
+    """Envía email a Papá (randolfbueno@) y a Rinaldi (soporte@)."""
+    for addr in STAFF_EMAILS:
+        await _send_mail(db, addr, subject, html)
 
 
 @api.post("/settings/test-email")
