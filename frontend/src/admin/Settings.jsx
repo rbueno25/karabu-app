@@ -195,6 +195,7 @@ export default function Settings() {
                 <Field label="Puerto"><input type="number" value={form.smtp_port} onChange={(e) => setForm({ ...form, smtp_port: e.target.value })} className={inputCls} disabled={!canEdit} /></Field>
               </div>
               <Field label="Usuario SMTP"><input value={form.smtp_user} onChange={(e) => setForm({ ...form, smtp_user: e.target.value })} className={inputCls} disabled={!canEdit} /></Field>
+              <Field label="Contraseña SMTP (App Password)"><input type="password" value={form.smtp_password || ""} onChange={(e) => setForm({ ...form, smtp_password: e.target.value })} className={inputCls} placeholder="Dejar vacío para no cambiar" disabled={!canEdit} /></Field>
               <Field label="Correo remitente (From)"><input type="email" value={form.smtp_from} onChange={(e) => setForm({ ...form, smtp_from: e.target.value })} className={inputCls} disabled={!canEdit} /></Field>
             </div>
           )}

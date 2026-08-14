@@ -289,6 +289,7 @@ class Setting(Base):
     smtp_port = Column(Integer, default=587)
     smtp_user = Column(String, default="")
     smtp_from = Column(String, default="")
+    smtp_password = Column(String, default="")
     template_quotation = Column(Text, default="")
     template_reservation = Column(Text, default="")
     session_hours = Column(Integer, default=12)
@@ -306,6 +307,7 @@ class Setting(Base):
             "default_currency": self.default_currency, "tax_percent": self.tax_percent,
             "smtp_host": self.smtp_host, "smtp_port": self.smtp_port,
             "smtp_user": self.smtp_user, "smtp_from": self.smtp_from,
+            "smtp_password": "••••••" if self.smtp_password else "",
             "template_quotation": self.template_quotation,
             "template_reservation": self.template_reservation,
             "session_hours": self.session_hours, "require_2fa": self.require_2fa,

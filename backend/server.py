@@ -7,12 +7,16 @@ ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / ".env")
 
 import os, uuid, logging, json, threading, urllib.request, urllib.parse
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 import bcrypt, jwt
 from datetime import datetime, timezone, timedelta
 from typing import List, Optional, Any
 
 from fastapi import FastAPI, APIRouter, HTTPException, Depends, Request, Response, status
 from starlette.middleware.cors import CORSMiddleware
+from starlette.concurrency import run_in_threadpool
 from pydantic import BaseModel, Field, EmailStr
 from sqlalchemy import select, func, and_, or_, text, desc
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -377,6 +381,7 @@ class SettingsIn(BaseModel):
     smtp_port: int = 587
     smtp_user: str = ""
     smtp_from: str = ""
+    smtp_password: str = ""
     template_quotation: str = ""
     template_reservation: str = ""
     session_hours: int = 12
@@ -1510,10 +1515,51 @@ async def update_settings(body: SettingsIn, db: AsyncSession = Depends(get_db), 
     if not s:
         s = Setting(id="global")
         db.add(s)
-    for k, v in body.model_dump().items():
+    data = body.model_dump()
+    if data.get("smtp_password") in ("", "••••••"):
+        data.pop("smtp_password", None)
+    for k, v in data.items():
         setattr(s, k, v)
     await db.flush()
     return s.to_dict()
+
+
+# -------------------- Email --------------------
+def _smtp_send(host, port, user, password, from_addr, to, subject, html):
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = subject
+    msg["From"] = from_addr
+    msg["To"] = to
+    msg.attach(MIMEText(html, "html"))
+    with smtplib.SMTP(host, port, timeout=30) as s:
+        s.starttls()
+        s.login(user, password)
+        s.sendmail(from_addr, [to], msg.as_string())
+
+
+async def _send_mail(db, to, subject, html):
+    result = await db.execute(select(Setting).where(Setting.id == "global"))
+    s = result.scalar_one_or_none()
+    if not s or not s.smtp_host or not s.smtp_user or not s.smtp_password:
+        return False, "SMTP no configurado"
+    from_addr = s.smtp_from or s.smtp_user
+    to_addr = to or from_addr
+    try:
+        await run_in_threadpool(_smtp_send, s.smtp_host, s.smtp_port, s.smtp_user, s.smtp_password, from_addr, to_addr, subject, html)
+        return True, "ok"
+    except Exception as e:
+        logger.warning(f"SMTP error: {e}")
+        return False, str(e)
+
+
+@api.post("/settings/test-email")
+async def test_email(body: dict, db: AsyncSession = Depends(get_db), u=Depends(get_current_user)):
+    require_admin(u)
+    to = (body or {}).get("to") or ""
+    ok, err = await _send_mail(db, to, "Prueba de correo — Karabu Viajes", "<p>Si estás leyendo esto, el envío de correos de <b>Karabu Viajes</b> funciona correctamente.</p>")
+    if not ok:
+        raise HTTPException(status_code=500, detail=err)
+    return {"ok": True, "message": f"Correo de prueba enviado a {to}"}
 
 
 # -------------------- Dashboard --------------------
@@ -2039,6 +2085,9 @@ async def startup():
         ))
         await conn.run_sync(lambda sync_conn: sync_conn.execute(
             __import__('sqlalchemy').text("ALTER TABLE quotations ADD COLUMN IF NOT EXISTS client_notes TEXT DEFAULT ''")
+        ))
+        await conn.run_sync(lambda sync_conn: sync_conn.execute(
+            __import__('sqlalchemy').text("ALTER TABLE settings ADD COLUMN IF NOT EXISTS smtp_password VARCHAR DEFAULT ''")
         ))
         logger.info("Migration: room_type and services columns ensured")
 
