@@ -159,13 +159,18 @@ export default function QuotationSheet() {
     setSaving(true); setSendingPlatform(platform);
     try {
       const isoNow = new Date().toISOString();
-      const updatedForm = { ...form, travelers: Number(form.travelers), amount: Number(form.amount), booking_price: form.booking_price ? Number(form.booking_price) : null, expedia_price: form.expedia_price ? Number(form.expedia_price) : null, status: "enviada", sent_via: platform, sent_at: isoNow };
-      await api.put(`/quotations/${id}`, updatedForm);
-      toast.success(`Cotización marcada como enviada vía ${platform}`);
-      // Copy WhatsApp message to clipboard
-      if (platform === "whatsapp") {
-        await navigator.clipboard.writeText(whatsappMsg);
-        toast.success("Mensaje copiado. Pégalo en WhatsApp.");
+      if (platform === "email") {
+        const link = `${window.location.origin}/#/cotizacion/${id}`;
+        await api.post(`/quotations/${id}/send-email`, { link });
+        toast.success("Cotización enviada por correo al cliente");
+      } else {
+        const updatedForm = { ...form, travelers: Number(form.travelers), amount: Number(form.amount), booking_price: form.booking_price ? Number(form.booking_price) : null, expedia_price: form.expedia_price ? Number(form.expedia_price) : null, status: "enviada", sent_via: platform, sent_at: isoNow };
+        await api.put(`/quotations/${id}`, updatedForm);
+        toast.success(`Cotización marcada como enviada vía ${platform}`);
+        if (platform === "whatsapp") {
+          await navigator.clipboard.writeText(whatsappMsg);
+          toast.success("Mensaje copiado. Pégalo en WhatsApp.");
+        }
       }
       setSendModalOpen(false); setSuccessModalOpen(true);
       loadQuotation();

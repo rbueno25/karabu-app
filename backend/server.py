@@ -719,6 +719,12 @@ async def client_update_status(qid: str, body: ClientStatusUpdate, db: AsyncSess
             message=f"Cotización para {q.destination} fue aceptada",
             link=f"/admin/cotizaciones/{q.id}",
         )
+        await _send_mail(
+            db, "",
+            f"{client_name} aceptó la propuesta — {q.destination}",
+            f"<p><b>{client_name}</b> aceptó la cotización para <b>{q.destination}</b>.</p>"
+            f"<p>Monto: ${q.amount:,.2f} {q.currency or ''}</p>",
+        )
 
         # Auto-convert to reservation (solo si no existe ya una)
         existing_res = await db.execute(
@@ -765,6 +771,46 @@ async def client_update_status(qid: str, body: ClientStatusUpdate, db: AsyncSess
             link=f"/admin/cotizaciones/{q.id}",
         )
 
+    return q.to_dict()
+
+
+@api.post("/quotations/{qid}/send-email")
+async def send_quotation_email(qid: str, body: dict = None, db: AsyncSession = Depends(get_db), u=Depends(get_current_user)):
+    """Envía la cotización por correo al cliente (vía SMTP) y la marca como enviada."""
+    result = await db.execute(select(Quotation).where(Quotation.id == qid))
+    q = result.scalar_one_or_none()
+    if not q:
+        raise HTTPException(status_code=404, detail="Cotización no encontrada")
+    client_r = await db.execute(select(Client).where(Client.id == q.client_id))
+    client = client_r.scalar_one_or_none()
+    if not client or not client.email:
+        raise HTTPException(status_code=400, detail="El cliente no tiene email registrado")
+
+    link = (body or {}).get("link") or ""
+    nombre = f"{client.first_name} {client.last_name}".strip() or "Cliente"
+    destino = q.destination or "tu viaje"
+
+    s_r = await db.execute(select(Setting).where(Setting.id == "global"))
+    s = s_r.scalar_one_or_none()
+    tpl = s.template_quotation if s else ""
+    if tpl:
+        html = tpl.replace("{cliente}", nombre).replace("{destino}", destino).replace("{link}", link)
+    else:
+        html = (
+            f"<p>Hola {nombre},</p>"
+            f"<p>Aquí tienes tu propuesta de viaje personalizada para <b>{destino}</b>.</p>"
+            f"<p><a href=\"{link}\">Ver mi cotización</a></p>"
+            f"<p>Saludos,<br>Karabu Viajes</p>"
+        )
+
+    ok, err = await _send_mail(db, client.email, f"Tu cotización de viaje — {destino}", html)
+    if not ok:
+        raise HTTPException(status_code=500, detail=f"No se pudo enviar el correo: {err}")
+
+    q.status = "enviada"
+    q.sent_via = "email"
+    q.sent_at = now_iso()
+    await db.flush()
     return q.to_dict()
 
 
@@ -1197,6 +1243,11 @@ async def create_payment(body: PaymentIn, db: AsyncSession = Depends(get_db), u=
         title=f"Pago recibido: {client_name}",
         message=f"${body.amount:,.2f} {body.method} — {res.destination}",
         link=f"/admin/reservas/{body.reservation_id}",
+    )
+    await _send_mail(
+        db, "",
+        f"Pago recibido: {client_name} — ${body.amount:,.2f}",
+        f"<p><b>{client_name}</b> realizó un pago de <b>${body.amount:,.2f}</b> ({body.method}) por {res.destination}.</p>",
     )
 
     return p.to_dict()
