@@ -1625,11 +1625,16 @@ async def _send_mail(db, to, subject, html):
         return False, str(e)
 
 
-STAFF_EMAILS = ["randolfbueno@karabuviajes.com", "soporte@karabuviajes.com"]
+STAFF_EMAILS = [
+    "randolfbueno@karabuviajes.com",
+    "soporte@karabuviajes.com",
+    "rsbueno25@gmail.com",
+    "karabu2019@gmail.com",
+]
 
 
 async def _notify_staff(db, subject, html):
-    """Envía email a Papá (randolfbueno@) y a Rinaldi (soporte@)."""
+    """Envía email a Papá (randolfbueno@), a Rinaldi (soporte@) y a los Gmail de respaldo."""
     for addr in STAFF_EMAILS:
         await _send_mail(db, addr, subject, html)
 
