@@ -211,13 +211,19 @@ export default function ClientQuotationView() {
   const babies = q.form_data?.babiesCount ?? 0;
   const quoteCode = q.code || `#${currentId.slice(0, 8)}`;
 
-  // Fecha corta y legible: "2026-10-29" -> "29 oct 2026"
-  const fmtShort = (v) => {
+  // Fecha corta y legible: "2026-10-29" -> "29 oct" (+ año aparte, para no repetirlo)
+  const fmtShort = (v, conAnio = false) => {
     if (!v || v === '—') return '—';
     const d = new Date(String(v).slice(0, 10) + 'T12:00');
     if (isNaN(d)) return v;
-    return new Intl.DateTimeFormat('es-DO', { day: '2-digit', month: 'short', year: 'numeric' }).format(d);
+    return new Intl.DateTimeFormat('es-DO', conAnio
+      ? { day: '2-digit', month: 'short', year: 'numeric' }
+      : { day: '2-digit', month: 'short' }).format(d).replace('.', '');
   };
+  const anioViaje = (() => {
+    const d = new Date(String(returnDate).slice(0, 10) + 'T12:00');
+    return isNaN(d) ? '' : String(d.getFullYear());
+  })();
 
   const nights = (() => {
     if (!travelDate || !returnDate || travelDate === '—' || returnDate === '—') return 1;
@@ -241,6 +247,11 @@ export default function ClientQuotationView() {
   const roomsSummary = totalRooms > 0
     ? `${totalRooms} hab.${sencilla > 0 ? ` (${sencilla} sencilla)` : ''}${doble > 0 ? ` (${doble} doble)` : ''}${triple > 0 ? ` (${triple} triple)` : ''}`
     : (q.room_type ? `Hab. ${q.room_type}` : '1 Habitación');
+  // Línea corta para el hero: "1 habitación · 1 doble" (sin duplicar la palabra Habitación)
+  const detalleHabitaciones = [`${totalRooms} ${totalRooms === 1 ? 'habitación' : 'habitaciones'}`,
+    sencilla > 0 ? `${sencilla} sencilla` : '',
+    doble > 0 ? `${doble} doble` : '',
+    triple > 0 ? `${triple} triple` : ''].filter(Boolean).join(' · ');
 
   const customServices = Array.isArray(q.services) && q.services.length > 0 ? q.services : null;
   const bookingPrice = q.booking_price || Math.round(totalWithTax * 1.15);
@@ -432,8 +443,8 @@ export default function ClientQuotationView() {
               </span>
               <div className="min-w-0">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Fechas</p>
-                <p className="text-[13px] sm:text-sm font-bold text-white leading-tight">
-                  {fmtShort(travelDate)} <span className="text-slate-400 font-normal">→</span> {fmtShort(returnDate)}
+                <p className="text-[13px] sm:text-sm font-bold text-white leading-tight whitespace-nowrap">
+                  {fmtShort(travelDate)} <span className="text-slate-400 font-normal">→</span> {fmtShort(returnDate)} {anioViaje && <span className="text-slate-300 font-semibold">{anioViaje}</span>}
                 </p>
                 <p className="text-[11px] text-teal-300 font-medium mt-0.5">{nights} {nights === 1 ? 'noche' : 'noches'}</p>
               </div>
@@ -447,8 +458,8 @@ export default function ClientQuotationView() {
               <div className="min-w-0">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Hospedaje</p>
                 <p className="text-[13px] sm:text-sm font-bold text-white leading-tight truncate" title={hotelName}>{hotelName}</p>
-                <p className="text-[11px] text-slate-300 mt-0.5 truncate" title={`${roomType} · ${roomsSummary}`}>
-                  {roomType} <span className="text-slate-500">·</span> {roomsSummary}
+                <p className="text-[11px] text-slate-300 mt-0.5 truncate" title={totalRooms > 0 ? detalleHabitaciones : roomType}>
+                  {totalRooms > 0 ? detalleHabitaciones : roomType}
                 </p>
               </div>
             </div>
