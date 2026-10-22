@@ -882,14 +882,14 @@ export default function ClientQuotationView() {
         </div>
 
         {/* ── 3. INVERSIÓN Y COMPARATIVA DE MERCADO (Elegante y Transparente) ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
 
           {/* Tarjeta de Inversión Karabu */}
           <div className="lg:col-span-6 bg-gradient-to-br from-[#0F2A4A] to-[#0A1D33] text-white rounded-3xl p-6 sm:p-8 shadow-xl flex flex-col justify-between border border-white/10">
             <div>
               <div className="flex items-center justify-between">
                 <span className="text-xs uppercase font-bold tracking-wider text-teal-300 bg-white/10 px-3 py-1 rounded-full border border-white/15">
-                  Tarifa Final Garantizada
+                  Total a pagar
                 </span>
                 <span className="text-xs text-slate-300 font-mono">Moneda: {q.currency || 'USD'}</span>
               </div>
@@ -901,33 +901,25 @@ export default function ClientQuotationView() {
                   <span className="text-base sm:text-lg font-semibold text-teal-300 ml-2">USD</span>
                 </div>
               </div>
-
-              {/* Detalle P/P/N limpio y comprensible */}
-              <div className="mt-6 p-4 rounded-2xl bg-white/10 border border-white/15 backdrop-blur-sm space-y-2">
-                <div className="flex items-center justify-between text-xs text-slate-300">
-                  <span>Equivalente por persona / noche:</span>
-                  <span className="text-lg font-bold text-teal-300">${perNightPerPerson.toLocaleString()} USD</span>
-                </div>
-                <div className="text-[11px] text-slate-400 flex items-center gap-2">
-                  <Clock className="w-3 h-3 text-teal-300" />
-                  <span>Calculado sobre {nights} {nights === 1 ? 'noche' : 'noches'} y {travelers} {travelers === 1 ? 'viajero' : 'viajeros'}</span>
-                </div>
-              </div>
             </div>
 
-            <div className="mt-8 pt-6 border-t border-white/10 flex items-center justify-between text-xs text-slate-300">
-              <span className="flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4 text-teal-300" />
-                Tarifa congelada al reservar
-              </span>
-              <span className="text-teal-300 font-semibold">Sin comisiones sorpresa</span>
+            {/* Detalle P/P/N (anclado al fondo de la tarjeta) */}
+            <div className="mt-7 p-5 rounded-2xl bg-white/10 border border-white/15 backdrop-blur-sm space-y-2">
+              <div className="flex items-center justify-between text-xs text-slate-300">
+                <span>Equivalente por persona / noche:</span>
+                <span className="text-lg font-bold text-teal-300">${perNightPerPerson.toLocaleString()} USD</span>
+              </div>
+              <div className="text-[11px] text-slate-400 flex items-center gap-2">
+                <Clock className="w-3 h-3 text-teal-300" />
+                <span>Calculado sobre {nights} {nights === 1 ? 'noche' : 'noches'} y {travelers} {travelers === 1 ? 'viajero' : 'viajeros'}</span>
+              </div>
             </div>
           </div>
 
           {/* Comparativa con Booking y Expedia */}
           <div className="lg:col-span-6 bg-white dark:bg-[#0F2A4A]/40 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex flex-wrap items-center justify-between gap-y-2 mb-5">
                 <div className="flex items-center gap-2">
                   <Award className="w-5 h-5 text-[#0D9387]" />
                   <h3 className="text-base font-bold text-[#0F2A4A] dark:text-white">
@@ -935,29 +927,31 @@ export default function ClientQuotationView() {
                   </h3>
                 </div>
                 {calculatedSavings > 0 && (
-                  <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 px-3 py-1 rounded-full">
+                  <span className="whitespace-nowrap text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 px-3 py-1 rounded-full">
                     Ahorras ~${calculatedSavings.toLocaleString()} USD
                   </span>
                 )}
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mb-6">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mb-7">
                 Comparación estimada con las principales plataformas online para el mismo destino e itinerario:
               </p>
 
-              <div className="space-y-3">
+              <div className="space-y-4 sm:space-y-5">
                 {/* Karabu Viajes (Destacado) */}
-                <div className="flex items-center justify-between p-3.5 rounded-2xl border-2 border-[#0D9387] bg-[#0D9387]/5 dark:bg-[#0D9387]/15">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-[#0D9387] text-white flex items-center justify-center font-bold text-xs shadow-sm">
-                      KV
-                    </div>
+                <div className="flex items-center justify-between gap-4 p-4 sm:p-5 rounded-2xl border-2 border-[#0D9387] bg-[#0D9387]/5 dark:bg-[#0D9387]/15">
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    <img
+                      src="/karabu-logo.svg"
+                      alt="Karabu Viajes"
+                      className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl object-contain shadow-md shrink-0"
+                    />
                     <div>
                       <span className="text-xs font-bold text-[#0F2A4A] dark:text-white block">Karabu Viajes</span>
                       <span className="text-[10px] text-teal-600 dark:text-teal-400 font-medium">Asesor asignado + Soporte 24/7</span>
                     </div>
                   </div>
                   <div className="text-right">
-                    <span className="text-base sm:text-lg font-extrabold text-[#0D9387]">
+                    <span className="whitespace-nowrap text-base sm:text-lg font-extrabold text-[#0D9387]">
                       ${totalWithTax.toLocaleString()} USD
                     </span>
                     <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold block">✓ Mejor valor</span>
@@ -965,40 +959,44 @@ export default function ClientQuotationView() {
                 </div>
 
                 {/* Booking.com */}
-                <div className="flex items-center justify-between p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/40">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-[#003580] text-white flex items-center justify-center font-bold text-xs p-1">
-                      <span className="text-[10px]">Booking</span>
-                    </div>
+                <div className="flex items-center justify-between gap-4 p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/40">
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    <img
+                      src="/booking-logo.svg"
+                      alt="Booking.com"
+                      className="w-11 h-11 sm:w-14 sm:h-14 rounded-xl object-contain shadow-sm shrink-0"
+                    />
                     <div>
                       <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">Booking.com</span>
                       <span className="text-[10px] text-slate-400">Tarifa pública estándar</span>
                     </div>
                   </div>
-                  <span className="text-sm sm:text-base font-bold text-slate-600 dark:text-slate-300">
+                  <span className="whitespace-nowrap text-sm sm:text-base font-bold text-slate-600 dark:text-slate-300">
                     ${bookingPrice.toLocaleString()} USD
                   </span>
                 </div>
 
                 {/* Expedia */}
-                <div className="flex items-center justify-between p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/40">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-[#FFE000] text-slate-900 flex items-center justify-center font-bold text-xs p-1">
-                      <span className="text-[10px]">Expedia</span>
-                    </div>
+                <div className="flex items-center justify-between gap-4 p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/40">
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    <img
+                      src="/expedia-logo.svg"
+                      alt="Expedia"
+                      className="w-11 h-11 sm:w-14 sm:h-14 rounded-xl object-contain shadow-sm shrink-0"
+                    />
                     <div>
                       <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">Expedia</span>
                       <span className="text-[10px] text-slate-400">Tarifa estimada</span>
                     </div>
                   </div>
-                  <span className="text-sm sm:text-base font-bold text-slate-600 dark:text-slate-300">
+                  <span className="whitespace-nowrap text-sm sm:text-base font-bold text-slate-600 dark:text-slate-300">
                     ${expediaPrice.toLocaleString()} USD
                   </span>
                 </div>
               </div>
             </div>
 
-            <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-400">
+            <div className="mt-7 pt-5 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-400">
               * Tarifas de plataformas tomadas como referencia comparativa en fechas similares.
             </div>
           </div>
