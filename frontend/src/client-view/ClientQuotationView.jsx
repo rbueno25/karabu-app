@@ -880,7 +880,7 @@ export default function ClientQuotationView() {
                   className="mt-4 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 bg-slate-50/60 dark:bg-[#070F1E]/30 px-4 py-6 text-center"
                 >
                   <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">
-                    Seleccionamos el banco y te mostramos la cuenta, el titular y el número para copiar.
+                    Elige un banco para ver la cuenta, el titular y el número listos para copiar.
                   </p>
                 </div>
               )}
