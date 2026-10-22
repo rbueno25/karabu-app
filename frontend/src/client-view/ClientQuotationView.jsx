@@ -66,6 +66,22 @@ export default function ClientQuotationView() {
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
 
+  // Scroll interno: con hash-routing, href="#id" cambia la ruta y desmonta la vista
+  const scrollToId = (id) => {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  // Barra fija inferior en móvil: solo aparece al pasar el hero (evita duplicar los botones)
+  const [showStickyBar, setShowStickyBar] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setShowStickyBar(window.scrollY > 480);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   useEffect(() => {
     if (darkMode) document.documentElement.classList.add('dark');
     else document.documentElement.classList.remove('dark');
@@ -208,6 +224,7 @@ export default function ClientQuotationView() {
   const travelers = q.travelers || 1;
   const adults = q.form_data?.adultsCount ?? travelers;
   const children = q.form_data?.childrenCount ?? 0;
+  const babies = q.form_data?.babiesCount ?? 0;
   const quoteCode = q.code || `#${currentId.slice(0, 8)}`;
 
   const nights = (() => {
@@ -256,11 +273,16 @@ export default function ClientQuotationView() {
     setCarouselIdx((prev) => (prev - 1 + imagesList.length) % imagesList.length);
   };
 
-  // Touch Swipe para móvil
+  // Touch Swipe para móvil (ignora controles del formulario/botones)
   const handleTouchStart = (e) => {
+    if (e.target.closest('button, a, form, input, textarea, select')) {
+      touchStartX.current = null;
+      return;
+    }
     touchStartX.current = e.targetTouches[0].clientX;
   };
   const handleTouchEnd = (e) => {
+    if (touchStartX.current === null) return;
     touchEndX.current = e.changedTouches[0].clientX;
     const diff = touchStartX.current - touchEndX.current;
     if (diff > 50) nextImage();
@@ -289,14 +311,14 @@ export default function ClientQuotationView() {
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <span className={`text-[11px] font-semibold px-3 py-1 rounded-full border flex items-center gap-1.5 ${
+              <span className={`whitespace-nowrap shrink-0 text-[10px] sm:text-[11px] font-semibold px-2.5 sm:px-3 py-1 rounded-full border flex items-center gap-1.5 ${
                 status === 'aceptada' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' :
                 status === 'cambios_solicitados' || status === 'rechazada' ? 'bg-[#FF6B35]/20 text-orange-300 border-[#FF6B35]/40' :
                 'bg-[#0D9387]/20 text-teal-300 border-[#0D9387]/40'
               }`}>
-                {status === 'aceptada' ? <><CheckCircle2 className="w-3.5 h-3.5" /> Aceptada</> :
-                 status === 'cambios_solicitados' || status === 'rechazada' ? <><RotateCcw className="w-3.5 h-3.5" /> Cambios Solicitados</> :
-                 <><Sparkles className="w-3.5 h-3.5 text-teal-300" /> Propuesta Lista</>}
+                {status === 'aceptada' ? <><CheckCircle2 className="w-3.5 h-3.5 shrink-0" /> Aceptada</> :
+                 status === 'cambios_solicitados' || status === 'rechazada' ? <><RotateCcw className="w-3.5 h-3.5 shrink-0" /> <span className="hidden sm:inline">Cambios&nbsp;Solicitados</span><span className="sm:hidden">Cambios</span></> :
+                 <><Sparkles className="w-3.5 h-3.5 text-teal-300 shrink-0" /> <span className="hidden sm:inline">Propuesta&nbsp;Lista</span><span className="sm:hidden">Lista</span></>}
               </span>
               <button
                 onClick={handleShare}
@@ -317,64 +339,217 @@ export default function ClientQuotationView() {
         </div>
       </header>
 
-      {/* ═══════ HERO CON CAROUSEL INTEGRADO (IMAGEN COMPLETA SIN DEFORMACIÓN) ═══════ */}
-      <section className="relative w-full bg-[#0B1E36] overflow-hidden pt-6 pb-10 sm:py-12 border-b border-slate-200 dark:border-slate-800">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+      {/* ═══════ HERO FULL-BLEED: FOTO A SANGRE + RESUMEN DEL VIAJE ENCIMA ═══════ */}
+      <section
+        className="relative w-full overflow-hidden bg-[#0B1E36] border-b border-white/10"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
+        {/* ── Fondo: carrusel de fotos cubriendo todo el hero (crossfade) ── */}
+        <div className="absolute inset-0" aria-hidden="true">
+          {imagesList.map((img, i) => (
+            <img
+              key={`hero-bg-${i}`}
+              src={img}
+              alt=""
+              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
+                i === carouselIdx ? 'opacity-100' : 'opacity-0'
+              }`}
+              onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = heroImageFallback; }}
+            />
+          ))}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#061726]/80 via-[#061726]/45 to-[#061726]/90" />
+        </div>
 
-          {/* Encabezado del Hero */}
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-            <div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-500/10 border border-teal-500/30 text-teal-300 text-xs font-semibold mb-2.5">
-                <MapPin className="w-3.5 h-3.5 text-[#0D9387]" />
-                {destination}
-              </div>
-              <h1 className="text-2xl sm:text-4xl font-bold text-white tracking-tight">
-                ¡Hola {clientName}!
-              </h1>
-              <p className="text-sm sm:text-base text-slate-300 mt-1">
-                Hemos preparado tu propuesta exclusiva a <span className="text-teal-300 font-semibold">{destination}</span>
-              </p>
+        {/* ── Controles del carrusel ── */}
+        <button
+          type="button"
+          onClick={() => setFullscreenImage(imagesList[carouselIdx])}
+          className="absolute top-4 right-4 z-20 p-2.5 rounded-xl bg-black/50 hover:bg-black/75 text-white backdrop-blur-md border border-white/20 transition"
+          title="Ampliar fotografía"
+        >
+          <Maximize2 className="w-4 h-4" />
+        </button>
+
+        {imagesList.length > 1 && (
+          <>
+            <div className="absolute top-4 left-4 z-20 px-3 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/20 text-white text-xs font-medium flex items-center gap-1.5">
+              <Sparkles className="w-3 h-3 text-teal-300" />
+              {carouselIdx + 1} / {imagesList.length}
             </div>
+            <button
+              type="button"
+              onClick={prevImage}
+              title="Foto anterior"
+              className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/45 hover:bg-black/75 text-white border border-white/20 backdrop-blur-md flex items-center justify-center transition active:scale-95"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <button
+              type="button"
+              onClick={nextImage}
+              title="Siguiente foto"
+              className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/45 hover:bg-black/75 text-white border border-white/20 backdrop-blur-md flex items-center justify-center transition active:scale-95"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
+              {imagesList.map((_, i) => (
+                <button
+                  key={`dot-${i}`}
+                  type="button"
+                  onClick={() => setCarouselIdx(i)}
+                  aria-label={`Foto ${i + 1}`}
+                  className={`h-1.5 rounded-full transition-all ${
+                    i === carouselIdx ? 'w-6 bg-white' : 'w-1.5 bg-white/50 hover:bg-white/80'
+                  }`}
+                />
+              ))}
+            </div>
+          </>
+        )}
 
-            {/* Acciones principales en el header para desktop */}
-            <div className="hidden sm:flex items-center gap-2.5">
-              {status === 'aceptada' ? (
-                <a
-                  href="#pago"
-                  className="px-5 py-2.5 rounded-xl font-bold text-sm bg-gradient-to-r from-[#0D9387] to-emerald-500 text-white shadow-lg shadow-[#0D9387]/30 hover:brightness-110 transition flex items-center gap-2"
-                >
-                  <DollarSign className="w-4 h-4" /> Realizar Pago
-                </a>
-              ) : status === 'cambios_solicitados' ? (
-                <div className="px-4 py-2 rounded-xl bg-[#FF6B35]/20 border border-[#FF6B35]/40 text-orange-300 text-xs font-medium flex items-center gap-2">
-                  <RotateCcw className="w-3.5 h-3.5" /> Revisión en curso
+        {/* ── Contenido sobre la foto ── */}
+        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-9 pb-10 sm:pt-14 sm:pb-12">
+          <div className="max-w-2xl">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-white/25 text-white/90 text-xs font-semibold mb-3 backdrop-blur-sm">
+              <MapPin className="w-3.5 h-3.5 text-[#2DD4BF]" />
+              {destination}
+            </div>
+            <h1 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight drop-shadow-[0_2px_12px_rgba(0,0,0,0.55)]">
+              ¡Hola {clientName}!
+            </h1>
+            <p className="text-sm sm:text-lg text-slate-100/90 mt-2 drop-shadow-[0_1px_8px_rgba(0,0,0,0.6)]">
+              Tu cotización a <span className="text-[#2DD4BF] font-semibold">{destination}</span> está lista
+            </p>
+          </div>
+
+          {/* ── Barra de resumen del viaje ── */}
+          <div className="mt-6 sm:mt-8 rounded-2xl overflow-hidden bg-[#0A1A2B]/60 backdrop-blur-xl border border-white/15 shadow-2xl shadow-black/40">
+            <div className="h-[3px] w-full bg-gradient-to-r from-[#0D9387] via-[#0D9387] to-[#FF6B35]" />
+            <div className="grid grid-cols-2 lg:grid-cols-4">
+
+              {/* Fechas */}
+              <div className="p-4 sm:p-5 border-b lg:border-b-0 border-white/10 lg:border-r">
+                <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-300">
+                  <Calendar className="w-3.5 h-3.5 text-[#2DD4BF]/80" /> Fechas
+                </p>
+                <p className="mt-2 text-[13px] sm:text-[15px] font-bold text-white leading-snug">
+                  <span className="block sm:inline whitespace-nowrap">{String(travelDate).slice(0, 10)}</span>
+                  <span className="hidden sm:inline text-slate-400 font-normal"> — </span>
+                  <span className="block sm:inline whitespace-nowrap">{String(returnDate).slice(0, 10)}</span>
+                </p>
+                <p className="mt-1 text-[11px] font-semibold text-[#2DD4BF]">
+                  {nights} {nights === 1 ? 'noche' : 'noches'}
+                </p>
+              </div>
+
+              {/* Hospedaje + habitaciones */}
+              <div className="p-4 sm:p-5 border-b lg:border-b-0 border-white/10 lg:border-r">
+                <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-300">
+                  <Bed className="w-3.5 h-3.5 text-amber-300/80" /> Hospedaje
+                </p>
+                <p className="mt-2 text-[13px] sm:text-[15px] font-bold text-white leading-snug line-clamp-2" title={hotelName}>
+                  {hotelName}
+                </p>
+                <p className="mt-1 text-[11px] text-slate-200 leading-snug" title={roomType}>{roomType}</p>
+                {totalRooms > 1 && (
+                  <p className="text-[11px] text-slate-400 leading-snug" title={roomsSummary}>{roomsSummary}</p>
+                )}
+              </div>
+
+              {/* Viajeros */}
+              <div className="p-4 sm:p-5 border-white/10 lg:border-r">
+                <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-300">
+                  <Users className="w-3.5 h-3.5 text-sky-300/80" /> Viajeros
+                </p>
+                <p className="mt-2 text-[13px] sm:text-[15px] font-bold text-white leading-snug">
+                  {travelers} {travelers === 1 ? 'pasajero' : 'pasajeros'}
+                </p>
+                <p className="mt-1 text-[11px] text-slate-200 leading-snug">
+                  {[
+                    adults > 0 ? `${adults} ${adults === 1 ? 'adulto' : 'adultos'}` : '',
+                    children > 0 ? `${children} ${children === 1 ? 'niño' : 'niños'}` : '',
+                    babies > 0 ? `${babies} ${babies === 1 ? 'bebé' : 'bebés'}` : '',
+                  ].filter(Boolean).join(', ')}
+                </p>
+              </div>
+
+              {/* Total + P/P/N */}
+              <div className="p-4 sm:p-5 bg-[#0D9387]/20 border-t lg:border-t-0 border-white/10">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-teal-200">Total</p>
+                    <p className="mt-1 text-[17px] sm:text-xl font-extrabold text-white leading-none">
+                      ${totalWithTax.toLocaleString()}{' '}
+                      <span className="text-[11px] font-bold text-teal-200">{q.currency || 'USD'}</span>
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-teal-200/80">P/P/N</p>
+                    <p className="mt-1 text-[13px] sm:text-base font-bold text-white leading-none">
+                      ${perNightPerPerson.toLocaleString()}{' '}
+                      <span className="text-[10px] font-bold text-teal-200/80">{q.currency || 'USD'}</span>
+                    </p>
+                  </div>
                 </div>
-              ) : (
-                <>
-                  <button
-                    type="button"
-                    onClick={handleDirectAccept}
-                    disabled={isSubmitting}
-                    className="px-5 py-2.5 rounded-xl font-bold text-sm bg-[#0D9387] hover:bg-[#0b7d72] text-white shadow-lg shadow-[#0D9387]/25 transition flex items-center gap-2 active:scale-95 disabled:opacity-50"
-                  >
-                    {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Check className="w-4 h-4 stroke-[3]" /> Aceptar Propuesta</>}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowChangeForm(!showChangeForm)}
-                    disabled={isSubmitting}
-                    className="px-4 py-2.5 rounded-xl font-semibold text-sm bg-white/10 hover:bg-white/20 text-white border border-white/20 transition flex items-center gap-1.5 active:scale-95"
-                  >
-                    <RotateCcw className="w-3.5 h-3.5 text-orange-300" /> Solicitar Cambios
-                  </button>
-                </>
-              )}
+              </div>
+            </div>
+          </div>
+
+          {/* ── Acciones ── */}
+          <div className="mt-5 sm:mt-6">
+            {status === 'aceptada' ? (
+              <div className="flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => scrollToId('pago')}
+                  className="w-full sm:w-72 py-3.5 px-5 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-[#0D9387] to-emerald-500 shadow-lg shadow-[#0D9387]/30 hover:brightness-110 transition flex items-center justify-center gap-2"
+                >
+                  <DollarSign className="w-4 h-4" /> REALIZAR PAGO
+                </button>
+              </div>
+            ) : status === 'cambios_solicitados' ? (
+              <div className="flex justify-center">
+                <div className="px-5 py-2.5 rounded-xl bg-[#FF6B35]/25 border border-[#FF6B35]/50 text-orange-200 text-xs font-semibold flex items-center gap-2 backdrop-blur-sm">
+                  <RotateCcw className="w-3.5 h-3.5" /> Cambios solicitados — tu asesor te contactará
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col sm:flex-row sm:justify-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={handleDirectAccept}
+                  disabled={isSubmitting}
+                  className="w-full sm:w-64 py-3.5 px-5 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-[#0D9387] to-[#0aa596] shadow-lg shadow-[#0D9387]/30 hover:brightness-110 transition flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-50"
+                >
+                  {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Check className="w-4 h-4 stroke-[3]" /> ACEPTAR PROPUESTA</>}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowChangeForm(!showChangeForm)}
+                  disabled={isSubmitting}
+                  className="w-full sm:w-64 py-3.5 px-5 rounded-xl font-bold text-sm text-white bg-[#FF6B35] hover:bg-[#e8590f] shadow-lg shadow-[#FF6B35]/25 transition flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-50"
+                >
+                  <RotateCcw className="w-4 h-4" /> SOLICITAR CAMBIOS
+                </button>
+              </div>
+            )}
+
+            <div className="mt-4 flex justify-center">
+              <button
+                type="button"
+                onClick={() => scrollToId('detalle')}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#0A1A2B]/70 hover:bg-[#0A1A2B]/90 border border-white/20 text-[11px] font-semibold text-slate-200 backdrop-blur-sm transition"
+              >
+                Ver detalles <ArrowDown className="w-3 h-3" />
+              </button>
             </div>
           </div>
 
           {/* Formulario de cambios desplegable si se activa */}
           {showChangeForm && (
-            <form onSubmit={handleSubmitChanges} className="bg-slate-900/90 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-[#FF6B35]/40 text-left space-y-3 shadow-xl">
+            <form onSubmit={handleSubmitChanges} className="mt-5 bg-[#0A1A2B]/85 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-[#FF6B35]/40 text-left space-y-3 shadow-xl">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-sm font-semibold text-orange-300">
                   <MessageSquare className="w-4 h-4 text-[#FF6B35]" />
@@ -404,7 +579,7 @@ export default function ClientQuotationView() {
           )}
 
           {inlineFeedback && (
-            <div className={`p-4 rounded-2xl border text-xs sm:text-sm font-medium flex items-center gap-2.5 ${
+            <div className={`mt-4 p-4 rounded-2xl border text-xs sm:text-sm font-medium flex items-center gap-2.5 ${
               inlineFeedback.type === 'success' ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-200' :
               inlineFeedback.type === 'info' ? 'bg-[#FF6B35]/20 border-[#FF6B35]/40 text-orange-200' :
               'bg-red-500/20 border-red-500/40 text-red-200'
@@ -413,124 +588,6 @@ export default function ClientQuotationView() {
               <span>{inlineFeedback.message}</span>
             </div>
           )}
-
-          {/* ── ESCENARIO DEL HERO CAROUSEL ── */}
-          <div
-            className="relative w-full rounded-3xl overflow-hidden bg-slate-900 border border-white/10 shadow-2xl group select-none"
-            onTouchStart={handleTouchStart}
-            onTouchEnd={handleTouchEnd}
-          >
-            {/* Ambient Backdrop Blur: Llena los costados con el color de la foto sin deformar */}
-            <div
-              className="absolute inset-0 bg-cover bg-center filter blur-2xl opacity-40 scale-110 pointer-events-none transition-all duration-700"
-              style={{ backgroundImage: `url('${activeImage}')` }}
-            />
-
-            {/* Imagen Principal en Contenedor Nítido (Proporción Natural) */}
-            <div className="relative z-10 w-full h-[280px] sm:h-[460px] md:h-[520px] flex items-center justify-center p-2 sm:p-4">
-              <img
-                src={activeImage}
-                alt={`${destination} - Foto ${carouselIdx + 1}`}
-                className="max-h-full max-w-full object-contain rounded-2xl shadow-xl transition-all duration-500"
-                onError={(e) => { e.target.src = heroImageFallback; }}
-              />
-
-              {/* Botón flotante para ver en Pantalla Completa */}
-              <button
-                type="button"
-                onClick={() => setFullscreenImage(activeImage)}
-                className="absolute top-4 right-4 z-20 p-2.5 rounded-xl bg-black/60 hover:bg-black/80 text-white backdrop-blur-md border border-white/20 transition opacity-80 hover:opacity-100 shadow-md"
-                title="Ampliar fotografía"
-              >
-                <Maximize2 className="w-4 h-4" />
-              </button>
-
-              {/* Contador de fotos */}
-              {imagesList.length > 1 && (
-                <div className="absolute top-4 left-4 z-20 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/20 text-white text-xs font-medium flex items-center gap-1.5 shadow-md">
-                  <Sparkles className="w-3 h-3 text-teal-300" />
-                  <span>{carouselIdx + 1} / {imagesList.length} fotos</span>
-                </div>
-              )}
-
-              {/* Flechas de navegación (si hay más de 1 imagen) */}
-              {imagesList.length > 1 && (
-                <>
-                  <button
-                    type="button"
-                    onClick={prevImage}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/55 hover:bg-black/80 text-white border border-white/20 backdrop-blur-md flex items-center justify-center transition shadow-lg hover:scale-105 active:scale-95"
-                    title="Foto anterior"
-                  >
-                    <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={nextImage}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/55 hover:bg-black/80 text-white border border-white/20 backdrop-blur-md flex items-center justify-center transition shadow-lg hover:scale-105 active:scale-95"
-                    title="Siguiente foto"
-                  >
-                    <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
-                  </button>
-                </>
-              )}
-            </div>
-
-            {/* Barra de miniaturas / indicadores en la parte inferior */}
-            {imagesList.length > 1 && (
-              <div className="relative z-20 bg-black/40 backdrop-blur-md px-4 py-2.5 flex items-center justify-center gap-2 border-t border-white/10 overflow-x-auto">
-                {imagesList.map((img, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={() => setCarouselIdx(i)}
-                    className={`h-10 w-14 sm:h-12 sm:w-18 rounded-lg overflow-hidden border-2 transition-all shrink-0 ${
-                      i === carouselIdx
-                        ? 'border-[#0D9387] scale-105 shadow-md shadow-[#0D9387]/30 ring-2 ring-[#0D9387]/40'
-                        : 'border-transparent opacity-60 hover:opacity-100'
-                    }`}
-                  >
-                    <img src={img} alt="" className="w-full h-full object-cover" />
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Botones de acción móvil (debajo del hero) */}
-          <div className="sm:hidden flex flex-col gap-2 pt-1">
-            {status === 'aceptada' ? (
-              <a
-                href="#pago"
-                className="w-full py-3.5 px-4 rounded-xl font-bold text-center text-sm bg-gradient-to-r from-[#0D9387] to-emerald-500 text-white shadow-lg shadow-[#0D9387]/25"
-              >
-                PAGAR AHORA POR TRANSFERENCIA
-              </a>
-            ) : status === 'cambios_solicitados' ? (
-              <div className="p-3 rounded-xl bg-[#FF6B35]/20 border border-[#FF6B35]/40 text-orange-200 text-center text-xs font-semibold">
-                CAMBIOS SOLICITADOS — Tu asesor te contactará
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={handleDirectAccept}
-                  disabled={isSubmitting}
-                  className="py-3 px-3 rounded-xl font-bold text-xs bg-[#0D9387] text-white flex items-center justify-center gap-1.5 shadow-md active:scale-95"
-                >
-                  <Check className="w-3.5 h-3.5 stroke-[3]" /> ACEPTAR
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowChangeForm(!showChangeForm)}
-                  disabled={isSubmitting}
-                  className="py-3 px-3 rounded-xl font-semibold text-xs bg-[#FF6B35] text-white flex items-center justify-center gap-1.5 shadow-md active:scale-95"
-                >
-                  <RotateCcw className="w-3.5 h-3.5" /> AJUSTAR
-                </button>
-              </div>
-            )}
-          </div>
         </div>
       </section>
 
@@ -651,7 +708,7 @@ export default function ClientQuotationView() {
       )}
 
       {/* ═══════ SECCIÓN DE COTIZACIÓN ORGANIZADA ═══════ */}
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 space-y-10">
+      <main id="detalle" className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 space-y-10 scroll-mt-20">
 
         {/* ── 1. FICHA EJECUTIVA DEL VIAJE (3 Tarjetas Claras y Ordenadas) ── */}
         <div>
@@ -957,12 +1014,13 @@ export default function ClientQuotationView() {
                 Tu viaje está en proceso de confirmación. Realiza la transferencia bancaria en la sección superior para emitir tus comprobantes.
               </p>
               <div className="pt-3">
-                <a
-                  href="#pago"
+                <button
+                  type="button"
+                  onClick={() => scrollToId('pago')}
                   className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#0D9387] text-white text-xs font-bold shadow-md hover:bg-[#0b7d72] transition"
                 >
                   Ver Cuentas Bancarias
-                </a>
+                </button>
               </div>
             </div>
           ) : status === 'cambios_solicitados' || status === 'rechazada' ? (
@@ -1117,7 +1175,8 @@ export default function ClientQuotationView() {
         </div>
       </footer>
 
-      {/* ═══════ FLOATING BOTTOM BAR EN MÓVIL ═══════ */}
+      {/* ═══════ FLOATING BOTTOM BAR EN MÓVIL (solo tras pasar el hero) ═══════ */}
+      {showStickyBar && (
       <div className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0F2A4A]/95 backdrop-blur-md border-t border-white/10 px-4 py-3 flex items-center justify-between gap-3 shadow-2xl">
         <div>
           <span className="text-[10px] text-slate-300 block uppercase tracking-wider">Total Cotizado</span>
@@ -1125,12 +1184,13 @@ export default function ClientQuotationView() {
         </div>
 
         {status === 'aceptada' ? (
-          <a
-            href="#pago"
+          <button
+            type="button"
+            onClick={() => scrollToId('pago')}
             className="px-4 py-2.5 rounded-xl font-bold text-xs bg-gradient-to-r from-[#0D9387] to-emerald-500 text-white shadow-md"
           >
             PAGAR AHORA
-          </a>
+          </button>
         ) : status === 'cambios_solicitados' ? (
           <span className="text-xs font-medium text-orange-300 px-3 py-1 rounded-lg bg-[#FF6B35]/20 border border-[#FF6B35]/40">
             Ajustes en curso
@@ -1156,6 +1216,7 @@ export default function ClientQuotationView() {
           </div>
         )}
       </div>
+      )}
     </div>
   );
 }
