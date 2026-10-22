@@ -14,7 +14,7 @@ import bcrypt, jwt
 from datetime import datetime, timezone, timedelta
 from typing import List, Optional, Any
 
-from fastapi import FastAPI, APIRouter, HTTPException, Depends, Request, Response, status, Form, File, UploadFile
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, Request, Response, status, Form, File, UploadFile, BackgroundTasks
 from starlette.middleware.cors import CORSMiddleware
 from starlette.concurrency import run_in_threadpool
 from pydantic import BaseModel, Field, EmailStr
@@ -821,9 +821,19 @@ RECEIPT_MIME = {
 MAX_RECEIPT_SIZE = 10 * 1024 * 1024  # 10 MB
 
 
+async def _notify_staff_email(subject: str, html: str):
+    """Aviso al staff en segundo plano (SMTP lento: no debe bloquear al cliente)."""
+    try:
+        async with AsyncSessionLocal() as session:
+            await _notify_staff(session, subject, html)
+    except Exception as e:
+        logger.warning(f"No se pudo enviar el aviso del comprobante: {e}")
+
+
 @api.post("/quotations/{qid}/receipt")
 async def upload_payment_receipt(
     qid: str,
+    background: BackgroundTasks,
     file: UploadFile = File(...),
     bank: str = Form(""),
     reference: str = Form(""),
@@ -914,15 +924,19 @@ async def upload_payment_receipt(
         message=f"${amount:,.2f} · {bank_label} · {q.destination}",
         link="/admin/pagos",
     )
+    # Se confirma el pago ANTES de responder: el aviso por correo puede tardar
+    # (SMTP con timeout de 30 s por destinatario) y bloqueaba la respuesta del cliente.
+    await db.commit()
+
     base_url = os.environ.get("PUBLIC_API_URL", "https://karabu-srv.onrender.com").rstrip("/")
-    await _notify_staff(
-        db,
-        f"Comprobante de transferencia — {client_name} ({q.destination})",
+    subject = f"Comprobante de transferencia — {client_name} ({q.destination})"
+    html = (
         f"<p><b>{client_name}</b> subió un comprobante para <b>{q.destination}</b>.</p>"
         f"<p>Monto: ${amount:,.2f} {q.currency or ''}<br>Banco: {bank_label}"
         + (f"<br>Referencia: {ref}" if ref else "") + "</p>"
-        f"<p><a href=\"{base_url}{receipt_url}\">Ver comprobante</a> — confírmalo en Pagos.</p>",
+        f"<p><a href=\"{base_url}{receipt_url}\">Ver comprobante</a> — confírmalo en Pagos.</p>"
     )
+    background.add_task(_notify_staff_email, subject, html)
 
     logger.info(f"Comprobante {payment.id} recibido para {q.code} ({bank_label})")
     return {"ok": True, "payment": payment.to_dict()}
