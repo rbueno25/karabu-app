@@ -7,7 +7,7 @@ import {
   DollarSign, Sun, Moon, ArrowDown, RotateCcw, Check, Plane,
   Car, Share2, MapPin, Sparkles, MessageSquare, Send, Award,
   Phone, Mail, Bed, Clock, ChevronLeft, ChevronRight, Star,
-  Globe, Headphones, BadgeCheck
+  Globe, Headphones, BadgeCheck, Copy, Maximize2, X, CheckCheck
 } from 'lucide-react';
 
 const BANK_ACCOUNTS = [
@@ -19,10 +19,10 @@ const BANK_ACCOUNTS = [
     type: 'Cuenta de ahorros · Pesos Dominicanos (RD$)',
     details: [
       { label: 'Titular', value: 'RINALDI BUENO' },
-      { label: 'Cédula', value: '402-0293128-9' },
-      { label: 'Número de cuenta', value: '40030140010', mono: true },
-      { label: 'Cuenta estándar (IBAN)', value: 'DO75BCBH00000000040030140010', mono: true },
-      { label: 'Correo', value: 'rsbueno25@gmail.com' },
+      { label: 'Cédula', value: '402-0293128-9', copyable: true },
+      { label: 'Número de cuenta', value: '40030140010', mono: true, copyable: true },
+      { label: 'Cuenta estándar (IBAN)', value: 'DO75BCBH00000000040030140010', mono: true, copyable: true },
+      { label: 'Correo', value: 'rsbueno25@gmail.com', copyable: true },
     ],
   },
   {
@@ -33,8 +33,9 @@ const BANK_ACCOUNTS = [
     type: 'Cuenta de ahorros · Pesos Dominicanos (RD$)',
     details: [
       { label: 'Titular', value: 'CARLOS RANDOLF' },
-      { label: 'Cédula', value: '001-0330213-9' },
-      { label: 'Número de cuenta', value: '9607638784', mono: true },
+      { label: 'Cédula', value: '001-0330213-9', copyable: true },
+      { label: 'Número de cuenta', value: '9607638784', mono: true, copyable: true },
+      { label: 'Correo', value: 'pagos@karabuviajes.com', copyable: true },
     ],
   },
 ];
@@ -57,10 +58,13 @@ export default function ClientQuotationView() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [inlineFeedback, setInlineFeedback] = useState(null);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [copiedField, setCopiedField] = useState(null);
 
-  // Gallery carousel state
+  // Gallery Hero Carousel state
   const [carouselIdx, setCarouselIdx] = useState(0);
-  const carouselRef = useRef(null);
+  const [fullscreenImage, setFullscreenImage] = useState(null);
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
 
   useEffect(() => {
     if (darkMode) document.documentElement.classList.add('dark');
@@ -69,42 +73,98 @@ export default function ClientQuotationView() {
 
   const loadQuotationData = async (idToFetch) => {
     setLoading(true); setError(null);
-    try { const result = await getQuotation(idToFetch); setData(result); }
-    catch (err) { setError(err.message || 'Error al cargar la propuesta'); }
-    finally { setLoading(false); }
+    try {
+      const result = await getQuotation(idToFetch);
+      setData(result);
+    } catch (err) {
+      setError(err.message || 'Error al cargar la propuesta');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  useEffect(() => { if (currentId) loadQuotationData(currentId); }, [currentId]);
+  useEffect(() => {
+    if (currentId) loadQuotationData(currentId);
+  }, [currentId]);
 
   const handleShare = () => {
     const url = window.location.href;
-    if (navigator.clipboard) { navigator.clipboard.writeText(url); setCopiedLink(true); setTimeout(() => setCopiedLink(false), 3000); }
+    if (navigator.share) {
+      navigator.share({
+        title: 'Propuesta de Viaje - Karabu Viajes',
+        text: 'Te comparto la propuesta de viaje de Karabu Viajes:',
+        url: url
+      }).catch(() => {});
+    } else if (navigator.clipboard) {
+      navigator.clipboard.writeText(url);
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 3000);
+    }
+  };
+
+  const copyToClipboard = (text, fieldKey) => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      setCopiedField(fieldKey);
+      setTimeout(() => setCopiedField(null), 2500);
+    }
   };
 
   const handleDirectAccept = async () => {
-    setIsSubmitting(true); setInlineFeedback(null);
+    setIsSubmitting(true);
+    setInlineFeedback(null);
     try {
-      await updateQuotationStatus(currentId, { status: 'aceptada', notes: 'Propuesta aceptada directamente por el cliente.' });
-      if (data) setData((prev) => ({ ...prev, quotation: { ...prev.quotation, status: 'aceptada' } }));
+      await updateQuotationStatus(currentId, {
+        status: 'aceptada',
+        notes: 'Propuesta aceptada directamente por el cliente.',
+      });
+      if (data) {
+        setData((prev) => ({
+          ...prev,
+          quotation: { ...prev.quotation, status: 'aceptada' }
+        }));
+      }
       setShowChangeForm(false);
-      setInlineFeedback({ type: 'success', message: '¡Propuesta ACEPTADA! Tu asesor te contactará para coordinar los detalles.' });
+      setInlineFeedback({
+        type: 'success',
+        message: '¡Propuesta Aceptada con éxito! Ya puedes realizar tu pago para asegurar tu reserva.'
+      });
+      setTimeout(() => {
+        document.getElementById('pago')?.scrollIntoView({ behavior: 'smooth' });
+      }, 400);
     } catch (err) {
       setInlineFeedback({ type: 'error', message: 'No se pudo procesar: ' + err.message });
-    } finally { setIsSubmitting(false); }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleSubmitChanges = async (e) => {
     e.preventDefault();
     if (!changeNotes.trim()) return;
-    setIsSubmitting(true); setInlineFeedback(null);
+    setIsSubmitting(true);
+    setInlineFeedback(null);
     try {
-      await updateQuotationStatus(currentId, { status: 'cambios_solicitados', notes: changeNotes });
-      if (data) setData((prev) => ({ ...prev, quotation: { ...prev.quotation, status: 'cambios_solicitados', notes: changeNotes } }));
+      await updateQuotationStatus(currentId, {
+        status: 'cambios_solicitados',
+        notes: changeNotes
+      });
+      if (data) {
+        setData((prev) => ({
+          ...prev,
+          quotation: { ...prev.quotation, status: 'cambios_solicitados', notes: changeNotes }
+        }));
+      }
       setShowChangeForm(false);
-      setInlineFeedback({ type: 'info', message: 'Solicitud de cambios enviada. Tu asesor ajustará la propuesta.' });
+      setInlineFeedback({
+        type: 'info',
+        message: 'Solicitud de cambios enviada. Tu asesor ajustará la propuesta a la brevedad.'
+      });
     } catch (err) {
       setInlineFeedback({ type: 'error', message: 'Error: ' + err.message });
-    } finally { setIsSubmitting(false); }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (loading) {
@@ -113,8 +173,8 @@ export default function ClientQuotationView() {
         <div className="w-16 h-16 rounded-2xl bg-[#0D9387]/20 text-[#0D9387] flex items-center justify-center animate-pulse mb-4 border border-[#0D9387]/30 shadow-2xl">
           <Compass className="w-8 h-8 animate-spin text-[#0D9387]" />
         </div>
-        <h3 className="text-xl font-semibold tracking-tight">Cargando propuesta de viaje...</h3>
-        <p className="text-sm text-slate-300 mt-1">Karabu Viajes — Cotización #{currentId}</p>
+        <h3 className="text-xl font-semibold tracking-tight">Cargando tu propuesta personalizada...</h3>
+        <p className="text-sm text-slate-300 mt-1">Karabu Viajes — Cotización #{currentId || ''}</p>
       </div>
     );
   }
@@ -126,7 +186,12 @@ export default function ClientQuotationView() {
           <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-3" />
           <h3 className="text-xl font-semibold">No pudimos cargar la propuesta</h3>
           <p className="text-xs text-slate-300 mt-2 mb-6">{error}</p>
-          <button onClick={() => loadQuotationData(currentId)} className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-semibold text-white bg-[#0D9387] hover:bg-[#0b7d72] transition shadow-lg"><RefreshCw className="w-4 h-4" /> Reintentar</button>
+          <button
+            onClick={() => loadQuotationData(currentId)}
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-semibold text-white bg-[#0D9387] hover:bg-[#0b7d72] transition shadow-lg"
+          >
+            <RefreshCw className="w-4 h-4" /> Reintentar
+          </button>
         </div>
       </div>
     );
@@ -139,10 +204,11 @@ export default function ClientQuotationView() {
   const returnDate = q.return_date || '—';
   const hotelName = q.assigned_hotel || 'Hotel por confirmar';
   const rawRoomType = q.room_type || q.form_data?.roomType || '';
-  const roomType = rawRoomType ? `Habitación ${rawRoomType}` : '';
+  const roomType = rawRoomType ? `Habitación ${rawRoomType}` : 'Habitación Estándar';
   const travelers = q.travelers || 1;
   const adults = q.form_data?.adultsCount ?? travelers;
   const children = q.form_data?.childrenCount ?? 0;
+  const quoteCode = q.code || `#${currentId.slice(0, 8)}`;
 
   const nights = (() => {
     if (!travelDate || !returnDate || travelDate === '—' || returnDate === '—') return 1;
@@ -164,55 +230,86 @@ export default function ClientQuotationView() {
   const triple = q.form_data?.habitacionesTriple ?? 0;
   const totalRooms = sencilla + doble + triple;
   const roomsSummary = totalRooms > 0
-    ? `${totalRooms} hab.${sencilla > 0 ? ` (${sencilla} sen.)` : ''}${doble > 0 ? ` (${doble} dob.)` : ''}${triple > 0 ? ` (${triple} trip.)` : ''}`
-    : (q.room_type ? `Hab. ${q.room_type}` : '');
+    ? `${totalRooms} hab.${sencilla > 0 ? ` (${sencilla} sencilla)` : ''}${doble > 0 ? ` (${doble} doble)` : ''}${triple > 0 ? ` (${triple} triple)` : ''}`
+    : (q.room_type ? `Hab. ${q.room_type}` : '1 Habitación');
 
   const customServices = Array.isArray(q.services) && q.services.length > 0 ? q.services : null;
-  const hasServices = customServices && customServices.length > 0;
-  const sumActiveServices = hasServices ? customServices.reduce((acc, s) => acc + (Number(s.price) || 0), 0) : 0;
-  const serviceFeePrice = hasServices ? (totalAmount > sumActiveServices ? totalAmount - sumActiveServices : 0) : 0;
-
   const bookingPrice = q.booking_price || Math.round(totalWithTax * 1.15);
   const expediaPrice = q.expedia_price || Math.round(totalWithTax * 1.12);
-  const heroBgImage = q.hero_image || q.gallery_images?.[0] || `https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&q=80&w=1920`;
+  const calculatedSavings = Math.max(0, bookingPrice - totalWithTax);
 
-  // Gallery carousel
-  const galleryImages = (q.gallery_images && q.gallery_images.length > 0)
-    ? q.gallery_images
-    : (q.hero_image ? [q.hero_image] : []);
+  // Imágenes del Hero y Galería: unificar sin duplicados
+  const heroImageFallback = `https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&q=80&w=1920`;
+  const allImages = [
+    ...(q.hero_image ? [q.hero_image] : []),
+    ...(Array.isArray(q.gallery_images) ? q.gallery_images : [])
+  ].filter(Boolean);
 
-  const scrollCarousel = (dir) => {
-    if (!carouselRef.current || galleryImages.length <= 1) return;
-    const newIdx = (carouselIdx + dir + galleryImages.length) % galleryImages.length;
-    setCarouselIdx(newIdx);
-    const card = carouselRef.current.children[newIdx];
-    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  const imagesList = allImages.length > 0 ? [...new Set(allImages)] : [heroImageFallback];
+  const activeImage = imagesList[carouselIdx] || imagesList[0];
+
+  const nextImage = () => {
+    setCarouselIdx((prev) => (prev + 1) % imagesList.length);
   };
 
+  const prevImage = () => {
+    setCarouselIdx((prev) => (prev - 1 + imagesList.length) % imagesList.length);
+  };
+
+  // Touch Swipe para móvil
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.targetTouches[0].clientX;
+  };
+  const handleTouchEnd = (e) => {
+    touchEndX.current = e.changedTouches[0].clientX;
+    const diff = touchStartX.current - touchEndX.current;
+    if (diff > 50) nextImage();
+    if (diff < -50) prevImage();
+  };
+
+  // WhatsApp link para notificar pago
+  const cleanBrokerPhone = (broker.phone || '').replace(/[^0-9]/g, '');
+  const whatsappPaymentMsg = encodeURIComponent(
+    `Hola ${broker.name || 'Asesor Karabu'}, he aceptado la cotización ${quoteCode} para viajar a ${destination}. Adjunto mi comprobante de pago por $${totalWithTax.toLocaleString()} USD.`
+  );
+  const whatsappPaymentUrl = cleanBrokerPhone
+    ? `https://wa.me/${cleanBrokerPhone}?text=${whatsappPaymentMsg}`
+    : '#';
+
   return (
-    <div className="min-h-screen bg-white dark:bg-[#070F1E] text-slate-800 dark:text-slate-200 transition-colors duration-300 font-sans">
-      {/* ═══════ NAVBAR — compacto, mismo estilo que landing ═══════ */}
-      <header className="sticky top-0 z-50 bg-[#0F2A4A] shadow-md">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#070F1E] text-slate-800 dark:text-slate-200 transition-colors duration-300 font-sans pb-24 sm:pb-12">
+      {/* ═══════ NAVBAR ═══════ */}
+      <header className="sticky top-0 z-50 bg-[#0F2A4A]/95 backdrop-blur-md border-b border-white/10 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
               <Logo light={true} showText={true} className="scale-[0.85] origin-left" />
-              <span className="hidden sm:inline text-[11px] font-mono text-slate-300 bg-white/10 px-2.5 py-0.5 rounded-full">{data?.quotation?.code || `#${currentId.slice(0, 8)}`}</span>
+              <span className="hidden sm:inline text-[11px] font-mono text-teal-200 bg-white/10 px-2.5 py-0.5 rounded-full border border-white/15">
+                {quoteCode}
+              </span>
             </div>
             <div className="flex items-center gap-2">
-              <span className={`text-[11px] font-medium px-2.5 py-1 rounded-full border flex items-center gap-1.5 ${
-                  status === 'aceptada' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' :
-                  status === 'cambios_solicitados' || status === 'rechazada' ? 'bg-[#FF6B35]/20 text-orange-300 border-[#FF6B35]/30' :
-                  'bg-[#0D9387]/20 text-teal-300 border-[#0D9387]/30'
+              <span className={`text-[11px] font-semibold px-3 py-1 rounded-full border flex items-center gap-1.5 ${
+                status === 'aceptada' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' :
+                status === 'cambios_solicitados' || status === 'rechazada' ? 'bg-[#FF6B35]/20 text-orange-300 border-[#FF6B35]/40' :
+                'bg-[#0D9387]/20 text-teal-300 border-[#0D9387]/40'
               }`}>
-                {status === 'aceptada' ? <><CheckCircle2 className="w-3 h-3" /> Aceptada</> :
-                 status === 'cambios_solicitados' || status === 'rechazada' ? <><RotateCcw className="w-3 h-3" /> Cambios</> :
-                 <><Sparkles className="w-3 h-3 text-teal-300" /> Lista</>}
+                {status === 'aceptada' ? <><CheckCircle2 className="w-3.5 h-3.5" /> Aceptada</> :
+                 status === 'cambios_solicitados' || status === 'rechazada' ? <><RotateCcw className="w-3.5 h-3.5" /> Cambios Solicitados</> :
+                 <><Sparkles className="w-3.5 h-3.5 text-teal-300" /> Propuesta Lista</>}
               </span>
-              <button onClick={handleShare} className="p-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-all" title="Compartir">
+              <button
+                onClick={handleShare}
+                className="p-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-all"
+                title="Compartir enlace"
+              >
                 {copiedLink ? <Check className="w-4 h-4 text-emerald-300" /> : <Share2 className="w-4 h-4" />}
               </button>
-              <button onClick={() => setDarkMode(!darkMode)} className="p-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-all" title="Tema">
+              <button
+                onClick={() => setDarkMode(!darkMode)}
+                className="p-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-all"
+                title="Modo Oscuro / Claro"
+              >
                 {darkMode ? <Sun className="w-4 h-4 text-amber-300" /> : <Moon className="w-4 h-4" />}
               </button>
             </div>
@@ -220,492 +317,845 @@ export default function ClientQuotationView() {
         </div>
       </header>
 
-      {/* ═══════ SECTION 1 — HERO ═══════ */}
-      <section
-        className="relative w-full min-h-[85vh] flex flex-col justify-between overflow-hidden bg-[#0F2A4A]"
-        style={{
-          backgroundImage: `url(${heroBgImage})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          backgroundColor: '#0F2A4A',
-        }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0F2A4A]/50 via-transparent to-[#0F2A4A]/60 pointer-events-none" />
+      {/* ═══════ HERO CON CAROUSEL INTEGRADO (IMAGEN COMPLETA SIN DEFORMACIÓN) ═══════ */}
+      <section className="relative w-full bg-[#0B1E36] overflow-hidden pt-6 pb-10 sm:py-12 border-b border-slate-200 dark:border-slate-800">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
 
-        <div className="relative z-20 w-full max-w-5xl mx-auto px-4 sm:px-6 mt-auto mb-auto text-center sm:text-left pt-16">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/40 backdrop-blur-md border border-white/20 text-teal-300 text-xs font-medium mb-3">
-            <MapPin className="w-3.5 h-3.5 text-[#0D9387]" />{destination}
-          </div>
-          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight drop-shadow-lg leading-tight">¡Hola {clientName}!</h1>
-          <p className="text-lg sm:text-2xl text-slate-200 font-medium mt-2 drop-shadow-md">Tu cotización a <span className="text-teal-300 font-semibold">{destination}</span> está lista</p>
-        </div>
+          {/* Encabezado del Hero */}
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-500/10 border border-teal-500/30 text-teal-300 text-xs font-semibold mb-2.5">
+                <MapPin className="w-3.5 h-3.5 text-[#0D9387]" />
+                {destination}
+              </div>
+              <h1 className="text-2xl sm:text-4xl font-bold text-white tracking-tight">
+                ¡Hola {clientName}!
+              </h1>
+              <p className="text-sm sm:text-base text-slate-300 mt-1">
+                Hemos preparado tu propuesta exclusiva a <span className="text-teal-300 font-semibold">{destination}</span>
+              </p>
+            </div>
 
-        <div className="relative z-20 w-full max-w-6xl mx-auto px-4 sm:px-6 pb-4">
-          <div className="backdrop-blur-xl bg-black/55 border border-white/20 shadow-2xl rounded-2xl p-4 sm:p-5 text-white">
-            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-[#0D9387] via-teal-300 to-[#FF6B35]" />
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-3 sm:gap-4">
-              <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
-                <Calendar className="w-5 h-5 text-teal-300 shrink-0" />
-                <div><span className="text-[10px] uppercase tracking-wider text-slate-400 font-medium block">Fechas</span><span className="text-xs text-white">{travelDate} — {returnDate}</span>{nights > 0 && <span className="text-[10px] text-teal-300 block mt-0.5">{nights} {nights === 1 ? 'noche' : 'noches'}</span>}</div>
-              </div>
-              <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
-                <Building2 className="w-5 h-5 text-teal-300 shrink-0" />
-                <div><span className="text-[10px] uppercase tracking-wider text-slate-400 font-medium block">Hospedaje</span><span className="text-xs text-white line-clamp-1">{hotelName}</span>{roomType && <span className="text-[11px] text-slate-300 line-clamp-1">{roomType}</span>}{roomsSummary && <span className="text-[10px] text-teal-300 block mt-0.5">{roomsSummary}</span>}</div>
-              </div>
-              <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
-                <Users className="w-5 h-5 text-teal-300 shrink-0" />
-                <div><span className="text-[10px] uppercase tracking-wider text-slate-400 font-medium block">Viajeros</span><span className="text-xs text-white">{travelers} pasajeros</span>{children > 0 && <span className="text-[11px] text-slate-300 block">{adults} adultos, {children} niño{children!==1?'s':''}</span>}</div>
-              </div>
-              <div className="flex items-center justify-between p-3 rounded-xl bg-[#0D9387]/20 border border-[#0D9387]/40">
-                <div><span className="text-[10px] uppercase tracking-wider text-teal-200 font-medium block">Total</span><span className="text-xl sm:text-2xl font-bold text-white">${totalWithTax.toLocaleString()} <span className="text-xs text-teal-200">USD</span></span></div>
-                <div className="text-right border-l border-white/15 pl-3"><span className="text-[10px] text-slate-300 block">P/P/N</span><span className="text-sm font-semibold text-teal-300">${perNightPerPerson.toLocaleString()} USD</span></div>
-              </div>
+            {/* Acciones principales en el header para desktop */}
+            <div className="hidden sm:flex items-center gap-2.5">
+              {status === 'aceptada' ? (
+                <a
+                  href="#pago"
+                  className="px-5 py-2.5 rounded-xl font-bold text-sm bg-gradient-to-r from-[#0D9387] to-emerald-500 text-white shadow-lg shadow-[#0D9387]/30 hover:brightness-110 transition flex items-center gap-2"
+                >
+                  <DollarSign className="w-4 h-4" /> Realizar Pago
+                </a>
+              ) : status === 'cambios_solicitados' ? (
+                <div className="px-4 py-2 rounded-xl bg-[#FF6B35]/20 border border-[#FF6B35]/40 text-orange-300 text-xs font-medium flex items-center gap-2">
+                  <RotateCcw className="w-3.5 h-3.5" /> Revisión en curso
+                </div>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={handleDirectAccept}
+                    disabled={isSubmitting}
+                    className="px-5 py-2.5 rounded-xl font-bold text-sm bg-[#0D9387] hover:bg-[#0b7d72] text-white shadow-lg shadow-[#0D9387]/25 transition flex items-center gap-2 active:scale-95 disabled:opacity-50"
+                  >
+                    {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Check className="w-4 h-4 stroke-[3]" /> Aceptar Propuesta</>}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowChangeForm(!showChangeForm)}
+                    disabled={isSubmitting}
+                    className="px-4 py-2.5 rounded-xl font-semibold text-sm bg-white/10 hover:bg-white/20 text-white border border-white/20 transition flex items-center gap-1.5 active:scale-95"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5 text-orange-300" /> Solicitar Cambios
+                  </button>
+                </>
+              )}
             </div>
           </div>
-        </div>
 
-        {/* Botones de acción en el hero */}
-        <div className="relative z-20 w-full max-w-2xl mx-auto px-4 pb-3">
-          {status === 'aceptada' ? (
-            <div className="space-y-3">
-              <div className="p-3 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-200 text-center text-sm font-medium flex items-center justify-center gap-2">
-                <CheckCircle2 className="w-4 h-4" /> PROPUESTA ACEPTADA
-              </div>
-              <a href="#pago"
-                className="flex items-center justify-center gap-3 w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-[#0D9387] to-emerald-500 text-white font-bold text-base shadow-xl shadow-[#0D9387]/30 transition-all hover:scale-[1.02] active:scale-[0.98] animate-pulse hover:animate-none cursor-pointer"
-                onClick={(e) => { e.preventDefault(); document.getElementById('pago')?.scrollIntoView({ behavior: 'smooth' }); }}>
-                <DollarSign className="w-5 h-5" />
-                PAGAR AHORA POR TRANSFERENCIA
-              </a>
-            </div>
-          ) : status === 'cambios_solicitados' || status === 'rechazada' ? (
-            <div className="p-3 rounded-xl bg-[#FF6B35]/20 border border-[#FF6B35]/30 text-orange-200 text-center text-sm font-medium flex items-center justify-center gap-2">
-              <RotateCcw className="w-4 h-4" /> CAMBIOS SOLICITADOS — Tu asesor ajustará la propuesta
-            </div>
-          ) : (
-            <div className="flex flex-col sm:flex-row gap-2.5">
-              <button type="button" onClick={handleDirectAccept} disabled={isSubmitting}
-                className="flex-1 font-semibold py-3 px-6 rounded-xl shadow-lg transition duration-200 flex items-center justify-center gap-2 text-sm bg-[#0D9387] hover:bg-[#0b7d72] active:scale-[0.98] text-white">
-                {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Check className="w-4 h-4 stroke-[3]" />ACEPTAR PROPUESTA</>}
-              </button>
-              <button type="button" onClick={() => { setShowChangeForm(!showChangeForm); setInlineFeedback(null); }} disabled={isSubmitting}
-                className="flex-1 font-semibold py-3 px-6 rounded-xl shadow-lg transition duration-200 flex items-center justify-center gap-2 text-sm bg-[#FF6B35] hover:bg-[#e05a28] active:scale-[0.98] text-white">
-                <RotateCcw className="w-4 h-4" />SOLICITAR CAMBIOS
-              </button>
-            </div>
-          )}
-
-          {inlineFeedback && (
-            <div className={`mt-3 p-3 rounded-xl border text-xs font-medium flex items-center gap-2 ${
-              inlineFeedback.type === 'success' ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-200' :
-              inlineFeedback.type === 'info' ? 'bg-[#FF6B35]/20 border-[#FF6B35]/30 text-orange-200' :
-              'bg-red-500/20 border-red-500/30 text-red-200'
-            }`}><CheckCircle2 className="w-3.5 h-3.5 shrink-0" /><span>{inlineFeedback.message}</span></div>
-          )}
-
+          {/* Formulario de cambios desplegable si se activa */}
           {showChangeForm && (
-            <form onSubmit={handleSubmitChanges} className="mt-3 bg-black/40 backdrop-blur-md p-3.5 rounded-xl border border-[#FF6B35]/30 text-left space-y-2">
-              <div className="flex items-center gap-2 text-xs font-medium text-orange-200"><MessageSquare className="w-3.5 h-3.5 text-[#FF6B35]" />Ajustes requeridos:</div>
-              <textarea rows={2} required placeholder="Ej: cambiar fecha, upgrade de habitación..." value={changeNotes} onChange={(e) => setChangeNotes(e.target.value)} className="w-full text-xs p-2.5 rounded-lg border border-white/20 bg-black/60 text-white placeholder-slate-400 focus:ring-2 focus:ring-[#FF6B35] outline-none" />
+            <form onSubmit={handleSubmitChanges} className="bg-slate-900/90 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-[#FF6B35]/40 text-left space-y-3 shadow-xl">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-sm font-semibold text-orange-300">
+                  <MessageSquare className="w-4 h-4 text-[#FF6B35]" />
+                  ¿Qué cambios te gustaría realizar en esta propuesta?
+                </div>
+                <button type="button" onClick={() => setShowChangeForm(false)} className="text-slate-400 hover:text-white p-1">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <textarea
+                rows={3}
+                required
+                placeholder="Ejemplo: Deseo ajustar las fechas para salir un día después, cotizar habitación con vista al mar o añadir traslados privados..."
+                value={changeNotes}
+                onChange={(e) => setChangeNotes(e.target.value)}
+                className="w-full text-xs sm:text-sm p-3 rounded-xl border border-white/20 bg-black/40 text-white placeholder-slate-400 focus:ring-2 focus:ring-[#FF6B35] outline-none"
+              />
               <div className="flex items-center justify-end gap-2">
-                <button type="button" onClick={() => setShowChangeForm(false)} className="px-3 py-1 rounded-lg text-xs text-slate-300 hover:text-white">Cancelar</button>
-                <button type="submit" disabled={isSubmitting || !changeNotes.trim()} className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white bg-[#FF6B35] hover:bg-[#e05a28] transition flex items-center gap-1 disabled:opacity-50">{isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <><Send className="w-3.5 h-3.5" />Enviar</>}</button>
+                <button type="button" onClick={() => setShowChangeForm(false)} className="px-3.5 py-1.5 rounded-xl text-xs text-slate-300 hover:text-white">
+                  Cancelar
+                </button>
+                <button type="submit" disabled={isSubmitting || !changeNotes.trim()} className="px-4 py-2 rounded-xl text-xs font-semibold text-white bg-[#FF6B35] hover:bg-[#e05a28] transition flex items-center gap-1.5 disabled:opacity-50">
+                  {isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <><Send className="w-3.5 h-3.5" /> Enviar Solicitud</>}
+                </button>
               </div>
             </form>
           )}
-        </div>
 
-        <div className="relative z-20 pb-6 text-center">
-          <button onClick={() => document.getElementById(status === 'aceptada' ? 'pago' : 'contenido')?.scrollIntoView({ behavior: 'smooth' })} className="inline-flex items-center gap-2 text-xs text-slate-300 hover:text-white transition bg-black/50 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/15">
-            <span>{status === 'aceptada' ? 'Pagar ahora' : 'Ver detalles'}</span><ArrowDown className="w-3.5 h-3.5 animate-bounce text-[#0D9387]" />
-          </button>
-        </div>
-      </section>
-
-      {/* ═══════ PAYMENT SECTION — visible solo si aceptada, PRIMERO arriba ═══════ */}
-      {status === 'aceptada' && (
-        <section id="pago" className="w-full bg-white dark:bg-[#070F1E] py-10 sm:py-14 px-4 sm:px-6 border-b-4 border-[#0D9387]">
-          <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-6">
-              <span className="text-xs font-semibold uppercase tracking-wider text-[#0D9387] bg-[#0D9387]/10 px-4 py-1.5 rounded-full">Paso 1 — Realiza tu pago</span>
-              <h2 className="text-2xl font-bold text-[#0F2A4A] dark:text-white mt-3">Transfiere a tu cuenta Karabu</h2>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Deposita o transfiere el monto total y envíanos el comprobante</p>
+          {inlineFeedback && (
+            <div className={`p-4 rounded-2xl border text-xs sm:text-sm font-medium flex items-center gap-2.5 ${
+              inlineFeedback.type === 'success' ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-200' :
+              inlineFeedback.type === 'info' ? 'bg-[#FF6B35]/20 border-[#FF6B35]/40 text-orange-200' :
+              'bg-red-500/20 border-red-500/40 text-red-200'
+            }`}>
+              <CheckCircle2 className="w-4 h-4 shrink-0" />
+              <span>{inlineFeedback.message}</span>
             </div>
+          )}
 
-            <div className="grid gap-6 lg:grid-cols-2">
-              {BANK_ACCOUNTS.map((bank) => (
-                <div key={bank.id} className="flex flex-col bg-white dark:bg-[#0F2A4A]/40 border-2 border-[#0D9387]/20 rounded-3xl p-6 sm:p-8 shadow-lg">
-                  {/* Bank header */}
-                  <div className="flex items-center gap-4 mb-6 pb-6 border-b border-slate-200 dark:border-slate-700">
-                    <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center shrink-0 border border-slate-200 overflow-hidden">
-                      <img src={bank.logo} alt={bank.bank} className={`w-full h-full ${bank.fit === 'contain' ? 'object-contain p-1.5' : 'object-cover'}`} />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-bold text-[#0F2A4A] dark:text-white">{bank.bank}</h3>
-                      <p className="text-sm text-slate-500 dark:text-slate-400">{bank.type}</p>
-                    </div>
-                  </div>
+          {/* ── ESCENARIO DEL HERO CAROUSEL ── */}
+          <div
+            className="relative w-full rounded-3xl overflow-hidden bg-slate-900 border border-white/10 shadow-2xl group select-none"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
+            {/* Ambient Backdrop Blur: Llena los costados con el color de la foto sin deformar */}
+            <div
+              className="absolute inset-0 bg-cover bg-center filter blur-2xl opacity-40 scale-110 pointer-events-none transition-all duration-700"
+              style={{ backgroundImage: `url('${activeImage}')` }}
+            />
 
-                  {/* Account details */}
-                  <div className="space-y-3 flex-1">
-                    {bank.details.map((item, i) => (
-                      <div key={i} className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 p-3 rounded-xl bg-slate-50 dark:bg-[#070F1E]/60 border border-slate-200/80 dark:border-slate-800">
-                        <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{item.label}</span>
-                        <span className={`text-sm font-bold text-[#0F2A4A] dark:text-white ${item.mono ? 'font-mono tracking-wider [font-feature-settings:"zero"]' : ''}`}>{item.value}</span>
-                      </div>
-                    ))}
-                  </div>
+            {/* Imagen Principal en Contenedor Nítido (Proporción Natural) */}
+            <div className="relative z-10 w-full h-[280px] sm:h-[460px] md:h-[520px] flex items-center justify-center p-2 sm:p-4">
+              <img
+                src={activeImage}
+                alt={`${destination} - Foto ${carouselIdx + 1}`}
+                className="max-h-full max-w-full object-contain rounded-2xl shadow-xl transition-all duration-500"
+                onError={(e) => { e.target.src = heroImageFallback; }}
+              />
+
+              {/* Botón flotante para ver en Pantalla Completa */}
+              <button
+                type="button"
+                onClick={() => setFullscreenImage(activeImage)}
+                className="absolute top-4 right-4 z-20 p-2.5 rounded-xl bg-black/60 hover:bg-black/80 text-white backdrop-blur-md border border-white/20 transition opacity-80 hover:opacity-100 shadow-md"
+                title="Ampliar fotografía"
+              >
+                <Maximize2 className="w-4 h-4" />
+              </button>
+
+              {/* Contador de fotos */}
+              {imagesList.length > 1 && (
+                <div className="absolute top-4 left-4 z-20 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/20 text-white text-xs font-medium flex items-center gap-1.5 shadow-md">
+                  <Sparkles className="w-3 h-3 text-teal-300" />
+                  <span>{carouselIdx + 1} / {imagesList.length} fotos</span>
                 </div>
-              ))}
-            </div>
+              )}
 
-            {/* Total reminder */}
-            <div className="mt-6 p-5 rounded-2xl bg-[#0D9387]/10 border border-[#0D9387]/30 text-center">
-              <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Total a transferir</p>
-              <p className="text-3xl font-bold text-[#0D9387]">${totalWithTax.toLocaleString()} <span className="text-base">USD</span></p>
-              <p className="text-[10px] text-slate-400 mt-2 flex items-center justify-center gap-1">
-                <ShieldCheck className="w-3 h-3 text-[#0D9387]" />
-                Al enviar el comprobante, tu asesor validará el pago y confirmará tu reserva
-              </p>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ═══════ GALLERY CAROUSEL ═══════ */}
-      {galleryImages.length > 1 && (
-        <section className="w-full bg-white dark:bg-[#0F2A4A] py-6 px-4 sm:px-6 border-b border-slate-200 dark:border-slate-800">
-          <div className="max-w-5xl mx-auto relative">
-            <div className="flex items-center gap-2 mb-3">
-              <Sparkles className="w-4 h-4 text-[#0D9387]" />
-              <span className="text-xs font-semibold uppercase tracking-wider text-[#0D9387]">Galería del destino</span>
-            </div>
-            <div className="relative group">
-              <div
-                ref={carouselRef}
-                className="flex gap-3 overflow-x-auto scrollbar-hide snap-x snap-mandatory scroll-smooth pb-2"
-                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-              >
-                {galleryImages.map((img, i) => (
-                  <div
-                    key={i}
-                    className={`flex-shrink-0 w-[280px] sm:w-[340px] h-[200px] rounded-2xl overflow-hidden snap-center border-2 transition-all duration-300 ${
-                      i === carouselIdx ? 'border-[#0D9387] shadow-lg shadow-[#0D9387]/20' : 'border-transparent'
-                    }`}
+              {/* Flechas de navegación (si hay más de 1 imagen) */}
+              {imagesList.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={prevImage}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/55 hover:bg-black/80 text-white border border-white/20 backdrop-blur-md flex items-center justify-center transition shadow-lg hover:scale-105 active:scale-95"
+                    title="Foto anterior"
                   >
-                    <img
-                      src={img}
-                      alt={`${destination} — imagen ${i + 1}`}
-                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-                      onError={(e) => { e.target.src = heroBgImage; }}
-                    />
-                  </div>
-                ))}
-              </div>
-              <button
-                onClick={() => scrollCarousel(-1)}
-                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 w-10 h-10 rounded-full bg-white dark:bg-[#0F2A4A] border border-slate-200 dark:border-slate-700 shadow-lg flex items-center justify-center text-slate-700 dark:text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[#0D9387] hover:text-white hover:border-[#0D9387] z-10"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-              <button
-                onClick={() => scrollCarousel(1)}
-                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 w-10 h-10 rounded-full bg-white dark:bg-[#0F2A4A] border border-slate-200 dark:border-slate-700 shadow-lg flex items-center justify-center text-slate-700 dark:text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[#0D9387] hover:text-white hover:border-[#0D9387] z-10"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
+                    <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={nextImage}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/55 hover:bg-black/80 text-white border border-white/20 backdrop-blur-md flex items-center justify-center transition shadow-lg hover:scale-105 active:scale-95"
+                    title="Siguiente foto"
+                  >
+                    <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
+                  </button>
+                </>
+              )}
             </div>
-            {/* Dots indicator */}
-            {galleryImages.length > 1 && (
-              <div className="flex justify-center gap-1.5 mt-3">
-                {galleryImages.map((_, i) => (
+
+            {/* Barra de miniaturas / indicadores en la parte inferior */}
+            {imagesList.length > 1 && (
+              <div className="relative z-20 bg-black/40 backdrop-blur-md px-4 py-2.5 flex items-center justify-center gap-2 border-t border-white/10 overflow-x-auto">
+                {imagesList.map((img, i) => (
                   <button
                     key={i}
-                    onClick={() => {
-                      setCarouselIdx(i);
-                      if (carouselRef.current?.children[i]) {
-                        carouselRef.current.children[i].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-                      }
-                    }}
-                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                      i === carouselIdx ? 'bg-[#0D9387] w-6' : 'bg-slate-300 dark:bg-slate-600 hover:bg-slate-400'
+                    type="button"
+                    onClick={() => setCarouselIdx(i)}
+                    className={`h-10 w-14 sm:h-12 sm:w-18 rounded-lg overflow-hidden border-2 transition-all shrink-0 ${
+                      i === carouselIdx
+                        ? 'border-[#0D9387] scale-105 shadow-md shadow-[#0D9387]/30 ring-2 ring-[#0D9387]/40'
+                        : 'border-transparent opacity-60 hover:opacity-100'
                     }`}
-                  />
+                  >
+                    <img src={img} alt="" className="w-full h-full object-cover" />
+                  </button>
                 ))}
               </div>
             )}
           </div>
-        </section>
-      )}
 
-      {/* ═══════ SECTION 2 — CONTENIDO ═══════ */}
-      <section id="contenido" className="w-full py-12 sm:py-16 px-4 sm:px-6 lg:px-8 bg-slate-50 dark:bg-[#070F1E] transition-colors">
-        <div className="max-w-4xl mx-auto space-y-8">
-
-          {/* ── 1. COMPARATIVA DE PRECIOS ── */}
-          <div className="bg-white dark:bg-[#0F2A4A]/40 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm">
-            <div className="mb-6 text-center sm:text-left">
-              <h3 className="text-xl font-semibold text-[#0F2A4A] dark:text-white flex items-center justify-center sm:justify-start gap-2"><Award className="w-5 h-5 text-[#0D9387]" />Comparativa de Precios</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Comparación de tarifas estimadas para este itinerario</p>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-              <div className="rounded-2xl border-2 border-[#0D9387] bg-white dark:bg-[#0F2A4A] p-5 text-center shadow-md">
-                <div className="w-full h-28 rounded-xl bg-white flex items-center justify-center p-3 mb-3"><img src="/karabu-comparador.jpeg" alt="Karabu" className="h-full w-full object-contain rounded-lg" /></div>
-                <div className="text-sm font-semibold text-[#0F2A4A] dark:text-white uppercase tracking-wider mb-1">Karabu Viajes</div>
-                <div className="text-xl sm:text-2xl font-bold text-[#0D9387]">${totalWithTax.toLocaleString()} <span className="text-xs text-slate-400">USD</span></div>
+          {/* Botones de acción móvil (debajo del hero) */}
+          <div className="sm:hidden flex flex-col gap-2 pt-1">
+            {status === 'aceptada' ? (
+              <a
+                href="#pago"
+                className="w-full py-3.5 px-4 rounded-xl font-bold text-center text-sm bg-gradient-to-r from-[#0D9387] to-emerald-500 text-white shadow-lg shadow-[#0D9387]/25"
+              >
+                PAGAR AHORA POR TRANSFERENCIA
+              </a>
+            ) : status === 'cambios_solicitados' ? (
+              <div className="p-3 rounded-xl bg-[#FF6B35]/20 border border-[#FF6B35]/40 text-orange-200 text-center text-xs font-semibold">
+                CAMBIOS SOLICITADOS — Tu asesor te contactará
               </div>
-              <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-5 text-center shadow-sm">
-                <div className="w-full h-28 rounded-xl bg-[#003580] flex items-center justify-center p-3 mb-3"><img src="/booking-logo.svg" alt="Booking" className="h-full w-full object-contain rounded-lg" /></div>
-                <div className="text-sm font-semibold text-slate-700 dark:text-slate-200 uppercase tracking-wider mb-1">Booking.com</div>
-                <div className="text-xl sm:text-2xl font-bold text-slate-700 dark:text-slate-200">${bookingPrice.toLocaleString()} <span className="text-xs text-slate-400">USD</span></div>
+            ) : (
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={handleDirectAccept}
+                  disabled={isSubmitting}
+                  className="py-3 px-3 rounded-xl font-bold text-xs bg-[#0D9387] text-white flex items-center justify-center gap-1.5 shadow-md active:scale-95"
+                >
+                  <Check className="w-3.5 h-3.5 stroke-[3]" /> ACEPTAR
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowChangeForm(!showChangeForm)}
+                  disabled={isSubmitting}
+                  className="py-3 px-3 rounded-xl font-semibold text-xs bg-[#FF6B35] text-white flex items-center justify-center gap-1.5 shadow-md active:scale-95"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" /> AJUSTAR
+                </button>
               </div>
-              <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-5 text-center shadow-sm">
-                <div className="w-full h-28 rounded-xl bg-[#FFE000] flex items-center justify-center p-3 mb-3"><img src="/expedia-logo.svg" alt="Expedia" className="h-full w-full object-contain rounded-lg" /></div>
-                <div className="text-sm font-semibold text-slate-700 dark:text-slate-200 uppercase tracking-wider mb-1">Expedia</div>
-                <div className="text-xl sm:text-2xl font-bold text-slate-700 dark:text-slate-200">${expediaPrice.toLocaleString()} <span className="text-xs text-slate-400">USD</span></div>
-              </div>
-            </div>
-          </div>
-
-          {/* ── 2. RESUMEN DE TARIFA + P/P/N ── */}
-          <div className="bg-white dark:bg-[#0F2A4A]/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm">
-            <span className="text-xs font-semibold uppercase tracking-wider text-[#0D9387] block mb-2">Resumen de tarifa</span>
-            <h3 className="text-lg font-semibold text-[#0F2A4A] dark:text-white flex items-center gap-2">
-              <Building2 className="w-5 h-5 text-[#0D9387]" />{hotelName}
-              {roomType && <span className="text-base font-normal text-slate-500"> · {roomType}</span>}
-            </h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1.5 flex items-center gap-4 flex-wrap">
-              <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5 text-[#0D9387]" />{nights} {nights === 1 ? 'noche' : 'noches'}</span>
-              <span className="flex items-center gap-1"><Users className="w-3.5 h-3.5 text-[#0D9387]" />{travelers} {travelers === 1 ? 'viajero' : 'viajeros'}</span>
-              <span className="text-slate-400">{q.currency || 'USD'}</span>
-            </p>
-
-            {/* P/P/N formula */}
-            <div className="mt-4 p-5 rounded-xl bg-[#0D9387]/5 dark:bg-[#0D9387]/10 border border-[#0D9387]/15">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div className="text-sm sm:text-base text-slate-600 dark:text-slate-300 flex-1">
-                  <span className="font-semibold text-[#0F2A4A] dark:text-white text-lg">${totalWithTax.toLocaleString()}</span>
-                  <span className="mx-2 text-slate-400">÷</span>
-                  <span className="font-medium">{nights} {nights === 1 ? 'noche' : 'noches'}</span>
-                  <span className="mx-2 text-slate-400">÷</span>
-                  <span className="font-medium">{travelers} {travelers === 1 ? 'persona' : 'pers.'}</span>
-                  <span className="mx-2 text-slate-400">=</span>
-                </div>
-                <div className="bg-[#0D9387] text-white px-6 py-3 rounded-xl text-center shadow-md min-w-[150px]">
-                  <span className="text-[10px] uppercase tracking-wider block opacity-80">Precio por noche</span>
-                  <span className="text-2xl font-bold">${perNightPerPerson.toLocaleString()}</span>
-                  <span className="text-xs opacity-80 block">USD / persona</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* ── 3. SERVICIOS / DESGLOSE ── */}
-          {hasServices && (
-            <div className="bg-white dark:bg-[#0F2A4A]/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm">
-              <h3 className="text-lg font-semibold text-[#0F2A4A] dark:text-white mb-5 flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-[#0D9387]" />Servicios incluidos
-              </h3>
-              <div className="space-y-3">
-                {customServices.map((srv, idx) => {
-                  const IconComponent = srv.name?.toLowerCase().includes('vuelo') ? Plane : srv.name?.toLowerCase().includes('hospedaj') || srv.name?.toLowerCase().includes('hotel') ? Building2 : srv.name?.toLowerCase().includes('traslado') ? Car : srv.name?.toLowerCase().includes('seguro') ? ShieldCheck : CheckCircle2;
-                  return (
-                    <div key={srv.id || idx} className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 dark:bg-[#070F1E]/60 border border-slate-200/80 dark:border-slate-800 text-sm text-slate-700 dark:text-slate-200">
-                      <div className="flex items-center gap-3"><span className="w-8 h-8 rounded-lg bg-[#0D9387]/15 text-[#0D9387] flex items-center justify-center shrink-0"><IconComponent className="w-4 h-4" /></span><span className="font-medium">{srv.name}</span></div>
-                      <span className="font-semibold text-[#0F2A4A] dark:text-white">${(Number(srv.price) || 0).toLocaleString()} USD</span>
-                    </div>
-                  );
-                })}
-                {serviceFeePrice > 0 && (
-                  <div className="flex items-center justify-between p-3.5 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/30 text-sm text-emerald-800 dark:text-emerald-200">
-                    <div className="flex items-center gap-3"><span className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0"><Award className="w-4 h-4" /></span><span className="font-medium">Gastos de gestión</span></div>
-                    <span className="font-semibold">${serviceFeePrice.toLocaleString()} USD</span>
-                  </div>
-                )}
-              </div>
-              <div className="mt-5 pt-4 border-t-2 border-slate-200 dark:border-slate-700 flex items-center justify-between bg-[#0D9387]/10 p-4 rounded-xl">
-                <span className="text-base font-bold text-[#0F2A4A] dark:text-white">Total a pagar</span>
-                <span className="text-2xl font-bold text-[#0D9387]">${totalWithTax.toLocaleString()} USD</span>
-              </div>
-            </div>
-          )}
-
-          {/* ── 3b. Total sin servicios ── */}
-          {!hasServices && (
-            <div className="bg-white dark:bg-[#0F2A4A]/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm">
-              <div className="flex items-center justify-between bg-[#0D9387]/10 p-4 rounded-xl border border-[#0D9387]/30">
-                <span className="text-base font-bold text-[#0F2A4A] dark:text-white">Total a pagar</span>
-                <span className="text-2xl font-bold text-[#0D9387]">${totalWithTax.toLocaleString()} USD</span>
-              </div>
-            </div>
-          )}
-
-          {/* ── 4. IMPUESTOS INCLUIDOS ── */}
-          <div className="text-center">
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 inline-flex items-center gap-2 bg-white dark:bg-slate-800/80 px-5 py-2.5 rounded-full border border-slate-200 dark:border-slate-700 shadow-sm">
-              <ShieldCheck className="w-4 h-4 text-[#0D9387]" />Impuestos y tasas incluidos en el precio final
-            </p>
+            )}
           </div>
         </div>
       </section>
 
-      {/* ═══════ SECTION 3 — BOTONES DE ACCIÓN ═══════ */}
-      <section className="w-full bg-slate-50 dark:bg-[#070F1E] py-8 sm:py-10 px-4 sm:px-6 border-t border-slate-200 dark:border-slate-800">
-        <div className="max-w-2xl mx-auto space-y-4">
-          {inlineFeedback && (
-            <div className={`p-4 rounded-xl border text-sm font-medium flex items-center gap-2 ${
-              inlineFeedback.type === 'success' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300' :
-              inlineFeedback.type === 'info' ? 'bg-[#FF6B35]/10 border-[#FF6B35]/30 text-orange-700 dark:text-orange-300' :
-              'bg-red-500/10 border-red-500/30 text-red-700 dark:text-red-300'
-            }`}><CheckCircle2 className="w-4 h-4 shrink-0" /><span>{inlineFeedback.message}</span></div>
-          )}
+      {/* ═══════ SECCIÓN DE PAGO (SOLO SI ACEPTADA) ═══════ */}
+      {status === 'aceptada' && (
+        <section id="pago" className="w-full py-12 px-4 sm:px-6 lg:px-8 bg-emerald-50/50 dark:bg-[#061A24] border-b-4 border-[#0D9387]">
+          <div className="max-w-4xl mx-auto space-y-6">
+            <div className="text-center">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#0D9387] bg-[#0D9387]/10 px-4 py-1.5 rounded-full border border-[#0D9387]/20">
+                Paso Final — Confirmación de Reserva
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-bold text-[#0F2A4A] dark:text-white mt-3">
+                Cuentas Bancarias Oficiales Karabu
+              </h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-lg mx-auto">
+                Transfiere el monto cotizado. Puedes copiar cada número con 1 clic y enviarnos el volante por WhatsApp.
+              </p>
+            </div>
 
-          {showChangeForm && (
-            <form onSubmit={handleSubmitChanges} className="bg-white dark:bg-[#0F2A4A]/60 border border-[#FF6B35]/30 rounded-xl p-4 space-y-3">
-              <div className="flex items-center gap-2 text-sm font-semibold text-[#FF6B35]"><MessageSquare className="w-4 h-4" />¿Qué cambios necesitas?</div>
-              <textarea rows={3} required placeholder="Ej: cambiar fecha, upgrade de habitación..." value={changeNotes} onChange={(e) => setChangeNotes(e.target.value)} className="w-full text-sm p-3 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-[#FF6B35] outline-none" />
-              <div className="flex justify-end gap-2">
-                <button type="button" onClick={() => setShowChangeForm(false)} className="px-4 py-2 rounded-lg text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white transition">Cancelar</button>
-                <button type="submit" disabled={isSubmitting || !changeNotes.trim()} className="px-5 py-2 rounded-lg text-sm font-semibold text-white bg-[#FF6B35] hover:bg-[#e05a28] transition flex items-center gap-2 disabled:opacity-50">{isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Send className="w-4 h-4" />Enviar</>}</button>
+            {/* Banner de Total a Transferir */}
+            <div className="p-6 rounded-3xl bg-white dark:bg-[#0F2A4A] border-2 border-[#0D9387]/30 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div>
+                <span className="text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 font-semibold block">
+                  Monto total a transferir
+                </span>
+                <div className="text-3xl sm:text-4xl font-extrabold text-[#0D9387]">
+                  ${totalWithTax.toLocaleString()} <span className="text-base font-bold text-slate-500">USD</span>
+                </div>
+                <span className="text-xs text-slate-400">Impuestos y gastos de gestión incluidos</span>
               </div>
-            </form>
-          )}
 
+              {cleanBrokerPhone && (
+                <a
+                  href={whatsappPaymentUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-lg shadow-emerald-600/30 transition-all hover:scale-105"
+                >
+                  <Send className="w-4 h-4" />
+                  Enviar comprobante por WhatsApp
+                </a>
+              )}
+            </div>
+
+            {/* Tarjetas Bancarias */}
+            <div className="grid gap-6 md:grid-cols-2">
+              {BANK_ACCOUNTS.map((bank) => (
+                <div
+                  key={bank.id}
+                  className="bg-white dark:bg-[#0F2A4A]/60 border border-slate-200 dark:border-slate-700 rounded-3xl p-6 shadow-md flex flex-col justify-between"
+                >
+                  <div>
+                    {/* Header del Banco */}
+                    <div className="flex items-center gap-3.5 pb-4 mb-4 border-b border-slate-100 dark:border-slate-800">
+                      <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center shrink-0 border border-slate-200 overflow-hidden p-1 shadow-sm">
+                        <img
+                          src={bank.logo}
+                          alt={bank.bank}
+                          className={`w-full h-full ${bank.fit === 'contain' ? 'object-contain' : 'object-cover'}`}
+                        />
+                      </div>
+                      <div>
+                        <h3 className="text-base font-bold text-[#0F2A4A] dark:text-white">{bank.bank}</h3>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">{bank.type}</p>
+                      </div>
+                    </div>
+
+                    {/* Detalles con botón de copiado rápido */}
+                    <div className="space-y-2.5">
+                      {bank.details.map((item, i) => {
+                        const copyKey = `${bank.id}-${i}`;
+                        const isCopied = copiedField === copyKey;
+                        return (
+                          <div
+                            key={i}
+                            className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-50 dark:bg-[#070F1E]/50 border border-slate-200/80 dark:border-slate-800"
+                          >
+                            <div className="min-w-0 flex-1">
+                              <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">
+                                {item.label}
+                              </span>
+                              <span className={`text-xs sm:text-sm font-bold text-[#0F2A4A] dark:text-white truncate block ${
+                                item.mono ? 'font-mono tracking-wider' : ''
+                              }`}>
+                                {item.value}
+                              </span>
+                            </div>
+
+                            {item.copyable && (
+                              <button
+                                type="button"
+                                onClick={() => copyToClipboard(item.value, copyKey)}
+                                className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all ${
+                                  isCopied
+                                    ? 'bg-emerald-500 text-white'
+                                    : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-[#0D9387] hover:text-white'
+                                }`}
+                                title="Copiar dato"
+                              >
+                                {isCopied ? <><CheckCheck className="w-3 h-3" /> Copiado</> : <><Copy className="w-3 h-3" /> Copiar</>}
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-400 flex items-center gap-1.5">
+                    <ShieldCheck className="w-3.5 h-3.5 text-[#0D9387]" />
+                    <span>Cuenta corporativa verificada Karabu</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ═══════ SECCIÓN DE COTIZACIÓN ORGANIZADA ═══════ */}
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 space-y-10">
+
+        {/* ── 1. FICHA EJECUTIVA DEL VIAJE (3 Tarjetas Claras y Ordenadas) ── */}
+        <div>
+          <div className="flex items-center gap-2 mb-4">
+            <Sparkles className="w-4 h-4 text-[#0D9387]" />
+            <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              Resumen de la Experiencia
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+            {/* Card 1: Hospedaje */}
+            <div className="bg-white dark:bg-[#0F2A4A]/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm space-y-3">
+              <div className="w-9 h-9 rounded-xl bg-teal-500/10 text-[#0D9387] flex items-center justify-center font-bold">
+                <Building2 className="w-5 h-5" />
+              </div>
+              <div>
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 block">
+                  Alojamiento Confirmado
+                </span>
+                <h3 className="text-base font-bold text-[#0F2A4A] dark:text-white mt-0.5 line-clamp-2">
+                  {hotelName}
+                </h3>
+              </div>
+              <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 space-y-1 text-xs text-slate-600 dark:text-slate-300">
+                <div className="flex items-center gap-1.5">
+                  <Bed className="w-3.5 h-3.5 text-[#0D9387]" />
+                  <span>{roomType}</span>
+                </div>
+                {roomsSummary && (
+                  <div className="text-[11px] text-teal-600 dark:text-teal-400 font-medium">
+                    {roomsSummary}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Card 2: Fechas & Duración */}
+            <div className="bg-white dark:bg-[#0F2A4A]/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm space-y-3">
+              <div className="w-9 h-9 rounded-xl bg-teal-500/10 text-[#0D9387] flex items-center justify-center font-bold">
+                <Calendar className="w-5 h-5" />
+              </div>
+              <div>
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 block">
+                  Itinerario & Estadía
+                </span>
+                <h3 className="text-base font-bold text-[#0F2A4A] dark:text-white mt-0.5">
+                  {nights} {nights === 1 ? 'Noche' : 'Noches'} / {nights + 1} Días
+                </h3>
+              </div>
+              <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 space-y-1 text-xs text-slate-600 dark:text-slate-300">
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-400">Salida:</span>
+                  <span className="font-semibold text-[#0F2A4A] dark:text-white">{travelDate}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-400">Regreso:</span>
+                  <span className="font-semibold text-[#0F2A4A] dark:text-white">{returnDate}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Card 3: Pasajeros & Garantía */}
+            <div className="bg-white dark:bg-[#0F2A4A]/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm space-y-3">
+              <div className="w-9 h-9 rounded-xl bg-teal-500/10 text-[#0D9387] flex items-center justify-center font-bold">
+                <Users className="w-5 h-5" />
+              </div>
+              <div>
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 block">
+                  Viajeros Registrados
+                </span>
+                <h3 className="text-base font-bold text-[#0F2A4A] dark:text-white mt-0.5">
+                  {travelers} {travelers === 1 ? 'Pasajero' : 'Pasajeros'}
+                </h3>
+              </div>
+              <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 space-y-1 text-xs text-slate-600 dark:text-slate-300">
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-400">Distribución:</span>
+                  <span className="font-semibold">{adults} Adultos{children > 0 ? `, ${children} Niños` : ''}</span>
+                </div>
+                <div className="flex items-center gap-1 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <span>Asistencia personalizada incluida</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── 2. SERVICIOS INCLUIDOS EN LA PROPUESTA ── */}
+        <div className="bg-white dark:bg-[#0F2A4A]/40 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-5 mb-5 border-b border-slate-100 dark:border-slate-800">
+            <div>
+              <h3 className="text-lg font-bold text-[#0F2A4A] dark:text-white flex items-center gap-2">
+                <ShieldCheck className="w-5 h-5 text-[#0D9387]" />
+                Servicios Incluidos en tu Paquete
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Todo lo acordado para tu viaje, sin cargos ocultos ni sorpresas.
+              </p>
+            </div>
+            <span className="text-xs font-semibold px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 self-start sm:self-auto">
+              ✓ Todo confirmado
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            {customServices && customServices.length > 0 ? (
+              customServices.map((srv, idx) => {
+                const lower = (srv.name || '').toLowerCase();
+                const IconComponent = lower.includes('vuelo') ? Plane :
+                  lower.includes('hospedaj') || lower.includes('hotel') ? Building2 :
+                  lower.includes('traslado') ? Car :
+                  lower.includes('seguro') ? ShieldCheck : CheckCircle2;
+                return (
+                  <div
+                    key={srv.id || idx}
+                    className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 dark:bg-[#070F1E]/60 border border-slate-200/80 dark:border-slate-800"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className="w-8 h-8 rounded-lg bg-[#0D9387]/15 text-[#0D9387] flex items-center justify-center shrink-0">
+                        <IconComponent className="w-4 h-4" />
+                      </span>
+                      <span className="font-semibold text-xs sm:text-sm text-slate-800 dark:text-slate-100 truncate">
+                        {srv.name}
+                      </span>
+                    </div>
+                    {srv.price > 0 && (
+                      <span className="text-xs font-bold text-slate-500 dark:text-slate-400 pl-2 shrink-0">
+                        ${Number(srv.price).toLocaleString()} USD
+                      </span>
+                    )}
+                  </div>
+                );
+              })
+            ) : (
+              <>
+                <div className="flex items-center gap-3 p-3.5 rounded-xl bg-slate-50 dark:bg-[#070F1E]/60 border border-slate-200/80 dark:border-slate-800">
+                  <span className="w-8 h-8 rounded-lg bg-[#0D9387]/15 text-[#0D9387] flex items-center justify-center shrink-0">
+                    <Building2 className="w-4 h-4" />
+                  </span>
+                  <div>
+                    <span className="font-semibold text-xs sm:text-sm text-slate-800 dark:text-slate-100 block">
+                      Alojamiento {hotelName}
+                    </span>
+                    <span className="text-[11px] text-slate-400">{nights} noches en {roomType}</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 p-3.5 rounded-xl bg-slate-50 dark:bg-[#070F1E]/60 border border-slate-200/80 dark:border-slate-800">
+                  <span className="w-8 h-8 rounded-lg bg-[#0D9387]/15 text-[#0D9387] flex items-center justify-center shrink-0">
+                    <ShieldCheck className="w-4 h-4" />
+                  </span>
+                  <div>
+                    <span className="font-semibold text-xs sm:text-sm text-slate-800 dark:text-slate-100 block">
+                      Asistencia Karabu 24/7
+                    </span>
+                    <span className="text-[11px] text-slate-400">Atención directa antes y durante el viaje</span>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
+          <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+            <span className="flex items-center gap-1.5">
+              <Check className="w-4 h-4 text-emerald-500" />
+              Impuestos hoteleros y cargos locales incluidos
+            </span>
+            <span className="font-mono text-[11px]">COT-ID: {quoteCode}</span>
+          </div>
+        </div>
+
+        {/* ── 3. INVERSIÓN Y COMPARATIVA DE MERCADO (Elegante y Transparente) ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+
+          {/* Tarjeta de Inversión Karabu */}
+          <div className="lg:col-span-6 bg-gradient-to-br from-[#0F2A4A] to-[#0A1D33] text-white rounded-3xl p-6 sm:p-8 shadow-xl flex flex-col justify-between border border-white/10">
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs uppercase font-bold tracking-wider text-teal-300 bg-white/10 px-3 py-1 rounded-full border border-white/15">
+                  Tarifa Final Garantizada
+                </span>
+                <span className="text-xs text-slate-300 font-mono">Moneda: {q.currency || 'USD'}</span>
+              </div>
+
+              <div className="mt-6">
+                <span className="text-xs text-slate-300 uppercase tracking-wider block">Inversión Total del Viaje</span>
+                <div className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight mt-1">
+                  ${totalWithTax.toLocaleString()}
+                  <span className="text-base sm:text-lg font-semibold text-teal-300 ml-2">USD</span>
+                </div>
+              </div>
+
+              {/* Detalle P/P/N limpio y comprensible */}
+              <div className="mt-6 p-4 rounded-2xl bg-white/10 border border-white/15 backdrop-blur-sm space-y-2">
+                <div className="flex items-center justify-between text-xs text-slate-300">
+                  <span>Equivalente por persona / noche:</span>
+                  <span className="text-lg font-bold text-teal-300">${perNightPerPerson.toLocaleString()} USD</span>
+                </div>
+                <div className="text-[11px] text-slate-400 flex items-center gap-2">
+                  <Clock className="w-3 h-3 text-teal-300" />
+                  <span>Calculado sobre {nights} {nights === 1 ? 'noche' : 'noches'} y {travelers} {travelers === 1 ? 'viajero' : 'viajeros'}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-8 pt-6 border-t border-white/10 flex items-center justify-between text-xs text-slate-300">
+              <span className="flex items-center gap-1.5">
+                <ShieldCheck className="w-4 h-4 text-teal-300" />
+                Tarifa congelada al reservar
+              </span>
+              <span className="text-teal-300 font-semibold">Sin comisiones sorpresa</span>
+            </div>
+          </div>
+
+          {/* Comparativa con Booking y Expedia */}
+          <div className="lg:col-span-6 bg-white dark:bg-[#0F2A4A]/40 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Award className="w-5 h-5 text-[#0D9387]" />
+                  <h3 className="text-base font-bold text-[#0F2A4A] dark:text-white">
+                    Comparativa de Mercado
+                  </h3>
+                </div>
+                {calculatedSavings > 0 && (
+                  <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 px-3 py-1 rounded-full">
+                    Ahorras ~${calculatedSavings.toLocaleString()} USD
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mb-6">
+                Comparación estimada con las principales plataformas online para el mismo destino e itinerario:
+              </p>
+
+              <div className="space-y-3">
+                {/* Karabu Viajes (Destacado) */}
+                <div className="flex items-center justify-between p-3.5 rounded-2xl border-2 border-[#0D9387] bg-[#0D9387]/5 dark:bg-[#0D9387]/15">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-[#0D9387] text-white flex items-center justify-center font-bold text-xs shadow-sm">
+                      KV
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold text-[#0F2A4A] dark:text-white block">Karabu Viajes</span>
+                      <span className="text-[10px] text-teal-600 dark:text-teal-400 font-medium">Asesor asignado + Soporte 24/7</span>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-base sm:text-lg font-extrabold text-[#0D9387]">
+                      ${totalWithTax.toLocaleString()} USD
+                    </span>
+                    <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold block">✓ Mejor valor</span>
+                  </div>
+                </div>
+
+                {/* Booking.com */}
+                <div className="flex items-center justify-between p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/40">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-[#003580] text-white flex items-center justify-center font-bold text-xs p-1">
+                      <span className="text-[10px]">Booking</span>
+                    </div>
+                    <div>
+                      <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">Booking.com</span>
+                      <span className="text-[10px] text-slate-400">Tarifa pública estándar</span>
+                    </div>
+                  </div>
+                  <span className="text-sm sm:text-base font-bold text-slate-600 dark:text-slate-300">
+                    ${bookingPrice.toLocaleString()} USD
+                  </span>
+                </div>
+
+                {/* Expedia */}
+                <div className="flex items-center justify-between p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/40">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-[#FFE000] text-slate-900 flex items-center justify-center font-bold text-xs p-1">
+                      <span className="text-[10px]">Expedia</span>
+                    </div>
+                    <div>
+                      <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">Expedia</span>
+                      <span className="text-[10px] text-slate-400">Tarifa estimada</span>
+                    </div>
+                  </div>
+                  <span className="text-sm sm:text-base font-bold text-slate-600 dark:text-slate-300">
+                    ${expediaPrice.toLocaleString()} USD
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-400">
+              * Tarifas de plataformas tomadas como referencia comparativa en fechas similares.
+            </div>
+          </div>
+        </div>
+
+        {/* ── 4. BOTONES DE ACCIÓN PRINCIPALES ── */}
+        <div className="max-w-2xl mx-auto space-y-4 pt-4">
           {status === 'aceptada' ? (
-            <div className="p-5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300 text-center">
-              <CheckCircle2 className="w-8 h-8 mx-auto mb-2 text-emerald-500" />
-              <p className="font-bold text-base">¡Propuesta Aceptada!</p>
-              <p className="text-sm mt-1">Tu asesor se pondrá en contacto para coordinar los detalles.</p>
+            <div className="p-6 rounded-3xl bg-emerald-500/10 border-2 border-emerald-500/30 text-emerald-800 dark:text-emerald-200 text-center space-y-2">
+              <CheckCircle2 className="w-10 h-10 text-emerald-500 mx-auto" />
+              <h4 className="text-lg font-bold">¡Propuesta Aceptada!</h4>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-md mx-auto">
+                Tu viaje está en proceso de confirmación. Realiza la transferencia bancaria en la sección superior para emitir tus comprobantes.
+              </p>
+              <div className="pt-3">
+                <a
+                  href="#pago"
+                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#0D9387] text-white text-xs font-bold shadow-md hover:bg-[#0b7d72] transition"
+                >
+                  Ver Cuentas Bancarias
+                </a>
+              </div>
             </div>
           ) : status === 'cambios_solicitados' || status === 'rechazada' ? (
-            <div className="p-5 rounded-xl bg-[#FF6B35]/10 border border-[#FF6B35]/30 text-orange-700 dark:text-orange-300 text-center">
-              <RotateCcw className="w-8 h-8 mx-auto mb-2 text-[#FF6B35]" />
-              <p className="font-bold text-base">Cambios Solicitados</p>
-              <p className="text-sm mt-1">Tu asesor está revisando tus comentarios y ajustará la propuesta.</p>
+            <div className="p-6 rounded-3xl bg-orange-500/10 border-2 border-orange-500/30 text-orange-800 dark:text-orange-200 text-center space-y-2">
+              <RotateCcw className="w-10 h-10 text-[#FF6B35] mx-auto" />
+              <h4 className="text-lg font-bold">Solicitud de Ajustes en Curso</h4>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-md mx-auto">
+                Hemos recibido tus observaciones. Tu asesor asignado ajustará las fechas, tarifas o servicios y te enviará la propuesta actualizada.
+              </p>
             </div>
           ) : (
             <div className="flex flex-col sm:flex-row gap-3">
-              <button type="button" onClick={handleDirectAccept} disabled={isSubmitting}
-                className="flex-1 font-semibold py-3.5 px-6 rounded-xl shadow-lg transition duration-200 flex items-center justify-center gap-2 text-base bg-[#0D9387] hover:bg-[#0b7d72] active:scale-[0.98] text-white">
-                {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Check className="w-5 h-5 stroke-[3]" />ACEPTAR PROPUESTA</>}
+              <button
+                type="button"
+                onClick={handleDirectAccept}
+                disabled={isSubmitting}
+                className="flex-1 font-bold py-4 px-6 rounded-2xl shadow-xl shadow-[#0D9387]/25 transition duration-200 flex items-center justify-center gap-2 text-sm sm:text-base bg-[#0D9387] hover:bg-[#0b7d72] active:scale-[0.98] text-white"
+              >
+                {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Check className="w-5 h-5 stroke-[3]" /> ACEPTAR ESTA PROPUESTA</>}
               </button>
-              <button type="button" onClick={() => { setShowChangeForm(!showChangeForm); setInlineFeedback(null); }} disabled={isSubmitting}
-                className="flex-1 font-semibold py-3.5 px-6 rounded-xl shadow-lg transition duration-200 flex items-center justify-center gap-2 text-base bg-[#FF6B35] hover:bg-[#e05a28] active:scale-[0.98] text-white shadow-[#FF6B35]/25">
-                <RotateCcw className="w-5 h-5" />SOLICITAR CAMBIOS
+              <button
+                type="button"
+                onClick={() => setShowChangeForm(!showChangeForm)}
+                disabled={isSubmitting}
+                className="flex-1 font-semibold py-4 px-6 rounded-2xl shadow-md transition duration-200 flex items-center justify-center gap-2 text-sm sm:text-base bg-white dark:bg-slate-800 text-[#FF6B35] border-2 border-[#FF6B35]/40 hover:bg-[#FF6B35]/10 active:scale-[0.98]"
+              >
+                <RotateCcw className="w-5 h-5" /> SOLICITAR CAMBIOS
               </button>
             </div>
           )}
         </div>
-      </section>
 
-      {/* ═══════ SECTION 4 — ASESOR ═══════ */}
-      {broker.name && (
-        <section className="relative w-full py-10 sm:py-14 border-t border-slate-200 dark:border-slate-800 overflow-hidden" style={{ background: 'linear-gradient(135deg, #0F2A4A 0%, #0D9387 100%)' }}>
-          {/* Animated vector background */}
-          <svg className="absolute inset-0 w-full h-full opacity-[0.06] pointer-events-none" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <pattern id="advisorGrid" width="40" height="40" patternUnits="userSpaceOnUse">
-                <circle cx="20" cy="20" r="1.5" fill="white" />
-              </pattern>
-              <pattern id="advisorDots" width="60" height="60" patternUnits="userSpaceOnUse">
-                <circle cx="30" cy="30" r="3" fill="white" opacity="0.6" />
-                <circle cx="0" cy="0" r="2" fill="white" opacity="0.3" />
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#advisorGrid)" />
-            <rect width="100%" height="100%" fill="url(#advisorDots)" style={{ animation: 'pulse 4s ease-in-out infinite' }} />
-            <path d="M0 80 Q180 50 360 80 T720 80" stroke="white" strokeWidth="0.5" fill="none" opacity="0.2">
-              <animateTransform attributeName="transform" type="translate" values="0,0;50,-8;0,0" dur="10s" repeatCount="indefinite" />
-            </path>
-            <path d="M0 280 Q200 240 400 280 T800 280" stroke="white" strokeWidth="0.5" fill="none" opacity="0.15">
-              <animateTransform attributeName="transform" type="translate" values="0,0;-40,5;0,0" dur="8s" repeatCount="indefinite" />
-            </path>
-          </svg>
-          {/* Gradient orbs */}
-          <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full opacity-15 pointer-events-none" style={{ background: 'radial-gradient(circle, #72D8E9 0%, transparent 70%)' }} />
-          <div className="absolute -bottom-24 -left-24 w-80 h-80 rounded-full opacity-10 pointer-events-none" style={{ background: 'radial-gradient(circle, #FF6B35 0%, transparent 70%)' }} />
+        {/* ── 5. ASESOR ASIGNADO (CONEXIÓN HUMANA & SEGURIDAD) ── */}
+        {broker.name && (
+          <div className="relative rounded-3xl overflow-hidden p-6 sm:p-10 border border-slate-200 dark:border-slate-800 shadow-xl" style={{ background: 'linear-gradient(135deg, #0F2A4A 0%, #0D9387 100%)' }}>
+            <div className="relative z-10 max-w-2xl mx-auto flex flex-col items-center text-center text-white space-y-4">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-teal-200 bg-white/10 px-3 py-1 rounded-full border border-white/15">
+                Tu Especialista de Viajes Karabu
+              </span>
 
-          <div className="relative z-10 max-w-2xl mx-auto px-4 sm:px-6">
-            <div className="text-center mb-6">
-              <span className="text-xs font-semibold uppercase tracking-wider text-teal-300">Tu asesor</span>
-              <h2 className="text-xl font-bold text-white mt-1">¿Tienes dudas? Contáctanos</h2>
-            </div>
-
-            <div className="bg-white dark:bg-[#0F2A4A]/90 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 sm:p-8 shadow-xl">
-              {/* Avatar + info */}
-              <div className="flex flex-col items-center text-center mb-6">
-                <div className="relative mb-4">
-                  {broker.avatar_url ? (
-                    <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-[#0D9387] shadow-lg">
-                      <img src={broker.avatar_url} alt={broker.name} className="w-full h-full object-cover" />
-                    </div>
-                  ) : (
-                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#0D9387] to-[#0F2A4A] text-white flex items-center justify-center text-3xl font-bold border-4 border-[#0D9387] shadow-lg">
-                      {broker.name.split(" ").map(n => n[0]).slice(0, 2).join("").toUpperCase()}
-                    </div>
-                  )}
-                  <div className="absolute -bottom-1 -right-1 p-1.5 rounded-full bg-emerald-500 text-white shadow-md">
-                    <ShieldCheck className="w-4 h-4" />
+              {/* Avatar del asesor */}
+              <div className="relative">
+                {broker.avatar_url ? (
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-4 border-white/30 shadow-2xl">
+                    <img src={broker.avatar_url} alt={broker.name} className="w-full h-full object-cover" />
                   </div>
+                ) : (
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white/20 text-white flex items-center justify-center text-2xl font-bold border-4 border-white/30 shadow-2xl">
+                    {broker.name.split(" ").map(n => n[0]).slice(0, 2).join("").toUpperCase()}
+                  </div>
+                )}
+                <div className="absolute -bottom-1 -right-1 p-1.5 rounded-full bg-emerald-500 text-white shadow-md">
+                  <ShieldCheck className="w-3.5 h-3.5" />
                 </div>
-                <h3 className="text-xl font-bold text-[#0F2A4A] dark:text-white">{broker.name}</h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5 flex items-center justify-center gap-1.5">
-                  <Award className="w-3.5 h-3.5 text-amber-500" />
-                  {broker.role === 'super_admin' ? 'Administrador' : broker.role === 'admin' ? 'Asesor' : 'Especialista de Viajes'}{broker.department ? ` · ${broker.department}` : ''}
-                </p>
-                {broker.phone && <p className="text-sm text-slate-600 dark:text-slate-300 mt-1 font-mono flex items-center justify-center gap-1.5"><Phone className="w-3.5 h-3.5 text-[#0D9387]" />{broker.phone}</p>}
               </div>
 
-              {/* Contact buttons */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {broker.phone && (
-                  <a href={`https://wa.me/${broker.phone.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2.5 px-4 py-3 rounded-xl text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 transition-colors shadow-sm">
-                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                    WhatsApp
+              <div>
+                <h3 className="text-xl sm:text-2xl font-bold text-white">{broker.name}</h3>
+                <p className="text-xs sm:text-sm text-slate-200 mt-0.5">
+                  {broker.role === 'super_admin' ? 'Administrador General' : broker.role === 'admin' ? 'Asesor Senior' : 'Especialista en Destinos'}{broker.department ? ` · ${broker.department}` : ''}
+                </p>
+              </div>
+
+              <p className="text-xs text-slate-200 max-w-md">
+                ¿Tienes dudas sobre vuelos, traslados o actividades opcionales? Estoy disponible para ayudarte en cada detalle.
+              </p>
+
+              {/* Botones de contacto */}
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full max-w-md pt-2">
+                {cleanBrokerPhone && (
+                  <a
+                    href={`https://wa.me/${cleanBrokerPhone}?text=${encodeURIComponent(`Hola ${broker.name}, tengo una consulta sobre la propuesta ${quoteCode} a ${destination}.`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full sm:w-auto flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-xs sm:text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition shadow-lg"
+                  >
+                    <MessageSquare className="w-4 h-4" />
+                    Chatear por WhatsApp
                   </a>
                 )}
                 {broker.email && (
-                  <a href={`mailto:${broker.email}`}
-                    className="flex items-center justify-center gap-2.5 px-4 py-3 rounded-xl text-sm font-semibold text-[#0F2A4A] dark:text-white bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-600 hover:border-[#0D9387] dark:hover:border-[#0D9387] transition-colors shadow-sm">
-                    <Mail className="w-5 h-5 text-[#0D9387]" />
-                    Correo
+                  <a
+                    href={`mailto:${broker.email}?subject=${encodeURIComponent(`Consulta propuesta ${quoteCode}`)}`}
+                    className="w-full sm:w-auto flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-xs sm:text-sm font-semibold text-white bg-white/15 hover:bg-white/25 border border-white/20 transition"
+                  >
+                    <Mail className="w-4 h-4" />
+                    Enviar Correo
                   </a>
                 )}
               </div>
 
-              {/* Advisor badges */}
-              <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700 grid grid-cols-2 gap-2">
-                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800/50 text-xs text-slate-600 dark:text-slate-300">
-                  <BadgeCheck className="w-3.5 h-3.5 text-[#0D9387] shrink-0" />
-                  <span>Asesor verificado</span>
+              {/* Badges de Confianza */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 w-full pt-4 border-t border-white/15 text-[11px] text-teal-100">
+                <div className="flex items-center justify-center gap-1.5 p-2 rounded-lg bg-black/15">
+                  <BadgeCheck className="w-3.5 h-3.5 text-teal-300" />
+                  <span>Asesor Verificado</span>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800/50 text-xs text-slate-600 dark:text-slate-300">
-                  <Star className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                  <span>Especialista</span>
+                <div className="flex items-center justify-center gap-1.5 p-2 rounded-lg bg-black/15">
+                  <Star className="w-3.5 h-3.5 text-amber-300 fill-current" />
+                  <span>Calidad Karabu</span>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800/50 text-xs text-slate-600 dark:text-slate-300">
-                  <Globe className="w-3.5 h-3.5 text-sky-500 shrink-0" />
-                  <span>Agencia oficial</span>
+                <div className="flex items-center justify-center gap-1.5 p-2 rounded-lg bg-black/15">
+                  <Globe className="w-3.5 h-3.5 text-sky-300" />
+                  <span>Agencia Oficial</span>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800/50 text-xs text-slate-600 dark:text-slate-300">
-                  <Headphones className="w-3.5 h-3.5 text-purple-500 shrink-0" />
-                  <span>Soporte 24/7</span>
+                <div className="flex items-center justify-center gap-1.5 p-2 rounded-lg bg-black/15">
+                  <Headphones className="w-3.5 h-3.5 text-purple-300" />
+                  <span>Soporte de Viaje</span>
                 </div>
               </div>
             </div>
           </div>
-        </section>
+        )}
+      </main>
+
+      {/* ═══════ MODAL PANTALLA COMPLETA PARA FOTOS ═══════ */}
+      {fullscreenImage && (
+        <div
+          onClick={() => setFullscreenImage(null)}
+          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 cursor-zoom-out"
+        >
+          <div className="relative max-w-5xl max-h-[90vh] w-full flex flex-col items-center">
+            <button
+              onClick={() => setFullscreenImage(null)}
+              className="absolute -top-12 right-0 p-2 text-white/80 hover:text-white"
+              title="Cerrar"
+            >
+              <X className="w-6 h-6" />
+            </button>
+            <img
+              src={fullscreenImage}
+              alt="Pantalla completa"
+              className="max-h-[82vh] max-w-full rounded-2xl object-contain shadow-2xl"
+            />
+          </div>
+        </div>
       )}
 
       {/* ═══════ FOOTER ═══════ */}
-      <footer className="w-full border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-[#070F1E] py-6 px-4 text-center transition-colors">
-        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400">
-          <div className="flex items-center gap-2"><span className="font-bold text-[#0F2A4A] dark:text-white tracking-wider">KARABU <span className="text-[#0D9387]">VIAJES</span></span><span>— Agencia Oficial</span></div>
-          <div className="flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 text-[#0D9387]" /><span>Documento seguro · Garantía Karabu</span></div>
+      <footer className="w-full border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-[#070F1E] py-8 px-4 text-center transition-colors">
+        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-400">
+          <div className="flex items-center gap-2">
+            <span className="font-extrabold text-[#0F2A4A] dark:text-white tracking-wider">
+              KARABU <span className="text-[#0D9387]">VIAJES</span>
+            </span>
+            <span>— Propuesta Exclusiva</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-[#0D9387]" />
+            <span>Documento seguro emitido por Karabu Viajes</span>
+          </div>
         </div>
       </footer>
+
+      {/* ═══════ FLOATING BOTTOM BAR EN MÓVIL ═══════ */}
+      <div className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0F2A4A]/95 backdrop-blur-md border-t border-white/10 px-4 py-3 flex items-center justify-between gap-3 shadow-2xl">
+        <div>
+          <span className="text-[10px] text-slate-300 block uppercase tracking-wider">Total Cotizado</span>
+          <span className="text-lg font-black text-teal-300">${totalWithTax.toLocaleString()} <span className="text-xs font-normal">USD</span></span>
+        </div>
+
+        {status === 'aceptada' ? (
+          <a
+            href="#pago"
+            className="px-4 py-2.5 rounded-xl font-bold text-xs bg-gradient-to-r from-[#0D9387] to-emerald-500 text-white shadow-md"
+          >
+            PAGAR AHORA
+          </a>
+        ) : status === 'cambios_solicitados' ? (
+          <span className="text-xs font-medium text-orange-300 px-3 py-1 rounded-lg bg-[#FF6B35]/20 border border-[#FF6B35]/40">
+            Ajustes en curso
+          </span>
+        ) : (
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleDirectAccept}
+              disabled={isSubmitting}
+              className="px-4 py-2.5 rounded-xl font-bold text-xs bg-[#0D9387] text-white shadow-md active:scale-95"
+            >
+              ACEPTAR
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowChangeForm(!showChangeForm)}
+              disabled={isSubmitting}
+              className="px-3 py-2.5 rounded-xl font-semibold text-xs bg-white/10 text-white border border-white/20 active:scale-95"
+            >
+              AJUSTAR
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

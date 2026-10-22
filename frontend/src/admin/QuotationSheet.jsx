@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import api, { formatApiError } from "../lib/api";
 import StatusBadge from "./StatusBadge";
 import ImageUpload from "./ImageUpload";
+import DeliverableMediaManager from "./DeliverableMediaManager";
 import { formatDate, formatCurrency } from "../lib/format";
 import { formatPhoneWithCode } from "../utils/phone";
 import { toast } from "sonner";
@@ -321,37 +322,27 @@ export default function QuotationSheet() {
 
             <hr className="border-gray-100 dark:border-zinc-800" />
 
-            {/* Configuración */}
-            <Section title="Configuración del Entregable" icon={Eye} defaultOpen={false}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <Field label="Comisión extra (%)">
-                  <div className="relative">
-                    <input data-testid="quotation-tax" type="number" min="0" max="100" step="0.5" value={form.tax_percent || ''} onChange={(e) => setForm({ ...form, tax_percent: e.target.value })} className={`${inputCls} w-28`} placeholder="0" />
-                    <span className="absolute right-8 top-1/2 -translate-y-1/2 text-gray-400 text-xs">%</span>
-                  </div>
-                  <p className="text-[11px] text-gray-400 mt-0.5">Margen interno (no visible al cliente)</p>
-                </Field>
-                <Field label="Imagen Hero">
-                  <ImageUpload
-                    value={form.hero_image}
-                    onChange={(url) => setForm({ ...form, hero_image: url })}
-                    label="Cargar imagen del destino"
-                    previewSize="sm"
-                  />
-                  <p className="text-[11px] text-gray-400 mt-1">Vacío = se usará una imagen del destino automáticamente</p>
-                </Field>
-              </div>
-              <div className="mt-3">
-                <Field label="Galería de imágenes (carrusel)">
-                  <textarea
-                    value={Array.isArray(form.gallery_images) ? form.gallery_images.join('\n') : (form.gallery_images || '')}
-                    onChange={(e) => setForm({ ...form, gallery_images: e.target.value.split('\n').filter(u => u.trim()) })}
-                    rows={4}
-                    placeholder={'https://images.unsplash.com/photo-...\nhttps://images.unsplash.com/photo-...'}
-                    className={inputCls}
-                  />
-                  <p className="text-[11px] text-gray-400 mt-1">Pega URLs de imágenes, una por línea. Se mostrarán en carrusel en el entregable.</p>
-                </Field>
+            {/* Configuración del Entregable */}
+            <Section title="Configuración del Entregable" icon={Eye} defaultOpen={true}>
+              <div className="space-y-4">
+                <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-200 dark:border-zinc-700/80">
+                  <Field label="Comisión extra (%)">
+                    <div className="flex items-center gap-3">
+                      <div className="relative">
+                        <input data-testid="quotation-tax" type="number" min="0" max="100" step="0.5" value={form.tax_percent || ''} onChange={(e) => setForm({ ...form, tax_percent: e.target.value })} className={inputCls + " w-28"} placeholder="0" />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">%</span>
+                      </div>
+                      <p className="text-[11px] text-gray-500 dark:text-gray-400">Margen interno aplicado sobre la cotización (no visible al cliente).</p>
+                    </div>
+                  </Field>
+                </div>
+
+                <DeliverableMediaManager
+                  heroImage={form.hero_image || ''}
+                  galleryImages={form.gallery_images || []}
+                  onHeroImageChange={(newHero) => setForm((prev) => ({ ...prev, hero_image: newHero }))}
+                  onGalleryImagesChange={(newGallery) => setForm((prev) => ({ ...prev, gallery_images: newGallery }))}
+                />
               </div>
             </Section>
 
