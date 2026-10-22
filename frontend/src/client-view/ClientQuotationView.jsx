@@ -16,8 +16,8 @@ const BANK_ACCOUNTS = [
   {
     id: 'bhd',
     bank: 'Banco BHD',
-    logo: '/bhd-logo.jpg',
-    fit: 'cover',
+    logo: '/bancos/bhd.jpg',
+    fit: 'contain',
     type: 'Cuenta de ahorros · Pesos Dominicanos (RD$)',
     details: [
       { label: 'Titular', value: 'RINALDI BUENO' },
@@ -30,7 +30,7 @@ const BANK_ACCOUNTS = [
   {
     id: 'banreservas',
     bank: 'Banreservas',
-    logo: '/banreservas-logo.png',
+    logo: '/bancos/banreservas.jpg',
     fit: 'contain',
     type: 'Cuenta de ahorros · Pesos Dominicanos (RD$)',
     details: [
@@ -61,6 +61,14 @@ export default function ClientQuotationView() {
   const [inlineFeedback, setInlineFeedback] = useState(null);
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedField, setCopiedField] = useState(null);
+
+  // Banco elegido por el cliente en la sección de pago (null = aún no eligió)
+  const [selectedBank, setSelectedBank] = useState(null);
+  const selectedBankData = BANK_ACCOUNTS.find((b) => b.id === selectedBank) || null;
+  const chooseBank = (id) => {
+    setSelectedBank(id);
+    setReceiptBank(id); // el modal de comprobante abre con ese banco ya elegido
+  };
 
   // Gallery Hero Carousel state
   const [carouselIdx, setCarouselIdx] = useState(0);
@@ -145,6 +153,7 @@ export default function ClientQuotationView() {
   const openReceiptModal = () => {
     setReceiptSent(false);
     setReceiptError(null);
+    if (selectedBank) setReceiptBank(selectedBank);
     setShowReceiptModal(true);
   };
 
@@ -668,7 +677,7 @@ export default function ClientQuotationView() {
                 Cuentas Bancarias Oficiales Karabu
               </h2>
               <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-lg mx-auto">
-                Transfiere el monto cotizado, copia cada número con 1 clic y sube tu comprobante aquí abajo.
+                Elige tu banco, copia los datos con 1 clic y sube tu comprobante al terminar la transferencia.
               </p>
             </div>
 
@@ -741,76 +750,140 @@ export default function ClientQuotationView() {
               </div>
             </div>
 
-            {/* Tarjetas Bancarias */}
-            <div className="grid gap-6 md:grid-cols-2">
-              {BANK_ACCOUNTS.map((bank) => (
-                <div
-                  key={bank.id}
-                  className="bg-white dark:bg-[#0F2A4A]/60 border border-slate-200 dark:border-slate-700 rounded-3xl p-6 shadow-md flex flex-col justify-between"
-                >
-                  <div>
-                    {/* Header del Banco */}
-                    <div className="flex items-center gap-3.5 pb-4 mb-4 border-b border-slate-100 dark:border-slate-800">
-                      <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center shrink-0 border border-slate-200 overflow-hidden p-1 shadow-sm">
+            {/* Selector de banco: el cliente elige y recién ahí ve los datos */}
+            <div className="bg-white dark:bg-[#0F2A4A]/40 border border-slate-200 dark:border-slate-700 rounded-3xl p-5 sm:p-6 shadow-md">
+              <div className="flex items-start gap-2.5 mb-4">
+                <span className="w-8 h-8 rounded-xl bg-[#0D9387]/10 text-[#0D9387] flex items-center justify-center shrink-0">
+                  <CreditCard className="w-4 h-4" />
+                </span>
+                <div>
+                  <h3 className="text-sm font-bold text-[#0F2A4A] dark:text-white">Elige el banco de tu transferencia</h3>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                    Toca un banco para ver la cuenta y el beneficiario.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                {BANK_ACCOUNTS.map((bank) => {
+                  const active = selectedBank === bank.id;
+                  return (
+                    <button
+                      key={bank.id}
+                      type="button"
+                      onClick={() => chooseBank(bank.id)}
+                      aria-pressed={active}
+                      data-testid={`bank-tile-${bank.id}`}
+                      className={`relative flex flex-col items-center gap-2.5 rounded-2xl border-2 p-3 sm:p-4 transition-all ${
+                        active
+                          ? 'border-[#0D9387] bg-[#0D9387]/5 shadow-lg shadow-[#0D9387]/15'
+                          : 'border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-[#070F1E]/40 hover:border-[#0D9387]/50 hover:bg-white dark:hover:bg-[#0F2A4A]'
+                      }`}
+                    >
+                      {active && (
+                        <span className="absolute top-2 right-2 w-5 h-5 rounded-full bg-[#0D9387] text-white flex items-center justify-center shadow">
+                          <Check className="w-3 h-3 stroke-[3]" />
+                        </span>
+                      )}
+                      <span className="w-full max-w-[104px] aspect-square rounded-xl bg-white border border-slate-200 overflow-hidden flex items-center justify-center p-1.5 shadow-sm">
                         <img
                           src={bank.logo}
                           alt={bank.bank}
-                          className={`w-full h-full ${bank.fit === 'contain' ? 'object-contain' : 'object-cover'}`}
+                          loading="lazy"
+                          className="w-full h-full object-contain"
                         />
-                      </div>
-                      <div>
-                        <h3 className="text-base font-bold text-[#0F2A4A] dark:text-white">{bank.bank}</h3>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">{bank.type}</p>
-                      </div>
-                    </div>
+                      </span>
+                      <span className="text-center leading-tight">
+                        <span className={`block text-xs sm:text-sm font-bold ${active ? 'text-[#0D9387]' : 'text-[#0F2A4A] dark:text-white'}`}>
+                          {bank.bank}
+                        </span>
+                        <span className="block text-[10px] text-slate-400 mt-0.5">Ahorros · RD$</span>
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
 
-                    {/* Detalles con botón de copiado rápido */}
-                    <div className="space-y-2.5">
-                      {bank.details.map((item, i) => {
-                        const copyKey = `${bank.id}-${i}`;
-                        const isCopied = copiedField === copyKey;
-                        return (
-                          <div
-                            key={i}
-                            className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-50 dark:bg-[#070F1E]/50 border border-slate-200/80 dark:border-slate-800"
-                          >
-                            <div className="min-w-0 flex-1">
-                              <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">
-                                {item.label}
-                              </span>
-                              <span className={`text-xs sm:text-sm font-bold text-[#0F2A4A] dark:text-white truncate block ${
-                                item.mono ? 'font-mono tracking-wider' : ''
-                              }`}>
-                                {item.value}
-                              </span>
-                            </div>
-
-                            {item.copyable && (
-                              <button
-                                type="button"
-                                onClick={() => copyToClipboard(item.value, copyKey)}
-                                className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all ${
-                                  isCopied
-                                    ? 'bg-emerald-500 text-white'
-                                    : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-[#0D9387] hover:text-white'
-                                }`}
-                                title="Copiar dato"
-                              >
-                                {isCopied ? <><CheckCheck className="w-3 h-3" /> Copiado</> : <><Copy className="w-3 h-3" /> Copiar</>}
-                              </button>
-                            )}
-                          </div>
-                        );
-                      })}
+              {/* Datos de la cuenta del banco seleccionado */}
+              {selectedBankData ? (
+                <div
+                  data-testid="bank-details"
+                  className="mt-4 rounded-2xl border-2 border-[#0D9387]/30 bg-slate-50 dark:bg-[#070F1E]/50 p-4 sm:p-5"
+                >
+                  <div className="flex items-center gap-2.5 pb-3 mb-3 border-b border-slate-200 dark:border-slate-800">
+                    <span className="w-10 h-10 rounded-lg bg-white border border-slate-200 overflow-hidden flex items-center justify-center p-1 shrink-0">
+                      <img src={selectedBankData.logo} alt={selectedBankData.bank} className="w-full h-full object-contain" />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-sm font-bold text-[#0F2A4A] dark:text-white truncate">{selectedBankData.bank}</p>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">{selectedBankData.type}</p>
                     </div>
                   </div>
 
-                  <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-400 flex items-center gap-1.5">
-                    <ShieldCheck className="w-3.5 h-3.5 text-[#0D9387]" />
-                    <span>Cuenta corporativa verificada Karabu</span>
+                  <div className="space-y-2.5">
+                    {selectedBankData.details.map((item, i) => {
+                      const copyKey = `${selectedBankData.id}-${i}`;
+                      const isCopied = copiedField === copyKey;
+                      return (
+                        <div
+                          key={i}
+                          className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-white dark:bg-[#0F2A4A]/40 border border-slate-200/80 dark:border-slate-800"
+                        >
+                          <div className="min-w-0 flex-1">
+                            <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">
+                              {item.label}
+                            </span>
+                            <span className={`text-xs sm:text-sm font-bold text-[#0F2A4A] dark:text-white truncate block ${
+                              item.mono ? 'font-mono tracking-wider' : ''
+                            }`}>
+                              {item.value}
+                            </span>
+                          </div>
+
+                          {item.copyable && (
+                            <button
+                              type="button"
+                              onClick={() => copyToClipboard(item.value, copyKey)}
+                              className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 shrink-0 transition-all ${
+                                isCopied
+                                  ? 'bg-emerald-500 text-white'
+                                  : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-[#0D9387] hover:text-white'
+                              }`}
+                              title="Copiar dato"
+                            >
+                              {isCopied ? <><CheckCheck className="w-3 h-3" /> Copiado</> : <><Copy className="w-3 h-3" /> Copiar</>}
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <span className="text-[11px] text-slate-400 flex items-center gap-1.5">
+                      <ShieldCheck className="w-3.5 h-3.5 text-[#0D9387] shrink-0" />
+                      Cuenta corporativa verificada Karabu
+                    </span>
+                    <button
+                      type="button"
+                      onClick={openReceiptModal}
+                      data-testid="bank-upload-cta"
+                      className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#0D9387] hover:bg-[#0b7d72] text-white text-[11px] font-bold transition shrink-0"
+                    >
+                      <UploadIcon className="w-3.5 h-3.5" /> Ya transferí — subir comprobante
+                    </button>
                   </div>
                 </div>
-              ))}
+              ) : (
+                <div
+                  data-testid="bank-empty"
+                  className="mt-4 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 bg-slate-50/60 dark:bg-[#070F1E]/30 px-4 py-6 text-center"
+                >
+                  <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">
+                    Seleccionamos el banco y te mostramos la cuenta, el titular y el número para copiar.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </section>
