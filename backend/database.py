@@ -17,7 +17,7 @@ if "sslmode" in DATABASE_URL:
 # Create engine with connection retry on startup
 # SSL: disable for local Docker/Coolify, enable for external hosts (Render)
 _db_host = DATABASE_URL.split("@")[-1].split("/")[0].split(":")[0] if "@" in DATABASE_URL else ""
-_ssl_mode = "require" if any(x in _db_host for x in [".render.com", "dpg-", ".rds.amazonaws.com"]) else False
+_ssl_mode = "require" if any(x in _db_host for x in [".render.com", "dpg-", ".rds.amazonaws.com", ".neon.tech", ".supabase.com", ".supabase.co"]) else False
 engine = create_async_engine(
     DATABASE_URL,
     echo=False,
