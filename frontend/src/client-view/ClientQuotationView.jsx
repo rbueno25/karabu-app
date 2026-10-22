@@ -208,7 +208,16 @@ export default function ClientQuotationView() {
   const travelers = q.travelers || 1;
   const adults = q.form_data?.adultsCount ?? travelers;
   const children = q.form_data?.childrenCount ?? 0;
+  const babies = q.form_data?.babiesCount ?? 0;
   const quoteCode = q.code || `#${currentId.slice(0, 8)}`;
+
+  // Fecha corta y legible: "2026-10-29" -> "29 oct 2026"
+  const fmtShort = (v) => {
+    if (!v || v === '—') return '—';
+    const d = new Date(String(v).slice(0, 10) + 'T12:00');
+    if (isNaN(d)) return v;
+    return new Intl.DateTimeFormat('es-DO', { day: '2-digit', month: 'short', year: 'numeric' }).format(d);
+  };
 
   const nights = (() => {
     if (!travelDate || !returnDate || travelDate === '—' || returnDate === '—') return 1;
@@ -413,6 +422,71 @@ export default function ClientQuotationView() {
               <span>{inlineFeedback.message}</span>
             </div>
           )}
+
+          {/* ── RESUMEN DEL VIAJE — visible al entrar, sin scroll ── */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
+            {/* Fechas */}
+            <div className="flex items-start gap-2.5 p-3 sm:p-3.5 rounded-xl bg-white/[0.07] border border-white/15 backdrop-blur-md">
+              <span className="w-8 h-8 shrink-0 rounded-lg bg-[#0D9387]/20 text-[#2DD4BF] flex items-center justify-center">
+                <Calendar className="w-4 h-4" />
+              </span>
+              <div className="min-w-0">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Fechas</p>
+                <p className="text-[13px] sm:text-sm font-bold text-white leading-tight">
+                  {fmtShort(travelDate)} <span className="text-slate-400 font-normal">→</span> {fmtShort(returnDate)}
+                </p>
+                <p className="text-[11px] text-teal-300 font-medium mt-0.5">{nights} {nights === 1 ? 'noche' : 'noches'}</p>
+              </div>
+            </div>
+
+            {/* Hospedaje + habitaciones */}
+            <div className="flex items-start gap-2.5 p-3 sm:p-3.5 rounded-xl bg-white/[0.07] border border-white/15 backdrop-blur-md">
+              <span className="w-8 h-8 shrink-0 rounded-lg bg-amber-400/20 text-amber-300 flex items-center justify-center">
+                <Bed className="w-4 h-4" />
+              </span>
+              <div className="min-w-0">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Hospedaje</p>
+                <p className="text-[13px] sm:text-sm font-bold text-white leading-tight truncate" title={hotelName}>{hotelName}</p>
+                <p className="text-[11px] text-slate-300 mt-0.5 truncate" title={`${roomType} · ${roomsSummary}`}>
+                  {roomType} <span className="text-slate-500">·</span> {roomsSummary}
+                </p>
+              </div>
+            </div>
+
+            {/* Viajeros */}
+            <div className="flex items-start gap-2.5 p-3 sm:p-3.5 rounded-xl bg-white/[0.07] border border-white/15 backdrop-blur-md">
+              <span className="w-8 h-8 shrink-0 rounded-lg bg-sky-400/20 text-sky-300 flex items-center justify-center">
+                <Users className="w-4 h-4" />
+              </span>
+              <div className="min-w-0">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Viajeros</p>
+                <p className="text-[13px] sm:text-sm font-bold text-white leading-tight">
+                  {travelers} {travelers === 1 ? 'pasajero' : 'pasajeros'}
+                </p>
+                <p className="text-[11px] text-slate-300 mt-0.5">
+                  {[
+                    adults > 0 ? `${adults} ${adults === 1 ? 'adulto' : 'adultos'}` : '',
+                    children > 0 ? `${children} ${children === 1 ? 'niño' : 'niños'}` : '',
+                    babies > 0 ? `${babies} ${babies === 1 ? 'bebé' : 'bebés'}` : '',
+                  ].filter(Boolean).join(' · ')}
+                </p>
+              </div>
+            </div>
+
+            {/* Total + por persona/noche */}
+            <div className="flex items-start gap-2.5 p-3 sm:p-3.5 rounded-xl bg-[#0D9387]/15 border border-[#0D9387]/40 backdrop-blur-md">
+              <span className="w-8 h-8 shrink-0 rounded-lg bg-[#0D9387]/30 text-white flex items-center justify-center">
+                <DollarSign className="w-4 h-4" />
+              </span>
+              <div className="min-w-0">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-teal-200/80">Total</p>
+                <p className="text-[15px] sm:text-base font-extrabold text-white leading-tight">
+                  ${totalWithTax.toLocaleString()} <span className="text-[11px] font-semibold text-teal-300">{q.currency || 'USD'}</span>
+                </p>
+                <p className="text-[11px] text-slate-300 mt-0.5">${perNightPerPerson} p/p por noche</p>
+              </div>
+            </div>
+          </div>
 
           {/* ── ESCENARIO DEL HERO CAROUSEL ── */}
           <div
