@@ -199,6 +199,10 @@ class Payment(Base):
     id = Column(String, primary_key=True, default=new_id)
     reservation_id = Column(String, ForeignKey("reservations.id"), nullable=False, index=True)
     client_id = Column(String, ForeignKey("clients.id"), nullable=False, index=True)
+    # Cotización de origen (los comprobantes subidos por el cliente desde la vista pública)
+    quotation_id = Column(String, ForeignKey("quotations.id"), nullable=True, index=True)
+    # Comprobante de transferencia subido por el cliente (/api/files/<id>)
+    receipt_url = Column(String, default="")
     amount = Column(Float, nullable=False)
     method = Column(String, nullable=False)  # efectivo, tarjeta, transferencia, otro
     reference = Column(String, default="")
@@ -215,6 +219,7 @@ class Payment(Base):
     def to_dict(self):
         return {
             "id": self.id, "reservation_id": self.reservation_id, "client_id": self.client_id,
+            "quotation_id": self.quotation_id, "receipt_url": self.receipt_url or "",
             "amount": self.amount, "method": self.method, "reference": self.reference,
             "payment_date": self.payment_date, "status": self.status, "notes": self.notes,
             "created_by": self.created_by,

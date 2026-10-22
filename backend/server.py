@@ -14,7 +14,7 @@ import bcrypt, jwt
 from datetime import datetime, timezone, timedelta
 from typing import List, Optional, Any
 
-from fastapi import FastAPI, APIRouter, HTTPException, Depends, Request, Response, status
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, Request, Response, status, Form, File, UploadFile
 from starlette.middleware.cors import CORSMiddleware
 from starlette.concurrency import run_in_threadpool
 from pydantic import BaseModel, Field, EmailStr
@@ -337,6 +337,15 @@ class PaymentIn(BaseModel):
     status: str = "completado"
     notes: Optional[str] = ""
 
+
+class PaymentUpdate(BaseModel):
+    """Admin: confirmar/rechazar un comprobante subido por el cliente."""
+    status: Optional[str] = None
+    reference: Optional[str] = None
+    notes: Optional[str] = None
+    amount: Optional[float] = None
+    method: Optional[str] = None
+
 class DestinationIn(BaseModel):
     name: str
     country: str
@@ -601,8 +610,15 @@ async def get_quotation(qid: str, db: AsyncSession = Depends(get_db), u=Depends(
         rooms_parts.append(f"{form_data['habitacionesTriple']} Triple")
     rooms_summary = ", ".join(rooms_parts) if rooms_parts else ""
     
+    # Comprobantes/pagos registrados para esta cotización (los sube el cliente)
+    pay_r = await db.execute(
+        select(Payment).where(Payment.quotation_id == q.id).order_by(Payment.created_at.desc())
+    )
+    quotation_payments = [p.to_dict() for p in pay_r.scalars().all()]
+
     return {
         "quotation": doc,
+        "payments": quotation_payments,
         "client": client.to_dict() if client else None,
         "broker": {
             **(broker.to_dict() if broker else {}),
@@ -794,6 +810,122 @@ async def client_update_status(qid: str, body: ClientStatusUpdate, db: AsyncSess
         )
 
     return q.to_dict()
+
+
+# -------------------- Comprobantes de pago (cliente) --------------------
+RECEIPT_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".gif", ".pdf"}
+RECEIPT_MIME = {
+    ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png",
+    ".webp": "image/webp", ".gif": "image/gif", ".pdf": "application/pdf",
+}
+MAX_RECEIPT_SIZE = 10 * 1024 * 1024  # 10 MB
+
+
+@api.post("/quotations/{qid}/receipt")
+async def upload_payment_receipt(
+    qid: str,
+    file: UploadFile = File(...),
+    bank: str = Form(""),
+    reference: str = Form(""),
+    db: AsyncSession = Depends(get_db),
+    _rl=Depends(rate_limit(6, 60)),
+):
+    """Publico: el cliente sube el comprobante de su transferencia.
+
+    Registra el pago en Pagos (metodo transferencia, estado pendiente) y avisa al staff.
+    Si ya habia un comprobante pendiente para esa cotizacion, lo reemplaza.
+    """
+    result = await db.execute(select(Quotation).where(Quotation.id == qid))
+    q = result.scalar_one_or_none()
+    if not q:
+        raise HTTPException(status_code=404, detail="Cotización no encontrada")
+    if q.status != "aceptada":
+        raise HTTPException(status_code=400, detail="Primero debes aceptar la propuesta para subir el comprobante")
+
+    ext = Path(file.filename or "comprobante.jpg").suffix.lower()
+    if ext not in RECEIPT_EXTENSIONS:
+        raise HTTPException(status_code=400, detail="Formato no permitido. Sube una imagen (JPG, PNG, WEBP) o un PDF")
+    contents = await file.read()
+    if not contents:
+        raise HTTPException(status_code=400, detail="El archivo está vacío")
+    if len(contents) > MAX_RECEIPT_SIZE:
+        raise HTTPException(status_code=400, detail="El comprobante no debe superar 10 MB")
+
+    fid = new_id()
+    db.add(Upload(
+        id=fid, filename=file.filename or "comprobante",
+        mime_type=RECEIPT_MIME.get(ext, "application/octet-stream"),
+        data=base64.b64encode(contents).decode("ascii"), created_by=None,
+    ))
+    await db.flush()
+    receipt_url = f"/api/files/{fid}"
+
+    client_r = await db.execute(select(Client).where(Client.id == q.client_id))
+    client = client_r.scalar_one_or_none()
+    client_name = f"{client.first_name} {client.last_name}" if client else "Cliente"
+
+    # Reserva asociada: se crea al aceptar; para cotizaciones viejas se crea ahora
+    res_r = await db.execute(select(Reservation).where(Reservation.quotation_id == q.id))
+    reservation = res_r.scalars().first()
+    if not reservation:
+        reservation = Reservation(
+            id=new_id(), client_id=q.client_id, quotation_id=q.id,
+            destination=q.destination,
+            departure_date=q.travel_date or now_iso(),
+            return_date=q.return_date or now_iso(),
+            travelers=q.travelers, services="", notes=q.notes or "",
+            total_amount=q.amount, currency=q.currency,
+            status="pendiente", created_by=q.created_by,
+        )
+        db.add(reservation)
+        await db.flush()
+
+    amount = round(float(q.amount or 0) * (1 + float(q.tax_percent or 0) / 100), 2)
+    bank_label = (bank or "").strip() or "Banco no indicado"
+    ref = (reference or "").strip()
+    notes = f"Comprobante subido por el cliente — {bank_label}"
+    if ref:
+        notes += f" · Ref: {ref}"
+
+    prev_r = await db.execute(
+        select(Payment).where(Payment.quotation_id == q.id, Payment.status == "pendiente")
+    )
+    payment = prev_r.scalars().first()
+    if payment:
+        payment.receipt_url = receipt_url
+        payment.reference = ref
+        payment.notes = notes
+        payment.amount = amount
+        payment.reservation_id = reservation.id
+        payment.method = "transferencia"
+    else:
+        payment = Payment(
+            id=new_id(), reservation_id=reservation.id, client_id=q.client_id,
+            quotation_id=q.id, receipt_url=receipt_url,
+            amount=amount, method="transferencia", reference=ref,
+            payment_date=now_iso(), status="pendiente", notes=notes, created_by=None,
+        )
+        db.add(payment)
+    await db.flush()
+
+    await create_notification_all(
+        db, "payment",
+        title=f"Comprobante recibido: {client_name}",
+        message=f"${amount:,.2f} · {bank_label} · {q.destination}",
+        link="/admin/pagos",
+    )
+    base_url = os.environ.get("PUBLIC_API_URL", "https://karabu-srv.onrender.com").rstrip("/")
+    await _notify_staff(
+        db,
+        f"Comprobante de transferencia — {client_name} ({q.destination})",
+        f"<p><b>{client_name}</b> subió un comprobante para <b>{q.destination}</b>.</p>"
+        f"<p>Monto: ${amount:,.2f} {q.currency or ''}<br>Banco: {bank_label}"
+        + (f"<br>Referencia: {ref}" if ref else "") + "</p>"
+        f"<p><a href=\"{base_url}{receipt_url}\">Ver comprobante</a> — confírmalo en Pagos.</p>",
+    )
+
+    logger.info(f"Comprobante {payment.id} recibido para {q.code} ({bank_label})")
+    return {"ok": True, "payment": payment.to_dict()}
 
 
 @api.post("/quotations/{qid}/send-email")
@@ -1273,6 +1405,48 @@ async def create_payment(body: PaymentIn, db: AsyncSession = Depends(get_db), u=
     )
 
     return p.to_dict()
+
+@api.patch("/payments/{pid}")
+async def update_payment(pid: str, body: PaymentUpdate, db: AsyncSession = Depends(get_db), u=Depends(get_current_user)):
+    """Confirmar/rechazar un pago (p. ej. el comprobante que subió el cliente)."""
+    result = await db.execute(select(Payment).where(Payment.id == pid))
+    p = result.scalar_one_or_none()
+    if not p:
+        raise HTTPException(status_code=404, detail="Pago no encontrado")
+
+    if body.status is not None:
+        if body.status not in ("pendiente", "completado", "fallido", "reembolsado"):
+            raise HTTPException(status_code=400, detail="Estado inválido")
+        p.status = body.status
+    if body.amount is not None:
+        p.amount = body.amount
+    for field in ("reference", "notes", "method"):
+        value = getattr(body, field)
+        if value is not None:
+            setattr(p, field, value)
+    await db.flush()
+
+    # Si el pago queda completado, recalcular el estado de la reserva
+    if body.status == "completado" and p.reservation_id:
+        res_r = await db.execute(select(Reservation).where(Reservation.id == p.reservation_id))
+        res = res_r.scalar_one_or_none()
+        if res:
+            paid_r = await db.execute(
+                select(func.coalesce(func.sum(Payment.amount), 0))
+                .where(Payment.reservation_id == res.id, Payment.status == "completado")
+            )
+            total_paid = paid_r.scalar() or 0
+            if total_paid >= (res.total_amount or 0) and res.status in ("pendiente", "confirmada"):
+                res.status = "pagada"
+        await create_notification_all(
+            db, "payment",
+            title="Pago confirmado",
+            message=f"${p.amount:,.2f} {p.method} — {p.notes or ''}".strip(),
+            link="/admin/pagos",
+        )
+
+    return p.to_dict()
+
 
 @api.delete("/payments/{pid}")
 async def delete_payment(pid: str, db: AsyncSession = Depends(get_db), _u=Depends(get_current_user)):

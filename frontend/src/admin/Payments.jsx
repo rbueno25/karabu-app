@@ -3,7 +3,7 @@ import api, { formatApiError } from "../lib/api";
 import PageHeader from "./PageHeader";
 import StatusBadge from "./StatusBadge";
 import EmptyState from "./EmptyState";
-import { Plus, Loader2, Trash2, CreditCard, X } from "lucide-react";
+import { Plus, Loader2, Trash2, CreditCard, X, CheckCircle2, ExternalLink, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { formatCurrency, formatDate } from "../lib/format";
 
@@ -62,6 +62,24 @@ export default function Payments() {
     }
   };
 
+  const receiptHref = (url) => {
+    if (!url) return "";
+    if (/^https?:/i.test(url)) return url;
+    const base = (api.defaults.baseURL || "").replace(/\/api$/, "");
+    return `${base}${url}`;
+  };
+
+  const confirmPayment = async (p) => {
+    if (!window.confirm(`¿Confirmar el pago de ${formatCurrency(p.amount)} de ${p.client_name}?`)) return;
+    try {
+      await api.patch(`/payments/${p.id}`, { status: "completado" });
+      toast.success("Pago confirmado");
+      load();
+    } catch (e) {
+      toast.error(formatApiError(e.response?.data?.detail) || "No fue posible confirmar el pago");
+    }
+  };
+
   const remove = async (p) => {
     if (!window.confirm("¿Eliminar este pago?")) return;
     try {
@@ -105,6 +123,7 @@ export default function Payments() {
                 <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Fecha</th>
                 <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Monto</th>
                 <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Método</th>
+                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Comprobante</th>
                 <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Estado</th>
                 <th className="text-right px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Acciones</th>
               </tr>
@@ -117,11 +136,49 @@ export default function Payments() {
                   <td className="px-6 py-3 text-gray-600 dark:text-gray-300">{formatDate(p.payment_date || p.created_at)}</td>
                   <td className="px-6 py-3 text-gray-900 dark:text-gray-100">{formatCurrency(p.amount)}</td>
                   <td className="px-6 py-3 text-gray-700 dark:text-gray-300 capitalize">{p.method}</td>
+                  <td className="px-6 py-3">
+                    {p.receipt_url ? (
+                      <a
+                        href={receiptHref(p.receipt_url)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        data-testid="payment-receipt-link"
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[8px] bg-[#0D9387]/10 text-[#0D9387] text-xs font-semibold hover:bg-[#0D9387]/20"
+                      >
+                        <Eye className="h-3.5 w-3.5" /> Ver
+                      </a>
+                    ) : (
+                      <span className="text-xs text-gray-400">—</span>
+                    )}
+                  </td>
                   <td className="px-6 py-3"><StatusBadge value={p.status} /></td>
                   <td className="px-6 py-3 text-right">
-                    <button onClick={() => remove(p)} className="h-8 w-8 rounded-[8px] hover:bg-red-50 flex items-center justify-center text-red-600">
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    <div className="flex items-center justify-end gap-1">
+                      {p.status === "pendiente" && (
+                        <button
+                          onClick={() => confirmPayment(p)}
+                          data-testid="payment-confirm-btn"
+                          title="Confirmar pago"
+                          className="h-8 px-2.5 rounded-[8px] hover:bg-emerald-50 flex items-center justify-center gap-1 text-emerald-600 text-xs font-semibold"
+                        >
+                          <CheckCircle2 className="h-4 w-4" /> Confirmar
+                        </button>
+                      )}
+                      {p.receipt_url && (
+                        <a
+                          href={receiptHref(p.receipt_url)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title="Abrir comprobante"
+                          className="h-8 w-8 rounded-[8px] hover:bg-gray-100 flex items-center justify-center text-gray-500"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                        </a>
+                      )}
+                      <button onClick={() => remove(p)} className="h-8 w-8 rounded-[8px] hover:bg-red-50 flex items-center justify-center text-red-600">
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

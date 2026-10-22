@@ -1,14 +1,16 @@
 import React, { useEffect, useState, useRef } from 'react';
 import Logo from '../components/Logo';
-import { getQuotation, updateQuotationStatus } from './api-adapter';
+import { getQuotation, updateQuotationStatus, uploadReceipt } from './api-adapter';
 import {
   Compass, Loader2, AlertCircle, RefreshCw, ShieldCheck,
   CheckCircle2, Calendar, Building2, Users, CreditCard,
   DollarSign, Sun, Moon, ArrowDown, RotateCcw, Check, Plane,
   Car, Share2, MapPin, Sparkles, MessageSquare, Send, Award,
   Phone, Mail, Bed, Clock, ChevronLeft, ChevronRight, Star,
-  Globe, Headphones, BadgeCheck, Copy, Maximize2, X, CheckCheck
+  Globe, Headphones, BadgeCheck, Copy, Maximize2, X, CheckCheck,
+  Upload as UploadIcon, Hourglass, FileText
 } from 'lucide-react';
+import { API_BASE } from '../lib/api';
 
 const BANK_ACCOUNTS = [
   {
@@ -72,6 +74,16 @@ export default function ClientQuotationView() {
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
+  // Comprobante de transferencia (subida del cliente)
+  const [showReceiptModal, setShowReceiptModal] = useState(false);
+  const [receiptBank, setReceiptBank] = useState('bhd');
+  const [receiptRef, setReceiptRef] = useState('');
+  const [receiptFile, setReceiptFile] = useState(null);
+  const [receiptPreview, setReceiptPreview] = useState('');
+  const [receiptError, setReceiptError] = useState(null);
+  const [receiptSent, setReceiptSent] = useState(false);
+  const [uploadingReceipt, setUploadingReceipt] = useState(false);
+
   // Barra fija inferior en móvil: solo aparece al pasar el hero (evita duplicar los botones)
   const [showStickyBar, setShowStickyBar] = useState(false);
 
@@ -87,8 +99,9 @@ export default function ClientQuotationView() {
     else document.documentElement.classList.remove('dark');
   }, [darkMode]);
 
-  const loadQuotationData = async (idToFetch) => {
-    setLoading(true); setError(null);
+  const loadQuotationData = async (idToFetch, silent = false) => {
+    if (!silent) setLoading(true);
+    setError(null);
     try {
       const result = await getQuotation(idToFetch);
       setData(result);
@@ -123,6 +136,54 @@ export default function ClientQuotationView() {
       navigator.clipboard.writeText(text);
       setCopiedField(fieldKey);
       setTimeout(() => setCopiedField(null), 2500);
+    }
+  };
+
+  // ---- Comprobante de transferencia ----
+  const fileUrl = (u) => (u ? `${API_BASE}${String(u).replace(/^\/api/, '')}` : '');
+
+  const openReceiptModal = () => {
+    setReceiptSent(false);
+    setReceiptError(null);
+    setShowReceiptModal(true);
+  };
+
+  const pickReceiptFile = (file) => {
+    setReceiptError(null);
+    if (!file) {
+      setReceiptFile(null);
+      setReceiptPreview('');
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setReceiptError('El comprobante no debe superar 10 MB');
+      return;
+    }
+    setReceiptFile(file);
+    setReceiptPreview(file.type && file.type.startsWith('image/') ? URL.createObjectURL(file) : '');
+  };
+
+  const submitReceipt = async (e) => {
+    e.preventDefault();
+    if (!receiptFile) {
+      setReceiptError('Selecciona la foto o el PDF del comprobante');
+      return;
+    }
+    setUploadingReceipt(true);
+    setReceiptError(null);
+    try {
+      const bankLabel = BANK_ACCOUNTS.find((b) => b.id === receiptBank)?.bank || 'Otro';
+      await uploadReceipt(currentId, { file: receiptFile, bank: bankLabel, reference: receiptRef });
+      setReceiptSent(true);
+      setReceiptFile(null);
+      setReceiptPreview('');
+      setReceiptRef('');
+      await loadQuotationData(currentId, true);
+    } catch (err) {
+      const detail = err?.response?.data?.detail;
+      setReceiptError(typeof detail === 'string' ? detail : 'No se pudo subir el comprobante. Intenta de nuevo.');
+    } finally {
+      setUploadingReceipt(false);
     }
   };
 
@@ -297,6 +358,10 @@ export default function ClientQuotationView() {
   const whatsappPaymentUrl = cleanBrokerPhone
     ? `https://wa.me/${cleanBrokerPhone}?text=${whatsappPaymentMsg}`
     : '#';
+
+  // Comprobantes ya subidos para esta cotización
+  const myPayments = Array.isArray(data?.payments) ? data.payments : [];
+  const pendingReceipt = myPayments.find((pay) => pay.receipt_url && pay.status === 'pendiente');
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#070F1E] text-slate-800 dark:text-slate-200 transition-colors duration-300 font-sans pb-24 sm:pb-12">
@@ -603,9 +668,42 @@ export default function ClientQuotationView() {
                 Cuentas Bancarias Oficiales Karabu
               </h2>
               <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-lg mx-auto">
-                Transfiere el monto cotizado. Puedes copiar cada número con 1 clic y enviarnos el volante por WhatsApp.
+                Transfiere el monto cotizado, copia cada número con 1 clic y sube tu comprobante aquí abajo.
               </p>
             </div>
+
+            {pendingReceipt && (
+              <div data-testid="receipt-pending" className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-300/70 dark:border-amber-500/40">
+                <div className="flex items-start gap-2.5">
+                  <Hourglass className="w-4 h-4 text-amber-600 dark:text-amber-300 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-bold text-amber-900 dark:text-amber-200">Comprobante recibido — en revisión</p>
+                    <p className="text-[11px] text-amber-800/80 dark:text-amber-200/70">
+                      Ya lo registramos en Pagos. Te confirmamos en cuanto verifiquemos la transferencia.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  {pendingReceipt.receipt_url && (
+                    <a
+                      href={fileUrl(pendingReceipt.receipt_url)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3 py-1.5 rounded-lg text-[11px] font-semibold bg-white/70 dark:bg-white/10 text-amber-900 dark:text-amber-100 border border-amber-300/70 dark:border-amber-500/40 hover:bg-white transition"
+                    >
+                      Ver
+                    </a>
+                  )}
+                  <button
+                    type="button"
+                    onClick={openReceiptModal}
+                    className="px-3 py-1.5 rounded-lg text-[11px] font-semibold bg-amber-600 hover:bg-amber-700 text-white transition"
+                  >
+                    Subir otro
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Banner de Total a Transferir */}
             <div className="p-6 rounded-3xl bg-white dark:bg-[#0F2A4A] border-2 border-[#0D9387]/30 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -619,17 +717,28 @@ export default function ClientQuotationView() {
                 <span className="text-xs text-slate-400">Impuestos y gastos de gestión incluidos</span>
               </div>
 
-              {cleanBrokerPhone && (
-                <a
-                  href={whatsappPaymentUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-lg shadow-emerald-600/30 transition-all hover:scale-105"
+              <div className="w-full sm:w-auto flex flex-col sm:flex-row items-stretch gap-2">
+                <button
+                  type="button"
+                  onClick={openReceiptModal}
+                  data-testid="receipt-open-btn"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-[#0D9387] hover:bg-[#0b7d72] text-white font-bold text-sm shadow-lg shadow-[#0D9387]/30 transition-all hover:scale-105 active:scale-95"
                 >
-                  <Send className="w-4 h-4" />
-                  Enviar comprobante por WhatsApp
-                </a>
-              )}
+                  <UploadIcon className="w-4 h-4" />
+                  Subir comprobante
+                </button>
+                {cleanBrokerPhone && (
+                  <a
+                    href={whatsappPaymentUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-lg shadow-emerald-600/30 transition-all"
+                  >
+                    <Send className="w-4 h-4" />
+                    WhatsApp
+                  </a>
+                )}
+              </div>
             </div>
 
             {/* Tarjetas Bancarias */}
@@ -1173,6 +1282,130 @@ export default function ClientQuotationView() {
         </div>
       </footer>
 
+      {/* ═══════ MODAL: SUBIR COMPROBANTE DE TRANSFERENCIA ═══════ */}
+      {showReceiptModal && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/70 backdrop-blur-sm p-4"
+          onClick={() => { if (!uploadingReceipt) setShowReceiptModal(false); }}
+        >
+          <div
+            data-testid="receipt-modal"
+            className="w-full max-w-md rounded-3xl bg-white dark:bg-[#0F2A4A] border border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden max-h-[92vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="h-1 w-full bg-gradient-to-r from-[#0D9387] to-[#FF6B35]" />
+
+            {receiptSent ? (
+              <div className="p-6 text-center" data-testid="receipt-success">
+                <div className="w-14 h-14 rounded-2xl bg-emerald-500/15 text-emerald-500 flex items-center justify-center mx-auto">
+                  <CheckCircle2 className="w-7 h-7" />
+                </div>
+                <h3 className="mt-4 text-lg font-bold text-[#0F2A4A] dark:text-white">¡Comprobante enviado!</h3>
+                <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-slate-300">
+                  Quedó registrado en <b>Pagos</b> como <b>transferencia pendiente</b>. Lo verificamos y te confirmamos.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setShowReceiptModal(false)}
+                  className="mt-5 w-full py-3 rounded-xl bg-[#0D9387] hover:bg-[#0b7d72] text-white text-sm font-bold transition"
+                >
+                  Cerrar
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={submitReceipt} className="p-5 sm:p-6 space-y-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <h3 className="text-base sm:text-lg font-bold text-[#0F2A4A] dark:text-white">Subir comprobante</h3>
+                    <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">
+                      Transferencia por{' '}
+                      <b className="text-[#0D9387]">${totalWithTax.toLocaleString()} {q.currency || 'USD'}</b>
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowReceiptModal(false)}
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white transition"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
+                    Banco destino
+                  </label>
+                  <select value={receiptBank} onChange={(e) => setReceiptBank(e.target.value)} className={receiptInput}>
+                    {BANK_ACCOUNTS.map((b) => (
+                      <option key={b.id} value={b.id}>{b.bank}</option>
+                    ))}
+                    <option value="otro">Otro / No estoy seguro</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
+                    Comprobante (foto o PDF)
+                  </label>
+                  <label className="flex items-center gap-3 p-3 rounded-xl border-2 border-dashed border-slate-300 dark:border-white/20 cursor-pointer hover:border-[#0D9387] transition">
+                    <input
+                      type="file"
+                      accept="image/*,application/pdf"
+                      className="hidden"
+                      data-testid="receipt-file"
+                      onChange={(e) => pickReceiptFile(e.target.files?.[0] || null)}
+                    />
+                    {receiptPreview ? (
+                      <img src={receiptPreview} alt="Comprobante" className="w-12 h-12 rounded-lg object-cover border border-slate-200 shrink-0" />
+                    ) : (
+                      <span className="w-12 h-12 rounded-lg bg-[#0D9387]/10 text-[#0D9387] flex items-center justify-center shrink-0">
+                        {receiptFile ? <FileText className="w-5 h-5" /> : <UploadIcon className="w-5 h-5" />}
+                      </span>
+                    )}
+                    <span className="min-w-0">
+                      <span className="block text-xs font-semibold text-[#0F2A4A] dark:text-white truncate">
+                        {receiptFile ? receiptFile.name : 'Toca para elegir el archivo'}
+                      </span>
+                      <span className="block text-[10px] text-slate-400">JPG, PNG, WEBP o PDF · máx. 10 MB</span>
+                    </span>
+                  </label>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
+                    Número de referencia <span className="font-normal normal-case text-slate-400">(opcional)</span>
+                  </label>
+                  <input
+                    value={receiptRef}
+                    onChange={(e) => setReceiptRef(e.target.value)}
+                    placeholder="Ej. 00123456"
+                    className={receiptInput}
+                  />
+                </div>
+
+                {receiptError && (
+                  <p className="text-[11px] font-semibold text-red-600 dark:text-red-300 bg-red-500/10 border border-red-500/30 rounded-lg px-3 py-2">
+                    {receiptError}
+                  </p>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={uploadingReceipt}
+                  data-testid="receipt-submit"
+                  className="w-full py-3.5 rounded-xl bg-[#0D9387] hover:bg-[#0b7d72] text-white text-sm font-bold transition flex items-center justify-center gap-2 disabled:opacity-60"
+                >
+                  {uploadingReceipt ? <><Loader2 className="w-4 h-4 animate-spin" /> Subiendo…</> : <><UploadIcon className="w-4 h-4" /> Enviar comprobante</>}
+                </button>
+                <p className="text-[10px] text-center text-slate-400">
+                  Tu comprobante queda registrado en Pagos y lo verifica nuestro equipo.
+                </p>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* ═══════ FLOATING BOTTOM BAR EN MÓVIL (solo tras pasar el hero) ═══════ */}
       {showStickyBar && (
       <div className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0F2A4A]/95 backdrop-blur-md border-t border-white/10 px-4 py-3 flex items-center justify-between gap-3 shadow-2xl">
@@ -1218,3 +1451,5 @@ export default function ClientQuotationView() {
     </div>
   );
 }
+
+const receiptInput = "w-full rounded-xl border border-slate-300 dark:border-white/20 bg-white dark:bg-[#0A1D33] text-[#0F2A4A] dark:text-white px-3 py-2.5 text-sm outline-none focus:border-[#0D9387] focus:ring-2 focus:ring-[#0D9387]/20";
