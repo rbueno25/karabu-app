@@ -1,2 +1,8 @@
 node_modules/
 dist/
+
+# secretos (nunca versionar)
+.env
+.env.*
+backend/.env
+frontend/.env
