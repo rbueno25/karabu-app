@@ -197,7 +197,7 @@ async def get_destination_image(db: AsyncSession, destination_name: str) -> str:
     result = await db.execute(
         select(Destination).where(Destination.name.ilike(destination_name), Destination.status == "activo")
     )
-    d = result.scalar_one_or_none()
+    d = result.scalars().first()  # .first(): puede haber varias coincidencias (RD/Santo Domingo) sin romper el lead
     if d and d.image_url:
         return d.image_url
     # Try partial match (destination name or country contains query or vice versa)
@@ -210,7 +210,7 @@ async def get_destination_image(db: AsyncSession, destination_name: str) -> str:
             Destination.status == "activo",
         )
     )
-    d = result.scalar_one_or_none()
+    d = result.scalars().first()  # .first(): puede haber varias coincidencias (RD/Santo Domingo) sin romper el lead
     if d and d.image_url:
         return d.image_url
     # If destination_name is "Country, City", try matching just the city
@@ -225,7 +225,7 @@ async def get_destination_image(db: AsyncSession, destination_name: str) -> str:
                 Destination.status == "activo",
             )
         )
-        d = result.scalar_one_or_none()
+        d = result.scalars().first()  # .first(): puede haber varias coincidencias (RD/Santo Domingo) sin romper el lead
         if d and d.image_url:
             return d.image_url
     return ""
