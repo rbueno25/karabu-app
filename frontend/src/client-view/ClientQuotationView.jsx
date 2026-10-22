@@ -216,9 +216,9 @@ export default function ClientQuotationView() {
     if (!v || v === '—') return '—';
     const d = new Date(String(v).slice(0, 10) + 'T12:00');
     if (isNaN(d)) return v;
-    return new Intl.DateTimeFormat('es-DO', conAnio
+    return new Intl.DateTimeFormat('es-ES', conAnio
       ? { day: '2-digit', month: 'short', year: 'numeric' }
-      : { day: '2-digit', month: 'short' }).format(d).replace('.', '');
+      : { day: '2-digit', month: 'short' }).format(d).replace(/\./g, '').replace(/,/g, '').trim();
   };
   const anioViaje = (() => {
     const d = new Date(String(returnDate).slice(0, 10) + 'T12:00');
@@ -443,7 +443,7 @@ export default function ClientQuotationView() {
               </span>
               <div className="min-w-0">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Fechas</p>
-                <p className="text-[13px] sm:text-sm font-bold text-white leading-tight whitespace-nowrap">
+                <p className="text-[12px] sm:text-sm font-bold text-white leading-tight">
                   {fmtShort(travelDate)} <span className="text-slate-400 font-normal">→</span> {fmtShort(returnDate)} {anioViaje && <span className="text-slate-300 font-semibold">{anioViaje}</span>}
                 </p>
                 <p className="text-[11px] text-teal-300 font-medium mt-0.5">{nights} {nights === 1 ? 'noche' : 'noches'}</p>
@@ -457,8 +457,8 @@ export default function ClientQuotationView() {
               </span>
               <div className="min-w-0">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Hospedaje</p>
-                <p className="text-[13px] sm:text-sm font-bold text-white leading-tight truncate" title={hotelName}>{hotelName}</p>
-                <p className="text-[11px] text-slate-300 mt-0.5 truncate" title={totalRooms > 0 ? detalleHabitaciones : roomType}>
+                <p className="text-[12px] sm:text-sm font-bold text-white leading-tight line-clamp-2" title={hotelName}>{hotelName}</p>
+                <p className="text-[11px] text-slate-300 mt-0.5 leading-snug" title={totalRooms > 0 ? detalleHabitaciones : roomType}>
                   {totalRooms > 0 ? detalleHabitaciones : roomType}
                 </p>
               </div>
